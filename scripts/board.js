@@ -29,6 +29,19 @@ var whiteboard = function(d3, socket) {
 		objects[data.name].addPoint(data.x, data.y);
 	})			
 
+	socket.on('replay', function(data) {
+		for(var obj in data.objects) {
+			var current = data.objects[obj];
+			if(current.type == 'line') {
+				objects[current.name] = new Line(current.x, current.y, current.color, current.offset.x, current.offset.y);
+				objects[current.name].name = current.name;
+				for(var i = 0; i < current.points.length; i++) {
+					objects[current.name].addPoint(current.points[i].x, current.points[i].y);
+				}
+			}
+		}
+	});
+
 	socket.on('move', function(data){
 		objects[data.name].move(data.x, data.y);
 	})	
@@ -51,7 +64,7 @@ var whiteboard = function(d3, socket) {
 	}
 
 		
-	function Line(x, y, color) {
+	function Line(x, y, color, offsetx, offsety) {
 		var lineData = [];
 		var minX = 9999, minY = 9999, maxX = 0, maxY = 0;
 		
@@ -59,12 +72,15 @@ var whiteboard = function(d3, socket) {
 			.x(function(d) { return d.x; })
 			.y(function(d) { return d.y; })
 			.interpolate("linear");
+
+		var offset = { x: offsetx || 0, y: offsety || 0 };
 		
 		var lineObject = svg.append("path")
 				.attr("d", lineFunction(lineData))
 				.attr("stroke", color)
 				.attr("stroke-width", 2)
-				.attr("fill", "none");
+				.attr("fill", "none")
+				.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
 		
 		minX = maxX = x;
 		minY = maxY = y;
@@ -72,7 +88,7 @@ var whiteboard = function(d3, socket) {
 		var isSelected = false;
 		
 		var origColor = color;
-		var offset = { x:0, y:0 };
+		
 		
 		function swap(a, b, c) { var t = a[c]; a[c] = b[c]; b[c] = t; }
 		

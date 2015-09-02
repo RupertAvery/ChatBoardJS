@@ -111,7 +111,6 @@ socket.on('errorhandler', function(data) {
 	$("#errormessage").html(data.message).show();
 });
 
-
 socket.on('boardInfo', function(data) {
 	$('#boardName').html(data.name);
 	$('#myModal').modal('show');

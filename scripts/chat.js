@@ -4,6 +4,11 @@ var chatterbox = function(socket) {
 		addMessage(data);
 	})			
 
+	socket.on('replay', function(data) {
+		for(var i = 0; i < data.messages.length; i++) {
+			addMessage(data.messages[i]);
+		}
+	});
 
 	$("#chatinput").keypress(function(e) {
 	  if ( event.which == 13 ) {

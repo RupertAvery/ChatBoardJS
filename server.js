@@ -39,17 +39,39 @@ app.get("/scripts/chat.js", function(req, res) {
 
 var boards = {};
 
-var clients = [];
-
-var messages = [ 'line', 'chat', 'newline', 'addpoint', 'move', 'remove' ];
-
 function clean(data) {
 	return entities.encode(data)
+}
+
+var messages = [ 'chat', 'newline', 'addpoint', 'move', 'remove' ];
+
+var messageHandlers = {
+	'chat' : function(board, data) {
+		board.messages.push(data)
+	},
+	'newline' : function(board, data) {
+		board.objects[data.name] = { type: 'line', name: data.name, x: data.x, y: data.y, color: data.color, offset: { x: 0, y: 0 } }
+	},
+	'addpoint' : function(board, data) {
+		board.objects[data.name].points = board.objects[data.name].points || [];
+		board.objects[data.name].points.push(data);
+	},
+	'move' : function(board, data) {
+		var offset = board.objects[data.name].offset
+		offset.x += data.x;
+		offset.y += data.y;
+	},
+	'remove' : function(board, data) {
+		delete board.objects[data.name];
+	}
 }
 
 function register(socket, message, board, processor){
 
 	socket.on(message, function (data) {
+		if(messageHandlers[message]) {
+			messageHandlers[message](board, data);
+		}
 
 		for(var i = 0; i < board.clients.length; i++){
 			// don't send the same message to the originating socket
@@ -75,6 +97,7 @@ function registerJoin(socket) {
 			{
 				register(socket, messages[j], board);
 			}
+			socket.emit('replay', { objects: board.objects, messages: board.messages });
 		} else {
 			socket.emit('error', { message: "Board does not exist!" });
 		}
@@ -95,7 +118,7 @@ function registerGetBoardInfo(socket) {
 function registerCreate(socket) {
 	socket.on('create', function (data) {
 		var id = makeid();
-		boards[id] = { id: id, name: data.name, clients: [] };
+		boards[id] = { id: id, name: data.name, messages: [], clients: [], objects: {} };
 		console.log("Created a new board: " + data.name + " (" + id + ")");
 		socket.emit('created', { id: id });
 	});
