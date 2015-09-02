@@ -306,6 +306,6 @@ var whiteboard = function(d3, socket) {
 		removeSelected: removeSelected,
 		deselectAll: deselectAll,
 		selectColor: function(color) { selectedColor = color; },
-		selectTool: function(tool) { selectedTool = tool; },
+		selectTool: function(tool) { selectedTool = tool; }
 	}
 };
