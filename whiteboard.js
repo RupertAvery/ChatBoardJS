@@ -10,6 +10,18 @@ app.get("/", function(req, res) {
 	res.sendFile(__dirname + '/index.html')
 })
 
+app.get("/scripts/geometry.js", function(req, res) {
+	res.sendFile(__dirname + '/scripts/geometry.js')
+})
+
+app.get("/scripts/board.js", function(req, res) {
+	res.sendFile(__dirname + '/scripts/board.js')
+})
+
+app.get("/scripts/chat.js", function(req, res) {
+	res.sendFile(__dirname + '/scripts/chat.js')
+})
+
 var clients = [];
 var messages = ['line','chat','newline','addpoint','move','remove'];
 
