@@ -24,6 +24,11 @@ var whiteboard = function(d3, socket) {
 		objects[data.name] = new Line(data.x, data.y, data.color);
 		objects[data.name].name = data.name;
 	})			
+	
+	socket.on('image', function(data) {
+		objects[data.name] = new ImageObject(data.href, data.width, data.height, data.offset.x, data.offset.y);
+		objects[data.name].name = name;
+	})
 			
 	socket.on('addpoint', function(data){
 		objects[data.name].addPoint(data.x, data.y);
@@ -38,7 +43,11 @@ var whiteboard = function(d3, socket) {
 				for(var i = 0; i < current.points.length; i++) {
 					objects[current.name].addPoint(current.points[i].x, current.points[i].y);
 				}
-			}
+			}else
+			if(current.type == 'image') {
+				objects[current.name] = new ImageObject(current.href, current.width, current.height, current.offset.x, current.offset.y);
+				objects[current.name].name = current.name;
+			}		
 		}
 	});
 
@@ -63,6 +72,50 @@ var whiteboard = function(d3, socket) {
 		return text;
 	}
 
+	function ImageObject(data, width, height, offsetx, offsety) {
+		
+		var offset = { x: offsetx || 0, y: offsety || 0 };
+		var isSelected = false;
+		var imgObject = svg.append("image")
+				.attr("xlink:href", data)
+				.attr("x", "0")
+				.attr("y", "0")
+				.attr("width", width + "px")
+				.attr("height", height + "px")
+				.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
+		
+		return {
+			containedBy: function(p1, p2) {
+				if(p1.x <= offset.x && p2.x >= (offset.x + width) && p1.y <= offset.y && p2.y >= (offset.y + height)) 
+				{
+					return true;
+				}
+			},
+			hitTest: function(x, y) {
+				if(x >= offset.x && x <= (offset.x + width) && y >= offset.y && y <= (offset.y + height)) 
+				{
+					return true;
+				}
+			},
+			isSelected: function() { return isSelected; },
+			select: function() {
+				isSelected = true;
+				imgObject.attr("opacity","0.5");
+			},
+			deselect: function() {
+				isSelected = false;
+				imgObject.attr("opacity","1.0");
+			},
+			remove: function() {
+				imgObject.remove();
+			},		
+			move: function(x, y) {
+				offset.x += x;
+				offset.y += y;
+				imgObject.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
+			}
+		}
+	}
 		
 	function Line(x, y, color, offsetx, offsety) {
 		var lineData = [];
@@ -209,6 +262,18 @@ var whiteboard = function(d3, socket) {
 		}
 	}
 	
+	function reverseForIn(obj, f) {
+		var arr = [];
+		for (var key in obj) {
+			arr.push(key);
+		}
+		for (var i=arr.length-1; i>=0; i--) {
+			if(!f.call(obj, arr[i])) {
+				break;
+			}
+		}
+	}
+	
 	function mouseDown() {
 		penisdown = true;
 		
@@ -222,7 +287,7 @@ var whiteboard = function(d3, socket) {
 			var name = makeid();
 			currentObject.name = name;
 			objects[name] = currentObject;
-			socket.emit('newline', { name: name, x: m[0], y: m[1], color: selectedColor});
+			socket.emit('newline', { name: name, x: m[0], y: m[1], color: selectedColor });
 		}	
 		else if(selectedTool == "select")
 		{	
@@ -231,13 +296,14 @@ var whiteboard = function(d3, socket) {
 			}
 			var selection = null
 			
-			for(var obj in objects) {
+			reverseForIn(objects, function(obj) {
 				if(objects[obj].hitTest(m[0], m[1]))
 				{
 					selection = objects[obj];
-					break;
+					return false;
 				}
-			}
+				return true;
+			})
 			
 			if(selection == null)
 			{
@@ -294,6 +360,9 @@ var whiteboard = function(d3, socket) {
 				
 				if(currentObject.length == 0) currentObject = null;
 				selectionRect.remove();
+				//selectionRect = null;
+			} else {
+				//deselectAll();
 			}
 		}
 	}
@@ -322,6 +391,16 @@ var whiteboard = function(d3, socket) {
 		removeSelected: removeSelected,
 		deselectAll: deselectAll,
 		selectColor: function(color) { selectedColor = color; },
-		selectTool: function(tool) { selectedTool = tool; }
+		selectTool: function(tool) { selectedTool = tool; },
+		addImage: function(data) { 
+			currentObject = new ImageObject(data.href, data.width, data.height, data.offset.x, data.offset.y);
+			var name = makeid();
+			currentObject.name = name;
+			objects[name] = currentObject;
+			socket.emit('image', { name: name, href: data.href, width: data.width, height: data.height, offset: { x: 0, y: 0 } });
+		},
+		setSize: function(width, height) {
+			svg.attr("width", width).attr("height",height);
+		}
 	}
 };

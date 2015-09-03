@@ -32,6 +32,41 @@
     </div>
   </div>
   
+   <!-- Modal -->
+  <div class="modal fade" id="imgUploadModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Upload an image</h4>
+        </div>
+     
+		<ul class="nav nav-tabs" id="tabContent">
+			<li class="active"><a href="#upload-tab" data-toggle="tab">Upload an image</a></li>
+			<li><a href="#url-tab" data-toggle="tab">Add by URL</a></li>
+		</ul>
+
+		<div class="tab-content">
+			<div class="tab-pane active" id="upload-tab">
+				<p>Select an image:</p>
+				<input type="file" id="fileupload"/>
+			</div> 
+
+			<div class="tab-pane" id="url-tab">
+				<p>Enter URL:</p>
+				<input type="text" id="imageUploadUrl"/>
+			</div>
+		</div>        
+		
+		<div class="modal-footer">
+          <button type="button" class="btn btn-default" id="uploadImageBtn">OK</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
 <table id="content" style="display: none">
 	<tr>
 		<td>
@@ -49,6 +84,7 @@
 			
 			</div>
 			<button class="btn" id="penTool">Pen</button>
+			<button class="btn" id="imgAction">Image</button>
 			<button class="btn" id="eraserTool">Eraser</button>
 			<button class="btn" id="deleteAction">Delete</button>
 			<button class="btn" id="textTool">Text</button>
@@ -168,6 +204,73 @@ $("#selectTool").click(function(){
 $("#deleteAction").click(function(){
 	board.removeSelected();
 });
+
+$("#imgAction").click(function(){
+	$("#imgUploadModal").modal("show")
+
+});
+
+function convertImgToBase64URL(url, callback, outputFormat){
+    var img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = function(){
+        var canvas = document.createElement('CANVAS'),
+        ctx = canvas.getContext('2d'), dataURL;
+        canvas.height = this.height;
+        canvas.width = this.width;
+        ctx.drawImage(this, 0, 0);
+        dataURL = canvas.toDataURL(outputFormat);
+        callback(dataURL);
+        canvas = null; 
+    };
+    img.src = url;
+}
+
+function loadImage(url){
+	var preloadImg = new Image(); 
+	
+	preloadImg.onload = function() {
+		board.addImage({ 
+			href: url,
+			width: preloadImg.width,
+			height: preloadImg.height,
+			offset: { x: 0, y: 0 }
+		});
+		$("#imgUploadModal").modal("hide")
+	}
+	preloadImg.src = url;
+}
+
+$("#uploadImageBtn").click(function(){
+	if($("#url-tab").hasClass("active")){
+		loadImage($('#imageUploadUrl').val());
+	} else {
+		var file = $('#fileupload')[0].files[0];
+		fr = new FileReader();
+		fr.onload =  function() {
+			loadImage(this.result);
+			$("#imgUploadModal").modal("hide")
+		}
+		fr.readAsDataURL(file);
+	}
+});
+
+function resize()
+{
+	var win = $(window);
+	var chat = $("#chatspace");
+	chat.height(win.height() - 60);
+	board.setSize(win.width() - 450, win.height() - 60);
+}
+
+$(window).resize(function() {
+	resize();
+})
+
+$(window).load(function() {
+	resize();
+})
+
 
 </script>
 </body>

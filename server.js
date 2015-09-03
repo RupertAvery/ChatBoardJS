@@ -1,5 +1,29 @@
 var app = require("express")();
+//var ntlm = require("express-ntlm");
+//var ActiveDirectory = require('activedirectory');
 var Entities = require('html-entities').AllHtmlEntities;
+
+// var config = { 
+	// url: 'ldap:' + process.env.LOGONSERVER,
+	// baseDN: 'dc=internal,dc=towerswatson,dc=com',
+	// username: 'davidkhristepher.santos@towerswatson.com',
+    // password: 'haha'	
+// }
+
+// var ad = new ActiveDirectory(config);
+
+// ad.findUser('DAVID518', function(err, results) {
+  // if ((err) || (! results)) {
+    // console.log('ERROR: ' + JSON.stringify(err));
+    // return;
+  // }
+  // console.log(results);
+// })
+
+// app.use(ntlm({
+    // domain: process.env.USERDOMAIN,
+    // domaincontroller: 'ldap:' + process.env.LOGONSERVER
+// }));
  
 var entities = new Entities();
 
@@ -19,6 +43,10 @@ function makeid()
 
 app.get("/", function(req, res) {
 	res.sendFile(__dirname + '/index.html');
+})
+
+app.get("/currentuser", function(req, res) {
+	res.send(req.ntlm);
 })
 
 app.get("/board", function(req, res) {
@@ -43,7 +71,7 @@ function clean(data) {
 	return entities.encode(data)
 }
 
-var messages = [ 'chat', 'newline', 'addpoint', 'move', 'remove' ];
+var messages = [ 'chat', 'newline', 'addpoint', 'move', 'remove', 'image'];
 
 var messageHandlers = {
 	'chat' : function(board, data) {
@@ -52,9 +80,12 @@ var messageHandlers = {
 	'newline' : function(board, data) {
 		board.objects[data.name] = { type: 'line', name: data.name, x: data.x, y: data.y, color: data.color, offset: { x: 0, y: 0 } }
 	},
+	'image' : function(board, data) {
+		board.objects[data.name] = { type: 'image', name: data.name, href: data.href, width: data.width, height: data.height, offset: { x: 0, y: 0 } }
+	},
 	'addpoint' : function(board, data) {
 		board.objects[data.name].points = board.objects[data.name].points || [];
-		board.objects[data.name].points.push(data);
+		board.objects[data.name].points.push({ x: data.x, y: data.y });
 	},
 	'move' : function(board, data) {
 		var offset = board.objects[data.name].offset
