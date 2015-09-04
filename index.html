@@ -7,11 +7,18 @@
 </head>
 <body>
 
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/">ChatBoard</a>
+    </div>
+  </div>
+</nav>
+
 <div class="content" style="text-align: center">
-<label for="name">Name:</label> <input type="text" id="name" />
+<label for="name">Enter a Name for your new ChatBoard:</label> <input type="text" id="name" />
 <br/>
-<button class="btn" id="create">Create Board</button> 
-<a id="link" href="" style="display: none">New Board</a>
+<button class="btn" id="create">Create</button> 
 <br/>
 </div>
 
@@ -19,8 +26,7 @@
 var socket = io.connect(window.location.origin);
 
 socket.on("created", function(data) {
-	$("#create").hide("slow");
-	$("#link").attr("href", "/board?id=" + data.id).show("slow");
+	window.location.href = "/board?id=" + data.id;
 });
 
 $("#create").click(function(){

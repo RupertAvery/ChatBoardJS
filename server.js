@@ -1,45 +1,10 @@
 var app = require("express")();
-//var ntlm = require("express-ntlm");
-//var ActiveDirectory = require('activedirectory');
+var Board = require("./board-server.js");
 var Entities = require('html-entities').AllHtmlEntities;
-
-// var config = { 
-	// url: 'ldap:' + process.env.LOGONSERVER,
-	// baseDN: 'dc=internal,dc=towerswatson,dc=com',
-	// username: 'davidkhristepher.santos@towerswatson.com',
-    // password: 'haha'	
-// }
-
-// var ad = new ActiveDirectory(config);
-
-// ad.findUser('DAVID518', function(err, results) {
-  // if ((err) || (! results)) {
-    // console.log('ERROR: ' + JSON.stringify(err));
-    // return;
-  // }
-  // console.log(results);
-// })
-
-// app.use(ntlm({
-    // domain: process.env.USERDOMAIN,
-    // domaincontroller: 'ldap:' + process.env.LOGONSERVER
-// }));
- 
 var entities = new Entities();
 
 var server = app.listen(9000);
 var io = require('socket.io').listen(server);
-
-function makeid()
-{
-	var text = "";
-	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-	for( var i=0; i < 24; i++ )
-		text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-	return text;
-}
 
 app.get("/", function(req, res) {
 	res.sendFile(__dirname + '/index.html');
@@ -57,78 +22,44 @@ app.get("/scripts/geometry.js", function(req, res) {
 	res.sendFile(__dirname + '/scripts/geometry.js');
 })
 
-app.get("/scripts/board.js", function(req, res) {
-	res.sendFile(__dirname + '/scripts/board.js');
+app.get("/scripts/board-client.js", function(req, res) {
+	res.sendFile(__dirname + '/scripts/board-client.js');
 })
 
 app.get("/scripts/chat.js", function(req, res) {
 	res.sendFile(__dirname + '/scripts/chat.js');
 })
 
-var boards = {};
-
 function clean(data) {
 	return entities.encode(data)
 }
 
-var messages = [ 'chat', 'newline', 'addpoint', 'move', 'remove', 'image'];
 
-var messageHandlers = {
-	'chat' : function(board, data) {
-		board.messages.push(data)
-	},
-	'newline' : function(board, data) {
-		board.objects[data.name] = { type: 'line', name: data.name, x: data.x, y: data.y, color: data.color, offset: { x: 0, y: 0 } }
-	},
-	'image' : function(board, data) {
-		board.objects[data.name] = { type: 'image', name: data.name, href: data.href, width: data.width, height: data.height, offset: { x: 0, y: 0 } }
-	},
-	'addpoint' : function(board, data) {
-		board.objects[data.name].points = board.objects[data.name].points || [];
-		board.objects[data.name].points.push({ x: data.x, y: data.y });
-	},
-	'move' : function(board, data) {
-		var offset = board.objects[data.name].offset
-		offset.x += data.x;
-		offset.y += data.y;
-	},
-	'remove' : function(board, data) {
-		delete board.objects[data.name];
+function BoardManager() {
+	var boards = {};
+
+	function createBoard(name) {
+		var board = new Board(name)
+		boards[board.id] = board;
+		return board;
+	}
+
+	return {
+		createBoard: createBoard,
+		getBoardById: function(id) {
+			return boards[id];
+		}
 	}
 }
 
-function register(socket, message, board, processor){
+var manager = new BoardManager();
 
-	socket.on(message, function (data) {
-		if(messageHandlers[message]) {
-			messageHandlers[message](board, data);
-		}
-
-		for(var i = 0; i < board.clients.length; i++){
-			// don't send the same message to the originating socket
-			if(board.clients[i] != socket)
-			{
-				if (processor) {
-					data = processor(data)
-				}
-				board.clients[i].emit(message, data);
-			}
-		}
-	});
-}
 
 function registerJoin(socket) {
 	socket.on('join', function (data) {
-		var board = boards[data.id];
+		var board = manager.getBoardById(data.id);
 		if (board) {
-			console.log(socket.id + " joins board: " + board.name);
-			board.clients.push(socket);
-			// attach all message handlers to this socket
-			for(var j = 0; j < messages.length; j++)
-			{
-				register(socket, messages[j], board);
-			}
-			socket.emit('replay', { objects: board.objects, messages: board.messages });
+			board.join(socket, data.name);
 		} else {
 			socket.emit('error', { message: "Board does not exist!" });
 		}
@@ -137,7 +68,7 @@ function registerJoin(socket) {
 
 function registerGetBoardInfo(socket) {
 	socket.on('getBoardInfo', function (data) {
-		var board = boards[data.id];
+		var board = manager.getBoardById(data.id);
 		if (board) {
 			socket.emit('boardInfo', { name: board.name });
 		} else {
@@ -146,12 +77,12 @@ function registerGetBoardInfo(socket) {
 	});
 }
 
+
 function registerCreate(socket) {
 	socket.on('create', function (data) {
-		var id = makeid();
-		boards[id] = { id: id, name: data.name, messages: [], clients: [], objects: {} };
-		console.log("Created a new board: " + data.name + " (" + id + ")");
-		socket.emit('created', { id: id });
+		var board = manager.createBoard(data.name);
+		console.log("Created a new board: " + board.name + " (" + board.id + ")");
+		socket.emit('created', { id: board.id, name: board.name });
 	});
 }
 

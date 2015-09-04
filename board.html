@@ -1,5 +1,6 @@
 <html>
 <head>
+ <title>ChatBoard</title>
  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
@@ -7,91 +8,50 @@
  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
  <script src="scripts/geometry.js"></script>
  <script src="scripts/chat.js"></script>
- <script src="scripts/board.js"></script>
+ <script src="scripts/board-client.js"></script>
 </head>
 <body>
 
- <!-- Modal -->
-  <div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog">
-    
-      <!-- Modal content-->
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">Welcome to <span id="boardName"></span></h4>
-        </div>
-        <div class="modal-body">
-          <p>Tell me your name:</p>
-		  <input type="text" id="myName" value="Lurker"/>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" id="closeName">OK</button>
-        </div>
-      </div>
-      
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/">ChatBoard</a>
     </div>
   </div>
-  
-   <!-- Modal -->
-  <div class="modal fade" id="imgUploadModal" role="dialog">
-    <div class="modal-dialog">
-    
-      <!-- Modal content-->
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">Upload an image</h4>
-        </div>
-     
-		<ul class="nav nav-tabs" id="tabContent">
-			<li class="active"><a href="#upload-tab" data-toggle="tab">Upload an image</a></li>
-			<li><a href="#url-tab" data-toggle="tab">Add by URL</a></li>
-		</ul>
+</nav>
 
-		<div class="tab-content">
-			<div class="tab-pane active" id="upload-tab">
-				<p>Select an image:</p>
-				<input type="file" id="fileupload"/>
-			</div> 
-
-			<div class="tab-pane" id="url-tab">
-				<p>Enter URL:</p>
-				<input type="text" id="imageUploadUrl"/>
-			</div>
-		</div>        
-		
-		<div class="modal-footer">
-          <button type="button" class="btn btn-default" id="uploadImageBtn">OK</button>
-        </div>
-      </div>
-      
-    </div>
-  </div>
   
-<table id="content" style="display: none">
+<table id="content" style="display: none; margin-top: -10px">
+	<tr> 
+		<td colspan="2" style="height: 50px;">
+		</td>
+	</tr>
 	<tr>
-		<td>
-			<div id="chatspace" style="width: 400; height: 600; overflow-y: scroll">
+		<td style="vertical-align: top; padding: 5px;">
+			<div id="chatspace" style="width: 350; overflow-y: scroll; border: 1px solid #c0c0c0">
 				
 			</div>
 
 			<div>
-			<input id="chatinput" type="text" style="width: 400;"/>
+			<input id="chatinput" type="text" style="width: 350; margin-top:10px;"/>
 			</div>
 		</td>
 		
-		<td>
-			<div id="whiteboard">
+		<td style="vertical-align: top; padding: 5px;">
+			<div id="whiteboard" style="border: 1px solid #c0c0c0">
 			
 			</div>
-			<button class="btn" id="penTool">Pen</button>
-			<button class="btn" id="imgAction">Image</button>
-			<button class="btn" id="eraserTool">Eraser</button>
-			<button class="btn" id="deleteAction">Delete</button>
-			<button class="btn" id="textTool">Text</button>
-			<button class="btn" id="selectTool">Select</button>
+			<div style="margin-top: 10px;">
+				<button class="btn" id="penTool">Pen</button>
+				<button class="btn" id="imgAction">Image</button>
+				<button class="btn" id="eraserTool">Eraser</button>
+				<button class="btn" id="deleteAction">Delete</button>
+				<button class="btn" id="textTool">Text</button>
+				<button class="btn" id="selectTool">Select</button>
+			</div>
 		</td>
 
-		<td>
+		<td style="vertical-align: top; padding: 5px;">
 			<table width="20">
 				<tr>
 					<td id="red" height="20" style="background: red; cursor: pointer"> </td>
@@ -117,9 +77,82 @@
 <span id="errormessage" class="alert alert-danger" style="display: none"></span>
 </div>
 
-<script>
-</script>
 
+ <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header modal-inverse">
+          <h4 class="modal-title">Welcome to <span id="boardName"></span></h4>
+        </div>
+        <div class="modal-body">
+          <p>Tell me your name:</p>
+		  <input type="text" id="myName" value=""/>
+		  <span id="joinErrorMessage" style="color: red; display: none" ></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" id="closeName">OK</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+   <!-- Modal -->
+  <div class="modal fade" id="imgUploadModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header modal-inverse">
+          <h4 class="modal-title">Upload an image</h4>
+        </div>
+     
+		<ul class="nav nav-tabs" id="tabContent">
+			<li class="active"><a href="#upload-tab" data-toggle="tab">Upload an image</a></li>
+			<li><a href="#url-tab" data-toggle="tab">Add by URL</a></li>
+		</ul>
+
+		<div class="tab-content">
+			<div class="tab-pane active" id="upload-tab">
+				<p>Select an image:</p>
+				<input type="file" id="fileupload"/>
+			</div> 
+
+			<div class="tab-pane" id="url-tab">
+				<p>Enter URL:</p>
+				<input type="text" id="imageUploadUrl"/>
+			</div>
+		</div>        
+		
+		<div class="modal-footer">
+          <button type="button" class="btn btn-default" id="uploadImageBtn">OK</button>
+          <button type="button" class="btn btn-default" id="cancelImageBtn">Cancel</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="modal fade" id="confirmExitDialog" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Are you sure you want to leave?</h4>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" id="confirmExit">Yes</button>
+          <button type="button" class="btn btn-default" id="cancelExit">No</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
 <script>
 var myName;
 var socket = io.connect(window.location.origin);
@@ -147,15 +180,26 @@ socket.on('errorhandler', function(data) {
 	$("#errormessage").html(data.message).show();
 });
 
+socket.on('joinerror', function(data) {
+	$('#joinErrorMessage').html(data.message).show();
+});
+
+socket.on('welcome', function(data) {
+	chat.setUserInfo(data);
+	$('#joinErrorMessage').hide();
+	$('#myModal').modal('hide');
+	$("#content").show();
+});
+
+$('#closeName').click(function() {
+	socket.emit('join', { id: id, name: $('#myName').val() });
+});
+	
 socket.on('boardInfo', function(data) {
 	$('#boardName').html(data.name);
+	document.title = "Welcome to " + data.name;
+	chat.setBoardName(data.name);
 	$('#myModal').modal('show');
-	$('#closeName').click(function() {
-		myName = $('#myName').val();
-		$('#myModal').modal('hide');
-		socket.emit('join', { id: id });
-		$("#content").show();
-	});
 });
 
 board.selectTool("pen");
@@ -207,7 +251,10 @@ $("#deleteAction").click(function(){
 
 $("#imgAction").click(function(){
 	$("#imgUploadModal").modal("show")
+});
 
+$("#cancelImageBtn").click(function(){
+	$("#imgUploadModal").modal("hide")
 });
 
 function convertImgToBase64URL(url, callback, outputFormat){
@@ -259,8 +306,8 @@ function resize()
 {
 	var win = $(window);
 	var chat = $("#chatspace");
-	chat.height(win.height() - 60);
-	board.setSize(win.width() - 450, win.height() - 60);
+	chat.height(win.height() - 50 - 80 - $("nav").height());
+	board.setSize(win.width() - 450, win.height() - 50 - 80 - $("nav").height());
 }
 
 $(window).resize(function() {
