@@ -9,6 +9,8 @@
  <script src="scripts/geometry.js"></script>
  <script src="scripts/chat.js"></script>
  <script src="scripts/board-client.js"></script>
+ <script src="scripts/js.cookie.js"></script>
+ 
 </head>
 <body>
 
@@ -20,6 +22,7 @@
   </div>
 </nav>
 
+<textarea id="hiddentext" style="display:none"></textarea>
   
 <table id="content" style="display: none; margin-top: -10px">
 	<tr> 
@@ -38,7 +41,7 @@
 		</td>
 		
 		<td style="vertical-align: top; padding: 5px;">
-			<div id="whiteboard" style="border: 1px solid #c0c0c0">
+			<div id="whiteboard" tabindex="1" style="border: 1px solid #c0c0c0">
 			
 			</div>
 			<div style="margin-top: 10px;">
@@ -181,11 +184,17 @@ socket.on('errorhandler', function(data) {
 });
 
 socket.on('joinerror', function(data) {
-	$('#joinErrorMessage').html(data.message).show();
+	if(data.message == "Invalid session")
+	{
+		$('#myModal').modal('show');
+	} else {
+		$('#joinErrorMessage').html(data.message).show();
+	}
 });
 
 socket.on('welcome', function(data) {
 	chat.setUserInfo(data);
+	Cookies.set(id + '-sessionId', data.sessionId, { path: location.pathname });
 	$('#joinErrorMessage').hide();
 	$('#myModal').modal('hide');
 	$("#content").show();
@@ -199,7 +208,13 @@ socket.on('boardInfo', function(data) {
 	$('#boardName').html(data.name);
 	document.title = "Welcome to " + data.name;
 	chat.setBoardName(data.name);
-	$('#myModal').modal('show');
+	
+	var oldSessionId = Cookies.get(id + '-sessionId');
+	if(oldSessionId) {
+		socket.emit('rejoin', { id: id, sessionId: oldSessionId });
+	} else {
+		$('#myModal').modal('show');
+	}
 });
 
 board.selectTool("pen");

@@ -12,7 +12,6 @@ function makeid()
 function Board(boardname) {
 	var id = makeid();
 	var name = boardname;
-	var clients = [];
 	var messages = [];
 	var objects = {};
 	var users = {};
@@ -21,8 +20,8 @@ function Board(boardname) {
 	var commands = [ 'chat', 'newline', 'addpoint', 'move', 'remove', 'image'];
 
 	var commandPreProcessor = {
-		'chat' : function(client, data) {
-			data.from = client.name; 
+		'chat' : function(user, data) {
+			data.from = user.name; 
 			return data;
 		}
 	}
@@ -51,36 +50,56 @@ function Board(boardname) {
 		}
 	}
 
-	function register(client, command){
+	function register(user, command){
 		
-		client.socket.on(command, function (data) {
+		user.socket.on(command, function (data) {
 			if (commandPreProcessor[command]) {
-				data = commandPreProcessor[command](client, data)
+				data = commandPreProcessor[command](user, data)
 			}		
 
 			if(commandHandlers[command]) {
 				commandHandlers[command](data);
 			}
 
-			for(var i = 0; i < clients.length; i++){
-				// don't send the same message to the originating socket
-				if(clients[i].socket != client.socket)
+			for(var cuser in users) {
+				if(users[cuser].socket != user.socket)
 				{
-		
-					clients[i].socket.emit(command, data);
+					users[cuser].socket.emit(command, data);
 				}
 			}
 		});
 	}
 	
 	function broadcast(command, data, socket) {
-		for(var i = 0; i < clients.length; i++) {
-			// don't send the same command to the originating socket
-			if(clients[i].socket != socket)
+		for(var cuser in users) {
+			if(users[cuser].socket != socket)
 			{
-				clients[i].socket.emit(command, data);
+				users[cuser].socket.emit(command, data);
 			}
 		}
+	}
+	
+	function rejoin(socket, sessionId) {
+		for(var user in users) {
+			if(users[user].sessionId == sessionId) {
+				users[user].socket = socket;
+
+				console.log(socket.id + " rejoins board: " + name + " as " + users[user].name);				
+
+				for(var j = 0; j < commands.length; j++)
+				{
+					register(users[user], commands[j]);
+				}
+			
+				socket.emit('welcome', {  name: users[user].name, sessionId: sessionId } );
+				
+				broadcast('joined', { name: users[user].name }, socket);
+				
+				socket.emit('replay', { objects: objects, messages: messages });
+				return;
+			}
+		}
+		socket.emit('joinerror', { message: 'Invalid session' });
 	}
 
 	function join(socket, username) {
@@ -92,22 +111,18 @@ function Board(boardname) {
 		
 		if(!users[username]) {
 			
-			users[username] = { name: username, socket: socket };
+			users[username] = { name: username, socket: socket, sessionId: makeid() };
 			
 			console.log(socket.id + " joins board: " + name);
-			
-			var client = { name: username, socket: socket };
-			
-			clients.push(client);
 			
 			// attach all message handlers to this socket
 			
 			for(var j = 0; j < commands.length; j++)
 			{
-				register(client, commands[j]);
+				register(users[username], commands[j]);
 			}
 			
-			socket.emit('welcome', { } );
+			socket.emit('welcome', { name: users[username].name, sessionId: users[username].sessionId } );
 			
 			broadcast('joined', { name: username }, socket);
 			
@@ -122,9 +137,9 @@ function Board(boardname) {
 		id: id,
 		name: name,
 		messages: messages,
-		clients: clients,
 		objects: objects,
-		join: join
+		join: join,
+		rejoin: rejoin
 	}
 }
 

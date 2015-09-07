@@ -30,6 +30,10 @@ app.get("/scripts/chat.js", function(req, res) {
 	res.sendFile(__dirname + '/scripts/chat.js');
 })
 
+app.get("/scripts/js.cookie.js", function(req, res) {
+	res.sendFile(__dirname + '/scripts/js.cookie.js');
+})
+
 function clean(data) {
 	return entities.encode(data)
 }
@@ -66,6 +70,17 @@ function registerJoin(socket) {
 	});
 }
 
+function registerRejoin(socket) {
+	socket.on('rejoin', function (data) {
+		var board = manager.getBoardById(data.id);
+		if (board) {
+			board.rejoin(socket, data.sessionId);
+		} else {
+			socket.emit('error', { message: "Board does not exist!" });
+		}
+	});
+}
+
 function registerGetBoardInfo(socket) {
 	socket.on('getBoardInfo', function (data) {
 		var board = manager.getBoardById(data.id);
@@ -91,7 +106,12 @@ io.on('connection', function (socket) {
 	console.log(socket.id);
 	// add this socket to the clients list
 	registerJoin(socket);
+	registerRejoin(socket);
 	registerCreate(socket);
 	registerGetBoardInfo(socket);
+	
+	//socket.on('disconnect', function() {
+	//	delete clients[socket.id];
+	//});
 });
 

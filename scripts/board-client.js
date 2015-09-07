@@ -19,6 +19,25 @@ var whiteboard = function(d3, socket) {
 				.on("mouseup", mouseUp)
 				.on("click", mouseClick)
 	;
+	
+	var ctrlDown = false;
+    var ctrlKey = 17, vKey = 86, cKey = 67;
+	
+	$('#whiteboard').on("keydown", function() {
+		console.log(event.which);
+		if(event.which == 17) {
+			ctrlDown = true;
+		} else if (event.which == 46) {
+			removeSelected();
+		}	
+	})
+	
+	$('#whiteboard').on("keyup", function() {
+		console.log(event.which);
+		if(event.which == 17) {
+			ctrlDown = false;
+		} 
+	})
 
 	socket.on('newline', function(data){
 		objects[data.name] = new Line(data.x, data.y, data.color);
@@ -275,6 +294,7 @@ var whiteboard = function(d3, socket) {
 	}
 	
 	function mouseDown() {
+		$('#whiteboard').focus();
 		penisdown = true;
 		
 		var m = d3.mouse(this);		
