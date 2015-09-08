@@ -411,7 +411,19 @@ var whiteboard = function(d3, socket) {
 		removeSelected: removeSelected,
 		deselectAll: deselectAll,
 		selectColor: function(color) { selectedColor = color; },
-		selectTool: function(tool) { selectedTool = tool; },
+		selectTool: function(tool) { 
+			if(tool == 'pen') {
+				$('#whiteboard').awesomeCursor('pencil', {
+					hotspot: 'bottom left'
+				});
+			}
+			if(tool == 'eraser') {
+				$('#whiteboard').awesomeCursor('eraser', {
+					hotspot: 'bottom left'
+				});
+			}
+			selectedTool = tool; 
+		},
 		addImage: function(data) { 
 			currentObject = new ImageObject(data.href, data.width, data.height, data.offset.x, data.offset.y);
 			var name = makeid();

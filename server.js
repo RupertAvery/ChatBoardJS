@@ -10,34 +10,28 @@ app.get("/", function(req, res) {
 	res.sendFile(__dirname + '/index.html');
 })
 
-app.get("/currentuser", function(req, res) {
-	res.send(req.ntlm);
-})
-
 app.get("/board", function(req, res) {
 	res.sendFile(__dirname + '/board.html');
-})
-
-app.get("/scripts/geometry.js", function(req, res) {
-	res.sendFile(__dirname + '/scripts/geometry.js');
-})
-
-app.get("/scripts/board-client.js", function(req, res) {
-	res.sendFile(__dirname + '/scripts/board-client.js');
-})
-
-app.get("/scripts/chat.js", function(req, res) {
-	res.sendFile(__dirname + '/scripts/chat.js');
-})
-
-app.get("/scripts/js.cookie.js", function(req, res) {
-	res.sendFile(__dirname + '/scripts/js.cookie.js');
 })
 
 function clean(data) {
 	return entities.encode(data)
 }
 
+function serveStatic(request, response) {
+	console.log(request.originalUrl);
+	console.log(" => " + __dirname + request.path);
+	response.sendFile(__dirname + request.path);
+}
+	
+function ignoreRoute(url)
+{
+	app.get(url, serveStatic)
+}
+
+ignoreRoute(/\/scripts\/*/);
+ignoreRoute(/\/css\/*/);
+ignoreRoute(/\/fonts\/*/);
 
 function BoardManager() {
 	var boards = {};
