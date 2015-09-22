@@ -29,6 +29,15 @@ function ignoreRoute(url)
 	app.get(url, serveStatic)
 }
 
+app.get(/\/images\/*/, function(req, res) {
+	var board = manager.getBoardById(req.query.board);
+	if (board) {
+		board.getImage(res, req.query.img);
+	} else {
+		socket.emit('error', { message: "Board does not exist!" });
+	}
+})
+
 ignoreRoute(/\/scripts\/*/);
 ignoreRoute(/\/css\/*/);
 ignoreRoute(/\/fonts\/*/);
@@ -57,7 +66,7 @@ function registerJoin(socket) {
 	socket.on('join', function (data) {
 		var board = manager.getBoardById(data.id);
 		if (board) {
-			board.join(socket, data.name);
+			board.join(socket, data);
 		} else {
 			socket.emit('error', { message: "Board does not exist!" });
 		}

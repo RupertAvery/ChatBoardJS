@@ -7,12 +7,22 @@
  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
  <script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+ <script src="scripts/md5.js"></script>
  <script src="scripts/geometry.js"></script>
  <script src="scripts/chat.js"></script>
  <script src="scripts/board-client.js"></script>
  <script src="scripts/js.cookie.js"></script>
  <script src="scripts/jquery.awesome-cursor.js"></script>
- 
+ <style>
+	.noselect {
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+ </style>
 </head>
 <body>
 
@@ -29,6 +39,7 @@
 <table id="content" style="display: none; margin-top: -10px">
 	<tr> 
 		<td colspan="2" style="height: 50px;">
+            <div id="users"></div>
 		</td>
 	</tr>
 	<tr>
@@ -38,7 +49,7 @@
 			</div>
 
 			<div>
-			<input id="chatinput" type="text" style="width: 350; margin-top:10px;"/>
+				<input id="chatinput" type="text" style="width: 350; margin-top:10px;"/>
 			</div>
 		</td>
 		
@@ -95,6 +106,8 @@
         <div class="modal-body">
           <p>Tell me your name:</p>
 		  <input type="text" id="myName" value=""/>
+          <p>If you want, tell me your gravatar email:</p>
+		  <input type="text" id="myEmail" value=""/>
 		  <span id="joinErrorMessage" style="color: red; display: none" ></span>
         </div>
         <div class="modal-footer">
@@ -121,14 +134,14 @@
 		</ul>
 
 		<div class="tab-content">
-			<div class="tab-pane active" id="upload-tab">
+			<div class="tab-pane active" id="upload-tab" style="padding:10px">
 				<p>Select an image:</p>
-				<input type="file" id="fileupload"/>
+				<input type="file" id="fileupload" style="width:100%"/>
 			</div> 
 
-			<div class="tab-pane" id="url-tab">
+			<div class="tab-pane" id="url-tab" style="padding:10px">
 				<p>Enter URL:</p>
-				<input type="text" id="imageUploadUrl"/>
+				<input type="text" id="imageUploadUrl" style="width:100%"/>
 			</div>
 		</div>        
 		
@@ -140,6 +153,29 @@
       
     </div>
   </div>
+  
+   <!-- Modal -->
+  <div class="modal fade" id="textModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header modal-inverse">
+          <h4 class="modal-title">Add Text</h4>
+        </div>
+
+		<div class="modal-body">
+		  <input type="text" id="myText" value="" style="width:100%"/>
+        </div>
+		
+		<div class="modal-footer">
+          <button type="button" class="btn btn-default" id="addTextBtn">OK</button>
+          <button type="button" class="btn btn-default" id="cancelTextBtn">Cancel</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>  
   
   <div class="modal fade" id="confirmExitDialog" role="dialog">
     <div class="modal-dialog">
@@ -203,7 +239,7 @@ socket.on('welcome', function(data) {
 });
 
 $('#closeName').click(function() {
-	socket.emit('join', { id: id, name: $('#myName').val() });
+	socket.emit('join', { id: id, name: $('#myName').val(), email: $('#myEmail').val() });
 });
 	
 socket.on('boardInfo', function(data) {
@@ -253,9 +289,15 @@ $("#eraserTool").click(function(){
 });
 
 $("#textTool").click(function(){
-	board.selectTool("text");
+	//board.selectTool("text");
 	board.deselectAll();
+	$("#textModal").modal("show")
 });
+
+$("#cancelTextBtn").click(function(){
+	$("#textModal").modal("hide");
+});
+
 
 $("#selectTool").click(function(){
 	board.selectTool("select");
@@ -305,9 +347,21 @@ function loadImage(url){
 	preloadImg.src = url;
 }
 
+$("#addTextBtn").click(function() {
+	board.addText({
+		text: $("#myText").val(),
+		width: null,
+		height: null,
+		offset: { x: 0, y: 0 }
+	});
+	$("#textModal").modal("hide");
+	$("#myText").val(null);
+});
+
 $("#uploadImageBtn").click(function(){
 	if($("#url-tab").hasClass("active")){
 		loadImage($('#imageUploadUrl').val());
+		$('#imageUploadUrl').val(null);
 	} else {
 		var file = $('#fileupload')[0].files[0];
 		fr = new FileReader();

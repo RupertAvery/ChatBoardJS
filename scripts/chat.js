@@ -12,6 +12,7 @@ var chatterbox = function(socket) {
 		var messageText = $("<div style='color: green'>* <strong>" + data.name + "</strong> has joined " + chatBoardName + "</div>");
 		$("#chatspace").append(messageText);
 		$("#chatspace").scrollTop($("#chatspace").scrollTop() + messageText.position().top);
+        addUser(data);
 	})
 
 	socket.on('replay', function(data) {
@@ -21,6 +22,10 @@ var chatterbox = function(socket) {
 		var messageText = $("<div style='color: green'>* Welcome to " + chatBoardName + "</div>");
 		$("#chatspace").append(messageText);
 		$("#chatspace").scrollTop($("#chatspace").scrollTop() + messageText.position().top);
+        
+        for(var i = 0; i < data.users.length; i++) {
+			addUser(data.users[i]);
+		}
 	});
 
 	$("#chatinput").keypress(function(e) {
@@ -44,6 +49,12 @@ var chatterbox = function(socket) {
 		$("#chatspace").append(messageText);
 		$("#chatspace").scrollTop($("#chatspace").scrollTop() + messageText.position().top);
 		lastMessageFrom = data.from;
+	}
+    
+    function addUser(user) {
+        var hash = window.md5(user.email.toLowerCase());
+        var url = "http://www.gravatar.com/avatar/" + hash;
+        $("#users").append("<img src=\"" + url + "\" style=\"width: 64px; height: 64px\" title=\"" + user.name + "\"/>");
 	}
 	
 	return {

@@ -12,6 +12,7 @@ var whiteboard = function(d3, socket) {
 
 	var svg = d3.select("#whiteboard")
 				.append("svg")
+				.attr("class", "noselect")
 				.attr("width", 900)
 				.attr("height", 600)
 				.on("mousemove", mouseMove)
@@ -62,11 +63,15 @@ var whiteboard = function(d3, socket) {
 				for(var i = 0; i < current.points.length; i++) {
 					objects[current.name].addPoint(current.points[i].x, current.points[i].y);
 				}
-			}else
+			} else
 			if(current.type == 'image') {
 				objects[current.name] = new ImageObject(current.href, current.width, current.height, current.offset.x, current.offset.y);
 				objects[current.name].name = current.name;
-			}		
+			} else
+			if(current.type == 'text') {
+				objects[current.name] = new TextObject(current.text, current.width, current.height, current.offset.x, current.offset.y);
+				objects[current.name].name = current.name;
+			}
 		}
 	});
 
@@ -89,6 +94,69 @@ var whiteboard = function(d3, socket) {
 			text += possible.charAt(Math.floor(Math.random() * possible.length));
 
 		return text;
+	}
+	
+	function getTextSize(text, font) {
+    // re-use canvas object for better performance
+		var canvas = getTextSize.canvas || (getTextSize.canvas = document.createElement("canvas"));
+		var context = canvas.getContext("2d");
+		context.font = font;
+		return context.measureText(text);
+	};
+
+	function TextObject(text, width, height, offsetx, offsety) {
+		var offset = { x: offsetx || 20, y: offsety || 16 };
+		var isSelected = false;
+		var txtObject = svg.append("text")
+				.attr("x", "0")
+				.attr("y", "0")
+				.attr("font-family", "Arial")
+				.attr("font-size", "16")
+				.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
+		txtObject.text(text);
+				
+		var extents = getTextSize(text, "16px Arial");
+		
+		width = extents.width;
+		height = 16;
+			
+			
+		return {
+			editText: function (text) {
+				txtObject.text(text);
+				extents = getTextSize(text, "16px Arial");
+				width = extents.width;
+			},
+			containedBy: function(p1, p2) {
+				if(p1.x <= offset.x && p2.x >= (offset.x + width) && p1.y <= (offset.y - height / 2) && p2.y >= (offset.y + height / 2)) 
+				{
+					return true;
+				}
+			},
+			hitTest: function(x, y) {
+				if(x >= offset.x && x <= (offset.x + width) && y >= (offset.y - height / 2) && y <= (offset.y + height / 2)) 
+				{
+					return true;
+				}
+			},
+			isSelected: function() { return isSelected; },
+			select: function() {
+				isSelected = true;
+				txtObject.attr("opacity","0.5");
+			},
+			deselect: function() {
+				isSelected = false;
+				txtObject.attr("opacity","1.0");
+			},
+			remove: function() {
+				txtObject.remove();
+			},		
+			move: function(x, y) {
+				offset.x += x;
+				offset.y += y;
+				txtObject.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
+			}
+		}
 	}
 
 	function ImageObject(data, width, height, offsetx, offsety) {
@@ -423,6 +491,13 @@ var whiteboard = function(d3, socket) {
 				});
 			}
 			selectedTool = tool; 
+		},
+		addText: function(data) {
+			currentObject = new TextObject(data.text, data.width, data.height, data.offset.x, data.offset.y);
+			var name = makeid();
+			currentObject.name = name;
+			objects[name] = currentObject;
+			socket.emit('text', { name: name, text: data.text, width: data.width, height: data.height, offset: { x: 0, y: 0 } });
 		},
 		addImage: function(data) { 
 			currentObject = new ImageObject(data.href, data.width, data.height, data.offset.x, data.offset.y);
