@@ -112,9 +112,7 @@ io.on('connection', function (socket) {
 	registerRejoin(socket);
 	registerCreate(socket);
 	registerGetBoardInfo(socket);
-	
-	//socket.on('disconnect', function() {
-	//	delete clients[socket.id];
-	//});
+
+
 });
 

@@ -14,6 +14,13 @@ var chatterbox = function(socket) {
 		$("#chatspace").scrollTop($("#chatspace").scrollTop() + messageText.position().top);
         addUser(data);
 	})
+	
+	socket.on('left', function(data){
+		var messageText = $("<div style='color: green'>* <strong>" + data.name + "</strong> has left " + chatBoardName + "</div>");
+		$("#chatspace").append(messageText);
+		$("#chatspace").scrollTop($("#chatspace").scrollTop() + messageText.position().top);
+        removeUser(data);
+	})
 
 	socket.on('replay', function(data) {
 		for(var i = 0; i < data.messages.length; i++) {
@@ -52,9 +59,18 @@ var chatterbox = function(socket) {
 	}
     
     function addUser(user) {
-        var hash = window.md5(user.email.toLowerCase());
-        var url = "http://www.gravatar.com/avatar/" + hash;
-        $("#users").append("<img src=\"" + url + "\" style=\"width: 64px; height: 64px\" title=\"" + user.name + "\"/>");
+		var imgUrl = '';
+		if(user.facebookId) {
+			imgUrl = "https://graph.facebook.com/" + user.facebookId + "/picture?type=square";
+		} else {
+			var hash = window.md5(user.email.toLowerCase());
+			imgUrl = "http://www.gravatar.com/avatar/" + hash;
+		}
+        $("#users").append("<img id=\"" + user.name + "\" src=\"" + imgUrl + "\" style=\"width: 64px; height: 64px\" title=\"" + user.name + "\"/>");
+	}
+	
+	function removeUser(user) {
+        $("#" + user.name).remove();
 	}
 	
 	return {

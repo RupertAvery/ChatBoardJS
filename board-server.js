@@ -122,7 +122,7 @@ function Board(boardname) {
 			
 				socket.emit('welcome', {  name: users[user].name, sessionId: sessionId } );
 				
-				broadcast('joined', { name: users[user].name }, socket);
+				broadcast('joined', { name: users[user].name, email: data.email, facebookId: data.facebookId  }, socket);
 				
 				socket.emit('replay', { objects: objects, messages: messages, users: getUsers() });
 				return;
@@ -135,7 +135,7 @@ function Board(boardname) {
         var userlist = [];
         for(var user in users)
         {
-            userlist.push({ name: users[user].name, email: users[user].email });
+            userlist.push({ name: users[user].name, email: users[user].email, facebookId: users[user].facebookId, });
         }
         return userlist;
     }
@@ -148,8 +148,9 @@ function Board(boardname) {
 			return;
 		}
 		
+		
 		if(!users[data.name]) {
-			users[data.name] = { name: data.name, email: data.email, socket: socket, sessionId: makeid() };
+			users[data.name] = { name: data.name, email: data.email, facebookId: data.facebookId, socket: socket, sessionId: makeid() };
 			            
 			console.log(socket.id + " joins board: " + name);
 			
@@ -162,9 +163,16 @@ function Board(boardname) {
 			
 			socket.emit('welcome', { name: users[data.name].name, sessionId: users[data.name].sessionId } );
 			
-			broadcast('joined', { name: data.name, email: data.email }, socket);
+			broadcast('joined', { name: data.name, email: data.email, facebookId: data.facebookId }, socket);
 			
 			socket.emit('replay', { objects: objects, messages: messages, users: getUsers() });
+			
+			socket.on('disconnect', function() {
+				console.log(data.name + ' has left the building');
+				broadcast('left', { name: data.name }, socket);
+				delete users[data.name];
+			});	
+			
 		} else {
 			socket.emit('joinerror', { message: 'That name is already in use!' });
 		}

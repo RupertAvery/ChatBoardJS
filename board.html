@@ -25,6 +25,24 @@
  </style>
 </head>
 <body>
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '905740989492290',
+      xfbml      : true,
+      version    : 'v2.4'
+    });
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+</script>
+
 
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
@@ -111,6 +129,7 @@
 		  <span id="joinErrorMessage" style="color: red; display: none" ></span>
         </div>
         <div class="modal-footer">
+          <button type="button" class="btn btn-default" id="fblogin">Facebook</button>
           <button type="button" class="btn btn-default" id="closeName">OK</button>
         </div>
       </div>
@@ -257,6 +276,21 @@ socket.on('boardInfo', function(data) {
 
 board.selectTool("pen");
 board.selectColor("black");
+
+$("#fblogin").click(function(){
+	FB.login(function(response) {
+	  if (response.status === 'connected') {
+		FB.api('/me', function(response) {
+			socket.emit('join', { id: id, name: response.name, facebookId: response.id });
+		});
+	  } else if (response.status === 'not_authorized') {
+		// The person is logged into Facebook, but not your app.
+	  } else {
+		// The person is not logged into Facebook, so we're not sure if
+		// they are logged into this app or not.
+	  }
+	}, {scope: 'public_profile,email'});
+});
 
 $("#red").click(function(){
 	board.selectColor("red");
