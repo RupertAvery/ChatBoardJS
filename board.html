@@ -2,6 +2,7 @@
 <head>
  <title>ChatBoard</title>
  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+ <link rel="stylesheet" href="http://lipis.github.io/bootstrap-social/bootstrap-social.css">
  <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
@@ -28,7 +29,8 @@
 <script>
   window.fbAsyncInit = function() {
     FB.init({
-      appId      : '905740989492290',
+      appId      : '905795099486879', // Test AppId - http://localhost:9000
+      //appId      : '905740989492290',
       xfbml      : true,
       version    : 'v2.4'
     });
@@ -140,15 +142,26 @@
           <h4 class="modal-title">Welcome to <span id="boardName"></span></h4>
         </div>
         <div class="modal-body">
-          <p>Tell me your name:</p>
-		  <input type="text" id="myName" value=""/>
-          <p>If you want, tell me your gravatar email:</p>
-		  <input type="text" id="myEmail" value=""/>
-		  <span id="joinErrorMessage" style="color: red; display: none" ></span>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" id="fblogin">Facebook</button>
-          <button type="button" class="btn btn-default" id="closeName">OK</button>
+			<table style="width: 100%;">
+				<td style="width: 50%; border-right: 1px solid #dedede">
+					<p>
+						<label>Tell me your name</label><br/>
+						<input type="text" id="myName" value=""/>
+					</p>
+					<p>
+						<label>Enter your gravatar email (optional)</label><br/>
+						<input type="text" id="myEmail" value=""/>
+					</p>
+					<span id="joinErrorMessage" style="color: red; display: none" ></span><br/>
+					<button type="button" class="btn btn-default" id="closeName">Login</button>
+				</td>
+				<td style="width: 50%; text-align: center; vertical-align: top">
+					<p>Or login using an existing account:</p>
+					<a class="btn btn-block btn-social btn-facebook" id="fblogin" style="width:70%; text-align: center; display: inline">
+						<i class="fa fa-facebook"></i> Sign in with Facebook
+					</a>
+ 				</td>
+			</table>
         </div>
       </div>
 
@@ -290,6 +303,11 @@ socket.on('boardInfo', function(data) {
 	} else {
 		$('#myModal').modal('show');
 	}
+});
+
+$(window).load(function() {
+board.selectTool("pen");
+board.selectColor("black");
 });
 
 $("#fblogin").click(function(){
