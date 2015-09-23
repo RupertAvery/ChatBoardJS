@@ -227,13 +227,15 @@
 
       dataURL = canvas.toDataURL('image/png');
 
-      $(this).css('cursor', [
-        'url(' + dataURL + ')',
-        options.hotspot[0],
-        options.hotspot[1],
-        ',',
-        'auto'
-      ].join(' '));
+      $(this)
+        .css('cursor', 'auto')
+        .css('cursor', [
+          'url(' + dataURL + ')',
+          options.hotspot[0],
+          options.hotspot[1],
+          ',',
+          'auto'
+        ].join(' '));
 
       // Maintain chaining
       return this;

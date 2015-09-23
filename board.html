@@ -53,9 +53,9 @@
 </nav>
 
 <textarea id="hiddentext" style="display:none"></textarea>
-  
+
 <table id="content" style="display: none; margin-top: -10px">
-	<tr> 
+	<tr>
 		<td colspan="2" style="height: 50px;">
             <div id="users"></div>
 		</td>
@@ -63,25 +63,43 @@
 	<tr>
 		<td style="vertical-align: top; padding: 5px;">
 			<div id="chatspace" style="width: 350; overflow-y: scroll; border: 1px solid #c0c0c0">
-				
+
 			</div>
 
 			<div>
 				<input id="chatinput" type="text" style="width: 350; margin-top:10px;"/>
 			</div>
 		</td>
-		
+
 		<td style="vertical-align: top; padding: 5px;">
 			<div id="whiteboard" tabindex="1" style="border: 1px solid #c0c0c0">
-			
+
 			</div>
 			<div style="margin-top: 10px;">
-				<button class="btn" id="penTool">Pen</button>
-				<button class="btn" id="imgAction">Image</button>
-				<button class="btn" id="eraserTool">Eraser</button>
-				<button class="btn" id="deleteAction">Delete</button>
-				<button class="btn" id="textTool">Text</button>
-				<button class="btn" id="selectTool">Select</button>
+        <div class="btn-group">
+          <button id="selectTool" class="btn" type="button">
+            <span class="fa fa-mouse-pointer"></span>
+          </button>
+          <!--<button id="deleteAction" class="btn" type="button">
+            <span class="fa fa-trash-o"></span>
+          </button>-->
+        </div>
+        <div class="btn-group">
+          <button id="textTool" class="btn" type="button">
+            <span class="fa fa-font"></span>
+          </button>
+          <button id="penTool" class="btn" type="button">
+            <span class="fa fa-pencil"></span>
+          </button>
+          <button id="eraserTool" class="btn" type="button">
+            <span class="fa fa-eraser"></span>
+          </button>
+        </div>
+        <div class="btn-group">
+          <button id="imgAction" class="btn" type="button">
+            <span class="fa fa-picture-o"></span>
+          </button>
+        </div>
 			</div>
 		</td>
 
@@ -115,7 +133,7 @@
  <!-- Modal -->
   <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">
-    
+
       <!-- Modal content-->
       <div class="modal-content">
         <div class="modal-header modal-inverse">
@@ -133,20 +151,20 @@
           <button type="button" class="btn btn-default" id="closeName">OK</button>
         </div>
       </div>
-      
+
     </div>
   </div>
-  
+
    <!-- Modal -->
   <div class="modal fade" id="imgUploadModal" role="dialog">
     <div class="modal-dialog">
-    
+
       <!-- Modal content-->
       <div class="modal-content">
         <div class="modal-header modal-inverse">
           <h4 class="modal-title">Upload an image</h4>
         </div>
-     
+
 		<ul class="nav nav-tabs" id="tabContent">
 			<li class="active"><a href="#upload-tab" data-toggle="tab">Upload an image</a></li>
 			<li><a href="#url-tab" data-toggle="tab">Add by URL</a></li>
@@ -156,27 +174,27 @@
 			<div class="tab-pane active" id="upload-tab" style="padding:10px">
 				<p>Select an image:</p>
 				<input type="file" id="fileupload" style="width:100%"/>
-			</div> 
+			</div>
 
 			<div class="tab-pane" id="url-tab" style="padding:10px">
 				<p>Enter URL:</p>
 				<input type="text" id="imageUploadUrl" style="width:100%"/>
 			</div>
-		</div>        
-		
+		</div>
+
 		<div class="modal-footer">
           <button type="button" class="btn btn-default" id="uploadImageBtn">OK</button>
           <button type="button" class="btn btn-default" id="cancelImageBtn">Cancel</button>
         </div>
       </div>
-      
+
     </div>
   </div>
-  
+
    <!-- Modal -->
   <div class="modal fade" id="textModal" role="dialog">
     <div class="modal-dialog">
-    
+
       <!-- Modal content-->
       <div class="modal-content">
         <div class="modal-header modal-inverse">
@@ -186,19 +204,19 @@
 		<div class="modal-body">
 		  <input type="text" id="myText" value="" style="width:100%"/>
         </div>
-		
+
 		<div class="modal-footer">
           <button type="button" class="btn btn-default" id="addTextBtn">OK</button>
           <button type="button" class="btn btn-default" id="cancelTextBtn">Cancel</button>
         </div>
       </div>
-      
+
     </div>
-  </div>  
-  
+  </div>
+
   <div class="modal fade" id="confirmExitDialog" role="dialog">
     <div class="modal-dialog">
-    
+
       <!-- Modal content-->
       <div class="modal-content">
         <div class="modal-header">
@@ -209,10 +227,10 @@
           <button type="button" class="btn btn-default" id="cancelExit">No</button>
         </div>
       </div>
-      
+
     </div>
   </div>
-  
+
 <script>
 var myName;
 var socket = io.connect(window.location.origin);
@@ -260,12 +278,12 @@ socket.on('welcome', function(data) {
 $('#closeName').click(function() {
 	socket.emit('join', { id: id, name: $('#myName').val(), email: $('#myEmail').val() });
 });
-	
+
 socket.on('boardInfo', function(data) {
 	$('#boardName').html(data.name);
 	document.title = "Welcome to " + data.name;
 	chat.setBoardName(data.name);
-	
+
 	var oldSessionId = Cookies.get(id + '-sessionId');
 	if(oldSessionId) {
 		socket.emit('rejoin', { id: id, sessionId: oldSessionId });
@@ -273,9 +291,6 @@ socket.on('boardInfo', function(data) {
 		$('#myModal').modal('show');
 	}
 });
-
-board.selectTool("pen");
-board.selectColor("black");
 
 $("#fblogin").click(function(){
 	FB.login(function(response) {
@@ -332,9 +347,9 @@ $("#cancelTextBtn").click(function(){
 	$("#textModal").modal("hide");
 });
 
-
 $("#selectTool").click(function(){
 	board.selectTool("select");
+  $('#whiteboard').css('cursor', 'crosshair');
 	board.deselectAll();
 });
 
@@ -350,6 +365,9 @@ $("#cancelImageBtn").click(function(){
 	$("#imgUploadModal").modal("hide")
 });
 
+$("#selectTool").click();
+board.selectColor("black");
+
 function convertImgToBase64URL(url, callback, outputFormat){
     var img = new Image();
     img.crossOrigin = 'Anonymous';
@@ -361,16 +379,16 @@ function convertImgToBase64URL(url, callback, outputFormat){
         ctx.drawImage(this, 0, 0);
         dataURL = canvas.toDataURL(outputFormat);
         callback(dataURL);
-        canvas = null; 
+        canvas = null;
     };
     img.src = url;
 }
 
 function loadImage(url){
-	var preloadImg = new Image(); 
-	
+	var preloadImg = new Image();
+
 	preloadImg.onload = function() {
-		board.addImage({ 
+		board.addImage({
 			href: url,
 			width: preloadImg.width,
 			height: preloadImg.height,
