@@ -47,7 +47,7 @@ var whiteboard = function(d3, socket) {
 	})
 
 	socket.on('newline', function(data){
-		objects[data.name] = new Line(data.x, data.y, data.color);
+		objects[data.name] = new Line({x:data.x, y:data.y, color:data.color, lineWeight:data.lineWeight});
 		objects[data.name].name = data.name;
 	})
 
@@ -64,7 +64,7 @@ var whiteboard = function(d3, socket) {
 		for(var obj in data.objects) {
 			var current = data.objects[obj];
 			if(current.type == 'line') {
-				objects[current.name] = new Line(current.x, current.y, current.color, current.offset.x, current.offset.y);
+				objects[current.name] = new Line({x:current.x, y:current.y, color:current.color, offsetx:current.offset.x, offsety:current.offset.y, lineWeight:current.lineWeight});
 				objects[current.name].name = current.name;
 				for(var i = 0; i < current.points.length; i++) {
 					objects[current.name].addPoint(current.points[i].x, current.points[i].y);
@@ -210,7 +210,7 @@ var whiteboard = function(d3, socket) {
 		}
 	}
 
-	function Line(x, y, color, offsetx, offsety) {
+	function Line (options) {
 		var lineData = [];
 		var minX = 9999, minY = 9999, maxX = 0, maxY = 0;
 
@@ -219,21 +219,21 @@ var whiteboard = function(d3, socket) {
 			.y(function(d) { return d.y; })
 			.interpolate("linear");
 
-		var offset = { x: offsetx || 0, y: offsety || 0 };
+		var offset = { x: options.offsetx || 0, y: options.offsety || 0 };
 
 		var lineObject = svg.append("path")
 				.attr("d", lineFunction(lineData))
-				.attr("stroke", color)
-				.attr("stroke-width", selectedLineWeight)
+				.attr("stroke", options.color)
+				.attr("stroke-width", options.lineWeight)
 				.attr("fill", "none")
 				.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
 
-		minX = maxX = x;
-		minY = maxY = y;
+		minX = maxX = options.x;
+		minY = maxY = options.y;
 
 		var isSelected = false;
 
-		var origColor = color;
+		var origColor = options.color;
 
 
 		function swap(a, b, c) { var t = a[c]; a[c] = b[c]; b[c] = t; }
@@ -377,11 +377,11 @@ var whiteboard = function(d3, socket) {
 
 		if(selectedTool == "pen")
 		{
-			currentObject = new Line(m[0], m[1], selectedColor);
+			currentObject = new Line({x:m[0], y:m[1], color:selectedColor, lineWeight:selectedLineWeight});
 			var name = makeid();
 			currentObject.name = name;
 			objects[name] = currentObject;
-			socket.emit('newline', { name: name, x: m[0], y: m[1], color: selectedColor });
+			socket.emit('newline', { name: name, x: m[0], y: m[1], color: selectedColor, lineWeight: selectedLineWeight });
 		}
 		else if(selectedTool == "select")
 		{
