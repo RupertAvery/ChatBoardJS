@@ -54,16 +54,28 @@
 
 				<div style="margin-top: 10px;">
 					<div class="btn-group">
-						<button class="btn" id="selectTool" type="button"><span class="fa fa-mouse-pointer"></span></button> 
+						<button class="btn" id="selectTool" type="button"><span class="fa fa-mouse-pointer"></span></button>
                         <!--<button id="deleteAction" class="btn" type="button">
 						<span class="fa fa-trash-o"></span>
 					</button>-->
 					</div>
 
 					<div class="btn-group">
-						<button class="btn" id="textTool" type="button"><span class="fa fa-font"></span></button> 
-                        <button class="btn" id="penTool" type="button"><span class="fa fa-pencil"></span></button> 
+						<button class="btn" id="textTool" type="button"><span class="fa fa-font"></span></button>
+                        <button class="btn" id="penTool" type="button"><span class="fa fa-pencil"></span></button>
                         <button class="btn" id="eraserTool" type="button"><span class="fa fa-eraser"></span></button>
+					</div>
+
+					<div class="btn-group dropup">
+						<button id="lineWeightTool" class="btn dropdown-toggle" data-toggle="dropdown" type="button" style="height: 33px; padding: 13px 9px;">
+								<div style="background-color: #000; height: 2px; width: 15px;"></div>
+						</button>
+						<ul class="dropdown-menu">
+							<li><a onclick="selectLineWeight(1)"><div style="background-color: #000; height: 1px; width: 80px;display: inline-block;"></div> 1px</a></li>
+							<li><a onclick="selectLineWeight(2)"><div style="background-color: #000; height: 2px; width: 80px;display: inline-block;"></div> 2px</a></li>
+							<li><a onclick="selectLineWeight(4)"><div style="background-color: #000; height: 4px; width: 80px;display: inline-block;"></div> 4px</a></li>
+							<li><a onclick="selectLineWeight(8)"><div style="background-color: #000; height: 8px; width: 80px;display: inline-block;"></div> 8px</a></li>
+						</ul>
 					</div>
 
 					<div class="btn-group">
@@ -71,10 +83,10 @@
 					</div>
 
 					<div class="btn-group">
-						<button class="btn color-btn" id="red" type="button"><span class="fa" style="background-color: #f00;"></span></button> 
-                        <button class="btn color-btn" id="blue" type="button"><span class="fa" style="background-color: #00f;"></span></button> 
-                        <button class="btn color-btn" id="green" type="button"><span class="fa" style="background-color: #0f0;"></span></button> 
-                        <button class="btn color-btn" id="black" type="button"><span class="fa" style="background-color: #000;"></span></button> 
+						<button class="btn color-btn" id="red" type="button"><span class="fa" style="background-color: #f00;"></span></button>
+                        <button class="btn color-btn" id="blue" type="button"><span class="fa" style="background-color: #00f;"></span></button>
+                        <button class="btn color-btn" id="green" type="button"><span class="fa" style="background-color: #0f0;"></span></button>
+                        <button class="btn color-btn" id="black" type="button"><span class="fa" style="background-color: #000;"></span></button>
                         <button class="btn color-btn" id="yellow" type="button"><span class="fa" style="background-color: #ff0;"></span></button>
 					</div>
 
@@ -89,7 +101,7 @@
 	<div style="text-align: center;">
 		<span class="alert alert-danger" id="errormessage" style="display: none"></span>
 	</div>
-    
+
     <!-- Login Dialog -->
 
 	<div class="modal fade" id="myModal">
@@ -124,7 +136,7 @@
 		</div>
 	</div>
     <!-- End Login Dialog -->
-    
+
 	<!-- Upload Image Dialog -->
 
 	<div class="modal fade" id="imgUploadModal">
@@ -155,15 +167,15 @@
 				</div>
 
 				<div class="modal-footer">
-					<button class="btn btn-default" id="uploadImageBtn" type="button">OK</button> 
+					<button class="btn btn-default" id="uploadImageBtn" type="button">OK</button>
                     <button class="btn btn-default" id="cancelImageBtn" type="button">Cancel</button>
 				</div>
 			</div>
 		</div>
 	</div>
-    
+
     <!-- END Upload Image Dialog -->
-    
+
 	<!-- Add Text Dialog -->
 
 	<div class="modal fade" id="textModal">
@@ -183,9 +195,9 @@
 			</div>
 		</div>
 	</div>
-    
+
     <!-- END Add Text Dialog -->
-    
+
 	<!-- Confirm Exit Dialog -->
 
 	<div class="modal fade" id="confirmExitDialog">
@@ -202,7 +214,7 @@
 		</div>
 	</div>
     <!-- END Confirm Exit Dialog -->
-    
+
 	<script src="scripts/main.js"></script>
 </body>
 </html>

@@ -14,7 +14,7 @@ function getUrlVars() {
 	}
 	return vars;
 }
-        
+
 var id = getUrlVars()['id'];
 
 socket.emit('getBoardInfo', {
@@ -235,6 +235,12 @@ function resize() {
 	var chat = $("#chatspace");
 	chat.height(win.height() - 50 - 80 - $("nav").height());
 	board.setSize(win.width() - 450, win.height() - 50 - 80 - $("nav").height());
+}
+
+function selectLineWeight(weight) {
+	$('#lineWeightTool div').height(weight);
+
+	board.selectLineWeight(weight);
 }
 
 $(window).resize(function() {

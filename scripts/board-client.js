@@ -13,6 +13,7 @@ var whiteboard = function(d3, socket) {
 	var objects = {};
 
 	var selectedObject = null;
+	var selectedLineWeight = 2;
 	var currentObject = null;
 
 	var svg = d3.select("#whiteboard")
@@ -223,7 +224,7 @@ var whiteboard = function(d3, socket) {
 		var lineObject = svg.append("path")
 				.attr("d", lineFunction(lineData))
 				.attr("stroke", color)
-				.attr("stroke-width", 2)
+				.attr("stroke-width", selectedLineWeight)
 				.attr("fill", "none")
 				.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
 
@@ -488,8 +489,11 @@ var whiteboard = function(d3, socket) {
 			var _tool = tools[tool];
 
 			if (_tool) $('#whiteboard').awesomeCursor(_tool.name, _tool.options);
-			
+
 			selectedTool = tool;
+		},
+		selectLineWeight: function (weight) {
+			selectedLineWeight = weight;
 		},
 		addText: function(data) {
 			currentObject = new TextObject(data.text, data.width, data.height, data.offset.x, data.offset.y);
