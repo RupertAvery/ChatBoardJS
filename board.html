@@ -2,6 +2,7 @@
 <head>
  <title>ChatBoard</title>
  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+ <link rel="stylesheet" href="http://lipis.github.io/bootstrap-social/bootstrap-social.css">
  <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
  <link rel="stylesheet" href="css/spectrum.css" type="text/css">
  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
@@ -309,6 +310,11 @@ socket.on('boardInfo', function(data) {
 	} else {
 		$('#myModal').modal('show');
 	}
+});
+
+$(window).load(function() {
+board.selectTool("pen");
+board.selectColor("black");
 });
 
 $("#fblogin").click(function(){
