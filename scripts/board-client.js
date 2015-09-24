@@ -285,11 +285,11 @@ var whiteboard = function(d3, socket) {
 			},
 			select: function() {
 				isSelected = true;
-				lineObject.attr("stroke", "magenta");
+				lineObject.attr("opacity","0.5");
 			},
 			deselect: function() {
 				isSelected = false;
-				lineObject.attr("stroke", origColor);
+				lineObject.attr("opacity","1.0");
 			},
 			remove: function() {
 				lineObject.remove();
