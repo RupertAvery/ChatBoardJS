@@ -147,7 +147,7 @@ var whiteboard = function(d3, socket) {
 				.attr("font-family", options.fontfamily)
 				.attr("font-size", options.size)
 				.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
-		txtObject.text(option.text);
+		txtObject.text(options.text);
 
 		var extents = getTextSize(options.text, "16px Arial");
 
@@ -209,13 +209,13 @@ var whiteboard = function(d3, socket) {
 
 		return {
 			containedBy: function(p1, p2) {
-				if(p1.x <= offset.x && p2.x >= (offset.x + width) && p1.y <= offset.y && p2.y >= (offset.y + height))
+				if(p1.x <= offset.x && p2.x >= (offset.x + options.width) && p1.y <= offset.y && p2.y >= (offset.y + options.height))
 				{
 					return true;
 				}
 			},
 			hitTest: function(x, y) {
-				if(x >= offset.x && x <= (offset.x + width) && y >= offset.y && y <= (offset.y + height))
+				if(x >= offset.x && x <= (offset.x + options.width) && y >= offset.y && y <= (offset.y + options.height))
 				{
 					return true;
 				}
@@ -526,7 +526,13 @@ var whiteboard = function(d3, socket) {
 			selectedLineWeight = weight;
 		},
 		addText: function(data) {
-			currentObject = new TextObject(data.text, data.width, data.height, data.offset.x, data.offset.y);
+			currentObject = new TextObject({
+                text: data.text, 
+                width: data.width, 
+                height: data.height, 
+                offsetx: data.offset.x, 
+                offsety: data.offset.y
+            });
 			var name = makeid();
 			currentObject.name = name;
 			objects[name] = currentObject;
