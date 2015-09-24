@@ -233,7 +233,7 @@ $("#uploadImageBtn").click(function() {
 function resize() {
 	var win = $(window);
 	var chat = $("#chatspace");
-	chat.height(win.height() - 50 - 80 - $("nav").height());
+	chat.height(win.height() - 80 - 80 - $("nav").height());
 	board.setSize(win.width() - 400, win.height() - 50 - 80 - $("nav").height());
 }
 
@@ -249,4 +249,44 @@ $(window).resize(function() {
 
 $(window).load(function() {
 	resize();
+});
+
+var hiddenInput = $('#hiddentext');
+
+['cut', 'copy', 'paste'].forEach(function(event) {
+    document.addEventListener(event, function(e) {
+			if (document.activeElement !== $('#whiteboard')[0]) return;
+
+			var clipboardData = e.clipboardData;
+
+			hiddenInput.text(' ');
+			hiddenInput.focus().select();
+
+			if (event === "paste") {
+				var  items = clipboardData.items;
+				for (var i = 0; i < items.length; i++) {
+					switch(items[i].kind) {
+						case "file":
+							var blob = clipboardData.items[i].getAsFile();
+							var reader = new FileReader();
+							reader.onload = function(evt){
+								loadImage(evt.target.result);
+							};
+							reader.readAsDataURL(blob);
+							break;
+						case "string":
+							board.addText({
+								text: clipboardData.getData(items[i].type),
+								width: null,
+								height: null,
+								offset: {
+									x: 0,
+									y: 0
+								}
+							});
+							break;
+					}
+				}
+			}
+    });
 });
