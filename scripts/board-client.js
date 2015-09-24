@@ -47,12 +47,23 @@ var whiteboard = function(d3, socket) {
 	})
 
 	socket.on('newline', function(data){
-		objects[data.name] = new Line({x:data.x, y:data.y, color:data.color, lineWeight:data.lineWeight});
+		objects[data.name] = new Line({
+            x: data.x, 
+            y: data.y, 
+            color: data.color, 
+            lineWeight: data.lineWeight
+        });
 		objects[data.name].name = data.name;
 	})
 
 	socket.on('image', function(data) {
-		objects[data.name] = new ImageObject(data.href, data.width, data.height, data.offset.x, data.offset.y);
+		objects[data.name] = new ImageObject({
+            href: data.href, 
+            width: data.width, 
+            height: data.height, 
+            offsetx: data.offset.x, 
+            offsety: data.offset.y
+        });
 		objects[data.name].name = name;
 	})
 
@@ -64,14 +75,27 @@ var whiteboard = function(d3, socket) {
 		for(var obj in data.objects) {
 			var current = data.objects[obj];
 			if(current.type == 'line') {
-				objects[current.name] = new Line({x:current.x, y:current.y, color:current.color, offsetx:current.offset.x, offsety:current.offset.y, lineWeight:current.lineWeight});
+				objects[current.name] = new Line({
+                    x: current.x, 
+                    y: current.y, 
+                    color: current.color, 
+                    offsetx: current.offset.x, 
+                    offsety: current.offset.y, 
+                    lineWeight: current.lineWeight
+                });
 				objects[current.name].name = current.name;
 				for(var i = 0; i < current.points.length; i++) {
 					objects[current.name].addPoint(current.points[i].x, current.points[i].y);
 				}
 			} else
 			if(current.type == 'image') {
-				objects[current.name] = new ImageObject(current.href, current.width, current.height, current.offset.x, current.offset.y);
+				objects[current.name] = new ImageObject({ 
+                    href: current.href, 
+                    width: current.width, 
+                    height: current.height, 
+                    offsetx: current.offset.x, 
+                    offsety: current.offset.y
+                });
 				objects[current.name].name = current.name;
 			} else
 			if(current.type == 'text') {
@@ -110,21 +134,25 @@ var whiteboard = function(d3, socket) {
 		return context.measureText(text);
 	};
 
-	function TextObject(text, width, height, offsetx, offsety) {
-		var offset = { x: offsetx || 20, y: offsety || 16 };
+	function TextObject(options) {
+        
+        options.fontfamily = options.fontfamily || "Arial";
+        options.size = options.size || "16";
+        
+		var offset = { x: options.offsetx || 20, y: options.offsety || 16 };
 		var isSelected = false;
 		var txtObject = svg.append("text")
 				.attr("x", "0")
 				.attr("y", "0")
-				.attr("font-family", "Arial")
-				.attr("font-size", "16")
+				.attr("font-family", options.fontfamily)
+				.attr("font-size", options.size)
 				.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
-		txtObject.text(text);
+		txtObject.text(option.text);
 
-		var extents = getTextSize(text, "16px Arial");
+		var extents = getTextSize(options.text, "16px Arial");
 
-		width = extents.width;
-		height = 16;
+		var width = extents.width;
+		var height = options.size || 16;
 
 
 		return {
@@ -165,16 +193,18 @@ var whiteboard = function(d3, socket) {
 		}
 	}
 
-	function ImageObject(data, width, height, offsetx, offsety) {
+	function ImageObject(options) {
 
-		var offset = { x: offsetx || 0, y: offsety || 0 };
-		var isSelected = false;
+		var offset = { x: options.offsetx || 0, y: options.offsety || 0 };
+		
+        var isSelected = false;
+        
 		var imgObject = svg.append("image")
-				.attr("xlink:href", data)
+				.attr("xlink:href", options.href)
 				.attr("x", "0")
 				.attr("y", "0")
-				.attr("width", width + "px")
-				.attr("height", height + "px")
+				.attr("width", options.width + "px")
+				.attr("height", options.height + "px")
 				.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
 
 		return {
@@ -503,7 +533,13 @@ var whiteboard = function(d3, socket) {
 			socket.emit('text', { name: name, text: data.text, width: data.width, height: data.height, offset: { x: 0, y: 0 } });
 		},
 		addImage: function(data) {
-			currentObject = new ImageObject(data.href, data.width, data.height, data.offset.x, data.offset.y);
+			currentObject = new ImageObject({ 
+                href: data.href, 
+                width: data.width, 
+                height: data.height, 
+                offsetx: data.offset.x, 
+                offsety: data.offset.y 
+            });
 			var name = makeid();
 			currentObject.name = name;
 			objects[name] = currentObject;
