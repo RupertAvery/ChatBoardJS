@@ -1,479 +1,208 @@
+<!DOCTYPE html>
 <html>
 <head>
- <title>ChatBoard</title>
- <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
- <link rel="stylesheet" href="http://lipis.github.io/bootstrap-social/bootstrap-social.css">
- <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
- <link rel="stylesheet" href="css/spectrum.css" type="text/css">
- <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
- <script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
- <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
- <script src="scripts/md5.js"></script>
- <script src="scripts/geometry.js"></script>
- <script src="scripts/chat.js"></script>
- <script src="scripts/board-client.js"></script>
- <script src="scripts/js.cookie.js"></script>
- <script src="scripts/jquery.awesome-cursor.js"></script>
- <script src="scripts/spectrum.js"></script>
- <style>
-	.noselect {
-		-webkit-touch-callout: none;
-		-webkit-user-select: none;
-		-khtml-user-select: none;
-		-moz-user-select: none;
-		-ms-user-select: none;
-		user-select: none;
-	}
- </style>
+	<title>ChatBoard</title>
+	<link href="css/site.css" rel="stylesheet" type="text/css">
+	<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+	<link href="http://lipis.github.io/bootstrap-social/bootstrap-social.css" rel="stylesheet">
+	<link href="css/font-awesome.min.css" rel="stylesheet" type="text/css">
+	<link href="css/spectrum.css" rel="stylesheet" type="text/css">
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script charset="utf-8" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+	<script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+	<script src="scripts/md5.js"></script>
+	<script src="scripts/geometry.js"></script>
+	<script src="scripts/chat.js"></script>
+	<script src="scripts/board-client.js"></script>
+	<script src="scripts/js.cookie.js"></script>
+	<script src="scripts/jquery.awesome-cursor.js"></script>
+	<script src="scripts/spectrum.js"></script>
 </head>
+
 <body>
-<script>
-  window.fbAsyncInit = function() {
-    FB.init({
-      appId      : '905795099486879', // Test AppId - http://localhost:9000
-      //appId      : '905740989492290',
-      xfbml      : true,
-      version    : 'v2.4'
-    });
-  };
+	<script src="scripts/fb.js"></script>
 
-  (function(d, s, id){
-     var js, fjs = d.getElementsByTagName(s)[0];
-     if (d.getElementById(id)) {return;}
-     js = d.createElement(s); js.id = id;
-     js.src = "//connect.facebook.net/en_US/sdk.js";
-     fjs.parentNode.insertBefore(js, fjs);
-   }(document, 'script', 'facebook-jssdk'));
-</script>
-
-
-<nav class="navbar navbar-inverse">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="/">ChatBoard</a>
-    </div>
-  </div>
-</nav>
-
-<textarea id="hiddentext" style="display:none"></textarea>
-
-<table id="content" style="display: none; margin-top: -10px">
-	<tr>
-		<td colspan="2" style="height: 50px;">
-            <div id="users"></div>
-		</td>
-	</tr>
-	<tr>
-		<td style="vertical-align: top; padding: 5px;">
-			<div id="chatspace" style="width: 350; overflow-y: scroll; border: 1px solid #c0c0c0">
-
-			</div>
-
-			<div>
-				<input id="chatinput" type="text" style="width: 350; margin-top:10px;"/>
-			</div>
-		</td>
-
-		<td style="vertical-align: top; padding: 5px;">
-			<div id="whiteboard" tabindex="1" style="border: 1px solid #c0c0c0">
-
-			</div>
-			<div style="margin-top: 10px;">
-        <div class="btn-group">
-          <button id="selectTool" class="btn" type="button">
-            <span class="fa fa-mouse-pointer"></span>
-          </button>
-          <!--<button id="deleteAction" class="btn" type="button">
-            <span class="fa fa-trash-o"></span>
-          </button>-->
-        </div>
-        <div class="btn-group">
-          <button id="textTool" class="btn" type="button">
-            <span class="fa fa-font"></span>
-          </button>
-          <button id="penTool" class="btn" type="button">
-            <span class="fa fa-pencil"></span>
-          </button>
-          <button id="eraserTool" class="btn" type="button">
-            <span class="fa fa-eraser"></span>
-          </button>
-        </div>
-        <div class="btn-group">
-          <button id="colorPicker" class="btn" type="button" style="padding: 3px;">
-            <span class="fa" style="border: 1px #000 solid; width: 20px; height: 20px; background-color: #000;"></span>
-          </button>
-        </div>
-        <div class="btn-group">
-          <button id="imgAction" class="btn" type="button">
-            <span class="fa fa-picture-o"></span>
-          </button>
-        </div>
-			</div>
-		</td>
-
-		<td style="vertical-align: top; padding: 5px;">
-			<table width="20">
-				<tr>
-					<td id="red" height="20" style="background: red; cursor: pointer"> </td>
-				<tr>
-				<tr>
-					<td id="blue" height="20" style="background: blue; cursor: pointer"> </td>
-				<tr>
-				<tr>
-					<td id="green" height="20" style="background: green; cursor: pointer"> </td>
-				<tr>
-				<tr>
-					<td id="black" height="20" style="background: black; cursor: pointer"> </td>
-				<tr>
-				<tr>
-					<td id="yellow"  height="20" style="background: yellow; cursor: pointer"> </td>
-				<tr>
-			</table>
-		</td>
-	</tr>
-</table>
-
-<div style="text-align: center;">
-<span id="errormessage" class="alert alert-danger" style="display: none"></span>
-</div>
-
-
- <!-- Modal -->
-  <div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog">
-
-      <!-- Modal content-->
-      <div class="modal-content">
-        <div class="modal-header modal-inverse">
-          <h4 class="modal-title">Welcome to <span id="boardName"></span></h4>
-        </div>
-        <div class="modal-body">
-			<table style="width: 100%;">
-				<td style="width: 50%; border-right: 1px solid #dedede">
-					<p>
-						<label>Tell me your name</label><br/>
-						<input type="text" id="myName" value=""/>
-					</p>
-					<p>
-						<label>Enter your gravatar email (optional)</label><br/>
-						<input type="text" id="myEmail" value=""/>
-					</p>
-					<span id="joinErrorMessage" style="color: red; display: none" ></span><br/>
-					<button type="button" class="btn btn-default" id="closeName">Login</button>
-				</td>
-				<td style="width: 50%; text-align: center; vertical-align: top">
-					<p style="margin-bottom: 20px">Or login using an existing account:</p>
-					<a class="btn btn-block btn-social btn-facebook" id="fblogin" style="width:70%; text-align: center; display: inline">
-						<i class="fa fa-facebook"></i> Sign in with Facebook
-					</a>
- 				</td>
-			</table>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-   <!-- Modal -->
-  <div class="modal fade" id="imgUploadModal" role="dialog">
-    <div class="modal-dialog">
-
-      <!-- Modal content-->
-      <div class="modal-content">
-        <div class="modal-header modal-inverse">
-          <h4 class="modal-title">Upload an image</h4>
-        </div>
-
-		<ul class="nav nav-tabs" id="tabContent">
-			<li class="active"><a href="#upload-tab" data-toggle="tab">Upload an image</a></li>
-			<li><a href="#url-tab" data-toggle="tab">Add by URL</a></li>
-		</ul>
-
-		<div class="tab-content">
-			<div class="tab-pane active" id="upload-tab" style="padding:10px">
-				<p>Select an image:</p>
-				<input type="file" id="fileupload" style="width:100%"/>
-			</div>
-
-			<div class="tab-pane" id="url-tab" style="padding:10px">
-				<p>Enter URL:</p>
-				<input type="text" id="imageUploadUrl" style="width:100%"/>
+	<nav class="navbar navbar-inverse">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="/">ChatBoard</a>
 			</div>
 		</div>
+	</nav>
+	<textarea id="hiddentext" style="display:none">
+</textarea>
 
-		<div class="modal-footer">
-          <button type="button" class="btn btn-default" id="uploadImageBtn">OK</button>
-          <button type="button" class="btn btn-default" id="cancelImageBtn">Cancel</button>
-        </div>
-      </div>
+	<table id="content" style="display: none; margin-top: -10px">
+		<tr>
+			<td colspan="2" style="height: 50px;">
+				<div id="users"></div>
+			</td>
+		</tr>
 
-    </div>
-  </div>
+		<tr>
+			<td class="chat-container">
+				<div id="chatspace"></div>
 
-   <!-- Modal -->
-  <div class="modal fade" id="textModal" role="dialog">
-    <div class="modal-dialog">
+				<div>
+					<input id="chatinput" type="text">
+				</div>
+			</td>
 
-      <!-- Modal content-->
-      <div class="modal-content">
-        <div class="modal-header modal-inverse">
-          <h4 class="modal-title">Add Text</h4>
-        </div>
+			<td class="board-container">
+				<div id="whiteboard" tabindex="1"></div>
 
-		<div class="modal-body">
-		  <input type="text" id="myText" value="" style="width:100%"/>
-        </div>
+				<div style="margin-top: 10px;">
+					<div class="btn-group">
+						<button class="btn" id="selectTool" type="button"><span class="fa fa-mouse-pointer"></span></button> 
+                        <!--<button id="deleteAction" class="btn" type="button">
+						<span class="fa fa-trash-o"></span>
+					</button>-->
+					</div>
 
-		<div class="modal-footer">
-          <button type="button" class="btn btn-default" id="addTextBtn">OK</button>
-          <button type="button" class="btn btn-default" id="cancelTextBtn">Cancel</button>
-        </div>
-      </div>
+					<div class="btn-group">
+						<button class="btn" id="textTool" type="button"><span class="fa fa-font"></span></button> 
+                        <button class="btn" id="penTool" type="button"><span class="fa fa-pencil"></span></button> 
+                        <button class="btn" id="eraserTool" type="button"><span class="fa fa-eraser"></span></button>
+					</div>
 
-    </div>
-  </div>
+					<div class="btn-group">
+						<button class="btn color-btn" id="colorPicker" type="button"><span class="fa" style=" background-color: #000;"></span></button>
+					</div>
 
-  <div class="modal fade" id="confirmExitDialog" role="dialog">
-    <div class="modal-dialog">
+					<div class="btn-group">
+						<button class="btn color-btn" id="red" type="button"><span class="fa" style="background-color: #f00;"></span></button> 
+                        <button class="btn color-btn" id="blue" type="button"><span class="fa" style="background-color: #00f;"></span></button> 
+                        <button class="btn color-btn" id="green" type="button"><span class="fa" style="background-color: #0f0;"></span></button> 
+                        <button class="btn color-btn" id="black" type="button"><span class="fa" style="background-color: #000;"></span></button> 
+                        <button class="btn color-btn" id="yellow" type="button"><span class="fa" style="background-color: #ff0;"></span></button>
+					</div>
 
-      <!-- Modal content-->
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">Are you sure you want to leave?</h4>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" id="confirmExit">Yes</button>
-          <button type="button" class="btn btn-default" id="cancelExit">No</button>
-        </div>
-      </div>
+					<div class="btn-group">
+						<button class="btn" id="imgAction" type="button"><span class="fa fa-picture-o"></span></button>
+					</div>
+				</div>
+			</td>
+		</tr>
+	</table>
 
-    </div>
-  </div>
+	<div style="text-align: center;">
+		<span class="alert alert-danger" id="errormessage" style="display: none"></span>
+	</div>
+    
+    <!-- Login Dialog -->
 
-<script>
-var myName;
-var socket = io.connect(window.location.origin);
-var chat = new chatterbox(socket);
-var board = new whiteboard(d3, socket);
+	<div class="modal fade" id="myModal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header modal-inverse">
+					<h4 class="modal-title">Welcome to <span id="boardName"></span></h4>
+				</div>
 
-function getUrlVars()
-{
-    var vars = [], hash;
-    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-    for(var i = 0; i < hashes.length; i++)
-    {
-        hash = hashes[i].split('=');
-        vars.push(hash[0]);
-        vars[hash[0]] = hash[1];
-    }
-    return vars;
-}
+				<div class="modal-body">
+					<table style="width: 100%;">
+						<tr>
+							<td style="width: 50%; border-right: 1px solid #dedede">
+								<p><label>Tell me your name</label><br>
+								<input id="myName" type="text" value=""></p>
 
-var id = getUrlVars()['id'];
-socket.emit('getBoardInfo', { id: id });
+								<p><label>Enter your gravatar email (optional)</label><br>
+								<input id="myEmail" type="text" value=""></p><span id="joinErrorMessage" style="color: red; display: none"></span><br>
+								<button class="btn btn-default" id="closeName" type="button">Login</button>
+							</td>
 
-socket.on('errorhandler', function(data) {
-	$("#content").hide();
-	$("#errormessage").html(data.message).show();
-});
+							<td style="width: 50%; text-align: center; vertical-align: top">
+								<p style="margin-bottom: 20px">Or login using an existing account:</p>
+                                <a class="btn btn-block btn-social btn-facebook" id="fblogin" style="width:70%; text-align: center; display: inline">
+                                    <i class="fa fa-facebook"></i> Sign in with Facebook
+                                </a>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+    <!-- End Login Dialog -->
+    
+	<!-- Upload Image Dialog -->
 
-socket.on('joinerror', function(data) {
-	if(data.message == "Invalid session")
-	{
-		$('#myModal').modal('show');
-	} else {
-		$('#joinErrorMessage').html(data.message).show();
-	}
-});
+	<div class="modal fade" id="imgUploadModal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header modal-inverse">
+					<h4 class="modal-title">Upload an image</h4>
+				</div>
 
-socket.on('welcome', function(data) {
-	chat.setUserInfo(data);
-	Cookies.set(id + '-sessionId', data.sessionId, { path: location.pathname });
-	$('#joinErrorMessage').hide();
-	$('#myModal').modal('hide');
-	$("#content").show();
-});
+				<ul class="nav nav-tabs" id="tabContent">
+					<li class="active">
+						<a data-toggle="tab" href="#upload-tab">Upload an image</a>
+					</li>
 
-$('#closeName').click(function() {
-	socket.emit('join', { id: id, name: $('#myName').val(), email: $('#myEmail').val() });
-});
+					<li>
+						<a data-toggle="tab" href="#url-tab">Add by URL</a>
+					</li>
+				</ul>
 
-socket.on('boardInfo', function(data) {
-	$('#boardName').html(data.name);
-	document.title = "Welcome to " + data.name;
-	chat.setBoardName(data.name);
+				<div class="tab-content">
+					<div class="tab-pane active" id="upload-tab" style="padding:10px">
+						<p>Select an image:</p><input id="fileupload" style="width:100%" type="file">
+					</div>
 
-	var oldSessionId = Cookies.get(id + '-sessionId');
-	if(oldSessionId) {
-		socket.emit('rejoin', { id: id, sessionId: oldSessionId });
-	} else {
-		$('#myModal').modal('show');
-	}
-});
+					<div class="tab-pane" id="url-tab" style="padding:10px">
+						<p>Enter URL:</p><input id="imageUploadUrl" style="width:100%" type="text">
+					</div>
+				</div>
 
-$(window).load(function() {
-board.selectTool("pen");
-board.selectColor("black");
-});
+				<div class="modal-footer">
+					<button class="btn btn-default" id="uploadImageBtn" type="button">OK</button> 
+                    <button class="btn btn-default" id="cancelImageBtn" type="button">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+    
+    <!-- END Upload Image Dialog -->
+    
+	<!-- Add Text Dialog -->
 
-$("#fblogin").click(function(){
-	FB.login(function(response) {
-	  if (response.status === 'connected') {
-		FB.api('/me', function(response) {
-			socket.emit('join', { id: id, name: response.name, facebookId: response.id });
-		});
-	  } else if (response.status === 'not_authorized') {
-		// The person is logged into Facebook, but not your app.
-	  } else {
-		// The person is not logged into Facebook, so we're not sure if
-		// they are logged into this app or not.
-	  }
-	}, {scope: 'public_profile,email'});
-});
+	<div class="modal fade" id="textModal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header modal-inverse">
+					<h4 class="modal-title">Add Text</h4>
+				</div>
 
-$('#colorPicker').spectrum({
-  change: function (color) {
-    board.selectColor(color.toHexString());
-    $(this).children('span').css("background-color", color.toHexString());
-  }
-});
+				<div class="modal-body">
+					<input id="myText" style="width:100%" type="text" value="">
+				</div>
 
-$("#red").click(function(){
-	board.selectColor("red");
-});
+				<div class="modal-footer">
+					<button class="btn btn-default" id="addTextBtn" type="button">OK</button> <button class="btn btn-default" id="cancelTextBtn" type="button">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+    
+    <!-- END Add Text Dialog -->
+    
+	<!-- Confirm Exit Dialog -->
 
-$("#green").click(function(){
-	board.selectColor("green");
-});
+	<div class="modal fade" id="confirmExitDialog">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Are you sure you want to leave?</h4>
+				</div>
 
-$("#blue").click(function(){
-	board.selectColor("blue");
-});
-
-$("#black").click(function(){
-	board.selectColor("black");
-});
-
-$("#yellow").click(function(){
-	board.selectColor("yellow");
-});
-
-$("#penTool").click(function(){
-	board.selectTool("pen");
-	board.deselectAll();
-});
-
-$("#eraserTool").click(function(){
-	board.selectTool("eraser");
-	board.deselectAll();
-});
-
-$("#textTool").click(function(){
-	//board.selectTool("text");
-	board.deselectAll();
-	$("#textModal").modal("show")
-});
-
-$("#cancelTextBtn").click(function(){
-	$("#textModal").modal("hide");
-});
-
-$("#selectTool").click(function(){
-	board.selectTool("select");
-  $('#whiteboard').css('cursor', 'crosshair');
-	board.deselectAll();
-});
-
-$("#deleteAction").click(function(){
-	board.removeSelected();
-});
-
-$("#imgAction").click(function(){
-	$("#imgUploadModal").modal("show")
-});
-
-$("#cancelImageBtn").click(function(){
-	$("#imgUploadModal").modal("hide")
-});
-
-$("#selectTool").click();
-board.selectColor("black");
-
-function convertImgToBase64URL(url, callback, outputFormat){
-    var img = new Image();
-    img.crossOrigin = 'Anonymous';
-    img.onload = function(){
-        var canvas = document.createElement('CANVAS'),
-        ctx = canvas.getContext('2d'), dataURL;
-        canvas.height = this.height;
-        canvas.width = this.width;
-        ctx.drawImage(this, 0, 0);
-        dataURL = canvas.toDataURL(outputFormat);
-        callback(dataURL);
-        canvas = null;
-    };
-    img.src = url;
-}
-
-function loadImage(url){
-	var preloadImg = new Image();
-
-	preloadImg.onload = function() {
-		board.addImage({
-			href: url,
-			width: preloadImg.width,
-			height: preloadImg.height,
-			offset: { x: 0, y: 0 }
-		});
-		$("#imgUploadModal").modal("hide")
-	}
-	preloadImg.src = url;
-}
-
-$("#addTextBtn").click(function() {
-	board.addText({
-		text: $("#myText").val(),
-		width: null,
-		height: null,
-		offset: { x: 0, y: 0 }
-	});
-	$("#textModal").modal("hide");
-	$("#myText").val(null);
-});
-
-$("#uploadImageBtn").click(function(){
-	if($("#url-tab").hasClass("active")){
-		loadImage($('#imageUploadUrl').val());
-		$('#imageUploadUrl').val(null);
-	} else {
-		var file = $('#fileupload')[0].files[0];
-		fr = new FileReader();
-		fr.onload =  function() {
-			loadImage(this.result);
-			$("#imgUploadModal").modal("hide")
-		}
-		fr.readAsDataURL(file);
-	}
-});
-
-function resize()
-{
-	var win = $(window);
-	var chat = $("#chatspace");
-	chat.height(win.height() - 50 - 80 - $("nav").height());
-	board.setSize(win.width() - 450, win.height() - 50 - 80 - $("nav").height());
-}
-
-$(window).resize(function() {
-	resize();
-})
-
-$(window).load(function() {
-	resize();
-})
-
-
-</script>
+				<div class="modal-footer">
+					<button class="btn btn-default" id="confirmExit" type="button">Yes</button> <button class="btn btn-default" id="cancelExit" type="button">No</button>
+				</div>
+			</div>
+		</div>
+	</div>
+    <!-- END Confirm Exit Dialog -->
+    
+	<script src="scripts/main.js"></script>
 </body>
 </html>

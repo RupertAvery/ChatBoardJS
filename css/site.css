@@ -1,0 +1,43 @@
+.noselect {
+	-webkit-touch-callout:none;
+	-webkit-user-select:none;
+	-khtml-user-select:none;
+	-moz-user-select:none;
+	-ms-user-select:none;
+	user-select:none
+}
+
+.color-btn {
+	padding:3px !important
+}
+
+.color-btn span {
+	border:1px #000 solid;
+	width:20px;
+	height:20px
+}
+
+#chatspace {
+	width:350px;
+	overflow-y:scroll;
+	border:1px solid silver
+}
+
+#chatinput {
+	width:350px;
+	margin-top:10px
+}
+
+#whiteboard {
+	border:1px solid silver
+}
+
+.chat-container {
+	vertical-align:top;
+	padding:5px
+}
+
+.board-container {
+	vertical-align:top;
+	padding:5px
+}
