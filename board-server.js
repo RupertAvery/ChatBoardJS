@@ -68,8 +68,10 @@ function Board(boardname) {
 		},
 		'move' : function(data) {
 			var offset = objects[data.name].offset
-			offset.x += data.x;
-			offset.y += data.y;
+            if(offset) {
+                offset.x += data.x;
+                offset.y += data.y;
+            }
 		},
 		'text' : function(data) {
 			objects[data.name] = { type: 'text', text: data.text, font: data.font, style: data.style, size: data.size, width: data.width, height: data.height, offset: { x: 0, y: 0 } }
