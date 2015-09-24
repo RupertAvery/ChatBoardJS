@@ -234,7 +234,7 @@ function resize() {
 	var win = $(window);
 	var chat = $("#chatspace");
 	chat.height(win.height() - 50 - 80 - $("nav").height());
-	board.setSize(win.width() - 450, win.height() - 50 - 80 - $("nav").height());
+	board.setSize(win.width() - 400, win.height() - 50 - 80 - $("nav").height());
 }
 
 function selectLineWeight(weight) {

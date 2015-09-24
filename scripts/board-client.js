@@ -19,8 +19,8 @@ var whiteboard = function(d3, socket) {
 	var svg = d3.select("#whiteboard")
 				.append("svg")
 				.attr("class", "noselect")
-				.attr("width", 900)
-				.attr("height", 600)
+				.attr("width", 1920)
+				.attr("height", 1080)
 				.on("mousemove", mouseMove)
 				.on("mousedown", mouseDown)
 				.on("mouseup", mouseUp)
@@ -510,7 +510,7 @@ var whiteboard = function(d3, socket) {
 			socket.emit('image', { name: name, href: data.href, width: data.width, height: data.height, offset: { x: 0, y: 0 } });
 		},
 		setSize: function(width, height) {
-			svg.attr("width", width).attr("height",height);
+			$("#whiteboard").width(width).height(height);
 		}
 	}
 };
