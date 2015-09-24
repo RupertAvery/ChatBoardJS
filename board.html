@@ -30,7 +30,8 @@
 <script>
   window.fbAsyncInit = function() {
     FB.init({
-      appId      : '905740989492290',
+      appId      : '905795099486879', // Test AppId - http://localhost:9000
+      //appId      : '905740989492290',
       xfbml      : true,
       version    : 'v2.4'
     });
@@ -109,6 +110,26 @@
         </div>
 			</div>
 		</td>
+
+		<td style="vertical-align: top; padding: 5px;">
+			<table width="20">
+				<tr>
+					<td id="red" height="20" style="background: red; cursor: pointer"> </td>
+				<tr>
+				<tr>
+					<td id="blue" height="20" style="background: blue; cursor: pointer"> </td>
+				<tr>
+				<tr>
+					<td id="green" height="20" style="background: green; cursor: pointer"> </td>
+				<tr>
+				<tr>
+					<td id="black" height="20" style="background: black; cursor: pointer"> </td>
+				<tr>
+				<tr>
+					<td id="yellow"  height="20" style="background: yellow; cursor: pointer"> </td>
+				<tr>
+			</table>
+		</td>
 	</tr>
 </table>
 
@@ -127,15 +148,26 @@
           <h4 class="modal-title">Welcome to <span id="boardName"></span></h4>
         </div>
         <div class="modal-body">
-          <p>Tell me your name:</p>
-		  <input type="text" id="myName" value=""/>
-          <p>If you want, tell me your gravatar email:</p>
-		  <input type="text" id="myEmail" value=""/>
-		  <span id="joinErrorMessage" style="color: red; display: none" ></span>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" id="fblogin">Facebook</button>
-          <button type="button" class="btn btn-default" id="closeName">OK</button>
+			<table style="width: 100%;">
+				<td style="width: 50%; border-right: 1px solid #dedede">
+					<p>
+						<label>Tell me your name</label><br/>
+						<input type="text" id="myName" value=""/>
+					</p>
+					<p>
+						<label>Enter your gravatar email (optional)</label><br/>
+						<input type="text" id="myEmail" value=""/>
+					</p>
+					<span id="joinErrorMessage" style="color: red; display: none" ></span><br/>
+					<button type="button" class="btn btn-default" id="closeName">Login</button>
+				</td>
+				<td style="width: 50%; text-align: center; vertical-align: top">
+					<p style="margin-bottom: 20px">Or login using an existing account:</p>
+					<a class="btn btn-block btn-social btn-facebook" id="fblogin" style="width:70%; text-align: center; display: inline">
+						<i class="fa fa-facebook"></i> Sign in with Facebook
+					</a>
+ 				</td>
+			</table>
         </div>
       </div>
 
