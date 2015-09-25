@@ -1,7 +1,7 @@
 var myName;
 var socket = io.connect(window.location.origin);
 var chat = new chatterbox(socket);
-var board = new whiteboard(d3, socket);
+var board = new WhiteBoard(d3, socket, 'whiteboard');
 
 function getUrlVars() {
 	var vars = [],
@@ -36,7 +36,7 @@ socket.on('joinerror', function(data) {
 
 socket.on('welcome', function(data) {
 	chat.setUserInfo(data);
-	Cookies.set(id + '-sessionId', data.sessionId, {
+	Cookies.set(id + '-sessionId', data.id, {
 		path: location.pathname
 	});
 	$('#joinErrorMessage').hide();
@@ -138,7 +138,8 @@ $("#eraserTool").click(function() {
 $("#textTool").click(function() {
 	//board.selectTool("text");
 	board.deselectAll();
-	$("#textModal").modal("show")
+	$("#textModal").modal("show");
+	$("#myText").focus().select();
 });
 
 $("#cancelTextBtn").click(function() {

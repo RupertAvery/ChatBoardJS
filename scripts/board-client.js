@@ -1,5 +1,4 @@
-var whiteboard = function(d3, socket) {
-
+ function WhiteBoard(d3, socket, elementId) {
 	var penisdown = false;
 	var lastPoint = null;
 	var startPoint = null;
@@ -9,109 +8,79 @@ var whiteboard = function(d3, socket) {
 		"pen": { name: "pencil", options: { hotspot: 'bottom left' } },
 		"eraser": { name: "eraser", options: { hotspot: 'bottom left' } }
 	};
-
-	var objects = {};
-
+	
+	var boardId = "#" + elementId;
+	
 	var selectedObject = null;
 	var selectedLineWeight = 2;
 	var currentObject = null;
 
-	var svg = d3.select("#whiteboard")
+	var svg = d3.select(boardId)
 				.append("svg")
 				.attr("class", "noselect")
 				.attr("width", 1920)
 				.attr("height", 1080)
 				.on("mousemove", mouseMove)
 				.on("mousedown", mouseDown)
-				.on("mouseup", mouseUp)
-				.on("click", mouseClick)
-	;
+				.on("mouseup", mouseUp);
+
+	var objectManager = new ObjectManager();
 
 	var ctrlDown = false;
     var ctrlKey = 17, vKey = 86, cKey = 67;
 
-	$('#whiteboard').on("keydown", function() {
+	$(boardId).on("keydown", function() {
 		console.log(event.which);
 		if(event.which == 17) {
 			ctrlDown = true;
 		} else if (event.which == 46) {
-			removeSelected();
+			objectManager.removeSelected();
 		}
 	})
 
-	$('#whiteboard').on("keyup", function() {
+	$(boardId).on("keyup", function() {
 		console.log(event.which);
 		if(event.which == 17) {
 			ctrlDown = false;
 		}
 	})
 
-	socket.on('newline', function(data){
-		objects[data.name] = new Line({
-            x: data.x, 
-            y: data.y, 
-            color: data.color, 
-            lineWeight: data.lineWeight
-        });
-		objects[data.name].name = data.name;
+	socket.on('line', function(data){
+		objectManager.add(new LineObject(svg, data));
 	})
 
 	socket.on('image', function(data) {
-		objects[data.name] = new ImageObject({
-            href: data.href, 
-            width: data.width, 
-            height: data.height, 
-            offsetx: data.offset.x, 
-            offsety: data.offset.y
-        });
-		objects[data.name].name = name;
+		objectManager.add(new ImageObject(svg, data));
 	})
 
-	socket.on('addpoint', function(data){
-		objects[data.name].addPoint(data.x, data.y);
+	socket.on('point', function(data){
+		objectManager.getObject(data.id).addPoint(data.point);
 	})
 
 	socket.on('replay', function(data) {
-		for(var obj in data.objects) {
-			var current = data.objects[obj];
-			if(current.type == 'line') {
-				objects[current.name] = new Line({
-                    x: current.x, 
-                    y: current.y, 
-                    color: current.color, 
-                    offsetx: current.offset.x, 
-                    offsety: current.offset.y, 
-                    lineWeight: current.lineWeight
-                });
-				objects[current.name].name = current.name;
-				for(var i = 0; i < current.points.length; i++) {
-					objects[current.name].addPoint(current.points[i].x, current.points[i].y);
-				}
-			} else
-			if(current.type == 'image') {
-				objects[current.name] = new ImageObject({ 
-                    href: current.href, 
-                    width: current.width, 
-                    height: current.height, 
-                    offsetx: current.offset.x, 
-                    offsety: current.offset.y
-                });
-				objects[current.name].name = current.name;
-			} else
-			if(current.type == 'text') {
-				objects[current.name] = new TextObject(current.text, current.width, current.height, current.offset.x, current.offset.y);
-				objects[current.name].name = current.name;
+		for(var key in data.objects) {
+			var object = data.objects[key];
+			switch(object.type) {
+			case 'line':
+				objectManager.add(new LineObject(svg, object));
+				break;
+			case 'image':
+				objectManager.add(new ImageObject(svg, object));
+				break;
+			case 'text':
+				objectManager.add(new TextObject(svg, object));
+				break;
 			}
 		}
 	});
 
 	socket.on('move', function(data){
-		objects[data.name].move(data.x, data.y);
+		objectManager.getObject(data.id).move(data.x, data.y);
 	})
 
 	socket.on('remove', function(data){
-		objects[data.name].remove();
-		delete objects[data.name];
+		objectManager.getObject(data.id).remove();
+		objectManager.remove(data.id)
 	})
 
 
@@ -126,433 +95,212 @@ var whiteboard = function(d3, socket) {
 		return text;
 	}
 
-	function getTextSize(text, font) {
-    // re-use canvas object for better performance
-		var canvas = getTextSize.canvas || (getTextSize.canvas = document.createElement("canvas"));
-		var context = canvas.getContext("2d");
-		context.font = font;
-		return context.measureText(text);
-	};
-
-	function TextObject(options) {
-        
-        options.fontfamily = options.fontfamily || "Arial";
-        options.size = options.size || "16";
-        
-		var offset = { x: options.offsetx || 20, y: options.offsety || 16 };
-		var isSelected = false;
-		var txtObject = svg.append("text")
-				.attr("x", "0")
-				.attr("y", "0")
-				.attr("font-family", options.fontfamily)
-				.attr("font-size", options.size)
-				.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
-		txtObject.text(options.text);
-
-		var extents = getTextSize(options.text, "16px Arial");
-
-		var width = extents.width;
-		var height = options.size || 16;
-
-
-		return {
-			editText: function (text) {
-				txtObject.text(text);
-				extents = getTextSize(text, "16px Arial");
-				width = extents.width;
-			},
-			containedBy: function(p1, p2) {
-				if(p1.x <= offset.x && p2.x >= (offset.x + width) && p1.y <= (offset.y - height / 2) && p2.y >= (offset.y + height / 2))
-				{
-					return true;
-				}
-			},
-			hitTest: function(x, y) {
-				if(x >= offset.x && x <= (offset.x + width) && y >= (offset.y - height / 2) && y <= (offset.y + height / 2))
-				{
-					return true;
-				}
-			},
-			isSelected: function() { return isSelected; },
-			select: function() {
-				isSelected = true;
-				txtObject.attr("opacity","0.5");
-			},
-			deselect: function() {
-				isSelected = false;
-				txtObject.attr("opacity","1.0");
-			},
-			remove: function() {
-				txtObject.remove();
-			},
-			move: function(x, y) {
-				offset.x += x;
-				offset.y += y;
-				txtObject.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
-			}
-		}
+	function toPoint(m) {
+		return { x: m[0], y: m[1] };
 	}
 
-	function ImageObject(options) {
-
-		var offset = { x: options.offsetx || 0, y: options.offsety || 0 };
-		
-        var isSelected = false;
-        
-		var imgObject = svg.append("image")
-				.attr("xlink:href", options.href)
-				.attr("x", "0")
-				.attr("y", "0")
-				.attr("width", options.width + "px")
-				.attr("height", options.height + "px")
-				.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
-
-		return {
-			containedBy: function(p1, p2) {
-				if(p1.x <= offset.x && p2.x >= (offset.x + options.width) && p1.y <= offset.y && p2.y >= (offset.y + options.height))
-				{
-					return true;
-				}
-			},
-			hitTest: function(x, y) {
-				if(x >= offset.x && x <= (offset.x + options.width) && y >= offset.y && y <= (offset.y + options.height))
-				{
-					return true;
-				}
-			},
-			isSelected: function() { return isSelected; },
-			select: function() {
-				isSelected = true;
-				imgObject.attr("opacity","0.5");
-			},
-			deselect: function() {
-				isSelected = false;
-				imgObject.attr("opacity","1.0");
-			},
-			remove: function() {
-				imgObject.remove();
-			},
-			move: function(x, y) {
-				offset.x += x;
-				offset.y += y;
-				imgObject.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
-			}
-		}
-	}
-
-	function Line (options) {
-		var lineData = [];
-		var minX = 9999, minY = 9999, maxX = 0, maxY = 0;
-
-		var lineFunction = d3.svg.line()
-			.x(function(d) { return d.x; })
-			.y(function(d) { return d.y; })
-			.interpolate("linear");
-
-		var offset = { x: options.offsetx || 0, y: options.offsety || 0 };
-
-		var lineObject = svg.append("path")
-				.attr("d", lineFunction(lineData))
-				.attr("stroke", options.color)
-				.attr("stroke-width", options.lineWeight)
-				.attr("fill", "none")
-				.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
-
-		minX = maxX = options.x;
-		minY = maxY = options.y;
-
-		var isSelected = false;
-
-		var origColor = options.color;
-
-
-		function swap(a, b, c) { var t = a[c]; a[c] = b[c]; b[c] = t; }
-
-		return {
-			type: 'line',
-			addPoint: function(x, y) {
-				if(x < minX) minX = x;
-				if(x > maxX) maxX = x;
-				if(y < minY) minY = y;
-				if(y > maxY) maxY = y;
-				lineData.push({x: x, y: y});
-				lineObject.attr("d", lineFunction(lineData));
-			},
-			containedBy: function(p1, p2) {
-				if(p1.x <= (offset.x + minX) && p2.x >= (offset.x + maxX) && p1.y <= (offset.y + minY) && p2.y >= (offset.y + maxY))
-				{
-					return true;
-				}
-			},
-			hitTest: function(x, y) {
-				if(x >= (offset.x + minX) && x <= (offset.x + maxX) && y >= (offset.y + minY) && y <= (offset.y + maxY))
-				{
-					var _lastPoint = { x: lineData[0].x + offset.x, y: lineData[0].y + offset.y };
-
-					for(var i = 1; i < lineData.length; i++) {
-						var point = { x: lineData[i].x + offset.x, y: lineData[i].y + offset.y };
-
-						if(lineCircleCollide(point, _lastPoint, { x: x, y: y }, 5))
-						{
-							return true;
-						}
-						_lastPoint = point;
-					}
-
-					return false;
-				}
-			},
-			isSelected: function() { return isSelected; },
-			length: function() {
-				var _lastPoint = lineData[0];
-				var length = 0;
-				for(var i = 1; i < lineData.length; i++) {
-					var point = lineData[i];
-					length += distance(point, _lastPoint);
-					_lastPoint = point;
-				}
-				return length;
-			},
-			select: function() {
-				isSelected = true;
-				lineObject.attr("opacity","0.5");
-			},
-			deselect: function() {
-				isSelected = false;
-				lineObject.attr("opacity","1.0");
-			},
-			remove: function() {
-				lineObject.remove();
-			},
-			move: function(x, y) {
-				offset.x += x;
-				offset.y += y;
-				lineObject.attr("transform", "translate(" + offset.x + " " + offset.y + ")");
-			}
-		}
-	}
-
+	/***********************************
+		Handle mouse move events
+	************************************/
 	function mouseMove() {
-		var m = d3.mouse(this);
+		var m = toPoint(d3.mouse(this));
+		
 		if(penisdown)
 		{
-			if(selectedTool == "pen")
-			{
+			switch(selectedTool) {
+			case "pen":
 				if(currentObject && currentObject.type == 'line')
 				{
-					currentObject.addPoint(m[0], m[1]);
+					currentObject.addPoint(m);
 				}
-				socket.emit('addpoint', { name: currentObject.name, x: m[0], y: m[1] });
-			}
-		   else if(selectedTool == "eraser")
-			{
-				for(var obj in objects) {
-					if(objects[obj].hitTest(m[0], m[1]))
-					{
-						objects[obj].remove();
-						socket.emit('remove', { name: objects[obj].name });
-						delete objects[obj];
-					}
-				}
-		   }
-			else if(selectedTool == "select")
-			{
+				socket.emit('point', { id: currentObject.id, point: m });
+				break;
+				
+			case "eraser":
+				objectManager.removeAtPoint(m);
+				break;
+				
+			case "select":
+				// If we have a selection, then we are probably moving something around
 				if(currentObject)
 				{
-					var dx = m[0] - lastPoint.x;
-					var dy = m[1] - lastPoint.y;
+					var dx = m.x - lastPoint.x;
+					var dy = m.y - lastPoint.y;
+					
+					// check if the selection is an array
 					if( Object.prototype.toString.call( currentObject ) === '[object Array]' ) {
+						var idList = [];
 						for(var i =0; i < currentObject.length; i++)
 						{
 							currentObject[i].move(dx, dy);
-							socket.emit('move', { name: currentObject[i].name, x: dx, y: dy});
+							// change this call to move multiple objects in one message?
+							socket.emit('move', { id: currentObject[i].id, x: dx, y: dy});
+							idList.push(currentObject[i].id);
 						}
+						socket.emit('move-many', { ids: idList, x: dx, y: dy});
 					}else {
 						currentObject.move(dx, dy);
-						socket.emit('move', { name: currentObject.name, x: dx, y: dy});
+						socket.emit('move', { id: currentObject.id, x: dx, y: dy});
 					}
 				} else {
+					// otherwise, we are probbaly selecting with a rectangle
 					if(selectionRect) {
-						selectionRect.select("#l1").attr("x1", startPoint.x).attr("y1", startPoint.y).attr("x2", m[0]).attr("y2", startPoint.y);
-						selectionRect.select("#l2").attr("x1", m[0]).attr("y1", startPoint.y).attr("x2", m[0]).attr("y2", m[1]);
-						selectionRect.select("#l3").attr("x1", m[0]).attr("y1", m[1]).attr("x2", startPoint.x).attr("y2", m[1]);
-						selectionRect.select("#l4").attr("x1", startPoint.x).attr("y1", m[1]).attr("x2", startPoint.x).attr("y2", startPoint.y);
-
+						// update the selection rectangle
+						selectionRect.select("#l1").attr("x1", startPoint.x).attr("y1", startPoint.y).attr("x2", m.x).attr("y2", startPoint.y);
+						selectionRect.select("#l2").attr("x1", m.x).attr("y1", startPoint.y).attr("x2", m.x).attr("y2", m.y);
+						selectionRect.select("#l3").attr("x1", m.x).attr("y1", m.y).attr("x2", startPoint.x).attr("y2", m.y);
+						selectionRect.select("#l4").attr("x1", startPoint.x).attr("y1", m.y).attr("x2", startPoint.x).attr("y2", startPoint.y);
 					}
 				}
-			}
-			lastPoint = { x: m[0], y: m[1] }
-		}
-	}
-
-	function reverseForIn(obj, f) {
-		var arr = [];
-		for (var key in obj) {
-			arr.push(key);
-		}
-		for (var i=arr.length-1; i>=0; i--) {
-			if(!f.call(obj, arr[i])) {
 				break;
+				
 			}
+			lastPoint = { x: m.x, y: m.y };
 		}
 	}
 
+	/***********************************
+		Handle mouse down events
+	************************************/
 	function mouseDown() {
-		$('#whiteboard').focus();
+		$(boardId).focus();
+		
 		penisdown = true;
 
-		var m = d3.mouse(this);
-		lastPoint = { x: m[0], y: m[1] };
+		var m = toPoint(d3.mouse(this));
+		lastPoint = { x: m.x, y: m.y };
 		startPoint = lastPoint;
 
-		if(selectedTool == "pen")
-		{
-			currentObject = new Line({x:m[0], y:m[1], color:selectedColor, lineWeight:selectedLineWeight});
-			var name = makeid();
-			currentObject.name = name;
-			objects[name] = currentObject;
-			socket.emit('newline', { name: name, x: m[0], y: m[1], color: selectedColor, lineWeight: selectedLineWeight });
-		}
-		else if(selectedTool == "select")
-		{
+		switch(selectedTool) {
+		case "pen":
+			addLine({
+				x: m.x, 
+				y: m.y, 
+				color: selectedColor, 
+				lineWeight: selectedLineWeight
+			});
+			break;
+			
+		case "select":
 			if(selectionRect) {
 				selectionRect.remove();
 			}
-			var selection = null
-
-			reverseForIn(objects, function(obj) {
-				if(objects[obj].hitTest(m[0], m[1]))
-				{
-					selection = objects[obj];
-					return false;
-				}
-				return true;
-			})
-
+			
+			var selection = objectManager.getObjectAtPoint(m);
+			
 			if(selection == null)
 			{
+				// nothing found at that point, proceed to select via rectangle
 				currentObject = null;
+				objectManager.deselectAll();
 
-				deselectAll();
-
+				// create the selection rectangle
 				selectionRect = svg.append("g");
 				selectionRect.append("line").attr("id", "l1").attr("stroke", "black").attr("stroke-width", 2).attr("stroke-dasharray", "5, 5")
 				selectionRect.append("line").attr("id", "l2").attr("stroke", "black").attr("stroke-width", 2).attr("stroke-dasharray", "5, 5")
 				selectionRect.append("line").attr("id", "l3").attr("stroke", "black").attr("stroke-width", 2).attr("stroke-dasharray", "5, 5")
 				selectionRect.append("line").attr("id", "l4").attr("stroke", "black").attr("stroke-width", 2).attr("stroke-dasharray", "5, 5")
 			} else {
-				if(currentObject) {
-
-				} else {
+				// If nothing is selected, then set the selected object as the current object
+				if(!currentObject) {
+					objectManager.deselectAll();
 					currentObject = selection;
-					deselectAll();
-					selection.select();
+					currentObject.select();
 				}
 			}
-
-
 		}
-
-
 	}
 
+	/***********************************
+		Handle mouseup events
+	************************************/
 	function mouseUp() {
 		penisdown = false;
+		var m = toPoint(d3.mouse(this));
 
-		var m = d3.mouse(this);
-
-		if(selectedTool == "pen") {
-			if(objects[currentObject.name].length() < 2) {
-				objects[currentObject.name].remove();
-				socket.emit('remove', { name: currentObject.name });
-				delete objects[currentObject.name];
+		switch(selectedTool) {
+		case "pen": 
+			// In case we started drawing a line, but didn't move the pen much, 
+			// remove the line altogether. This prevents almost invisible lines from
+			// polluting the object list
+			if(currentObject.length() < 2) {
+				objectManager.remove(currentObject);
+				socket.emit('remove', { id: currentObject.id });
 			}
 			currentObject = null;
-		}
-		else if(selectedTool == "select")
-		{
+			break;
+			
+		case "select":
+			// check if a rectangle selection is in progress
 			if(selectionRect) {
-				currentObject = [];
-
-				for(var obj in objects) {
-					if(objects[obj].containedBy(startPoint, { x: m[0], y: m[1] }))
-					{
-						objects[obj].select();
-						currentObject.push(objects[obj]);
-					}
-				}
-
+				currentObject = objectManager.getObjectsInRect(startPoint, m)
 				if(currentObject.length == 0) currentObject = null;
 				selectionRect.remove();
-				//selectionRect = null;
-			} else {
-				//deselectAll();
 			}
+			break;
 		}
 	}
-
-	function mouseClick() {
-
+	
+	
+	function selectColor (color) { 
+		selectedColor = color; 
+	}
+	
+	function selectTool (tool) {
+		var _tool = tools[tool];
+		if (_tool) $(boardId).awesomeCursor(_tool.name, _tool.options);
+		selectedTool = tool;
+	}
+	
+	function selectLineWeight(weight) {
+		selectedLineWeight = weight;
 	}
 
-	function removeSelected() {
-		for(var obj in objects) {
-			if(objects[obj].isSelected()) {
-				objects[obj].remove();
-				socket.emit('remove', { name: objects[obj].name });
-				delete objects[obj];
-			}
-		}
+	function addLine(options) {
+		currentObject = new LineObject(svg, {
+			id: makeid(),
+			x: options.x, 
+			y: options.y, 
+			color: options.color, 
+			lineWeight: options.lineWeight
+		});
+		objectManager.add(currentObject);
+		socket.emit('line', currentObject.options);
+	}
+	
+	function addImage(data) {
+		currentObject = new ImageObject(svg, { 
+			id: makeid(), 
+			href: data.href, 
+			width: data.width, 
+			height: data.height
+		});
+		objectManager.add(currentObject);
+		socket.emit('image', currentObject.options);
 	}
 
-	function deselectAll() {
-		for(var obj in objects) {
-			objects[obj].deselect();
-		}
+	function addText (data) {
+		currentObject = new TextObject(svg, {
+			id: makeid(),
+			text: data.text, 
+			width: data.width, 
+			height: data.height
+		})
+		objectManager.add(currentObject);
+		socket.emit('text', currentObject.options);
 	}
 
 	return {
-		removeSelected: removeSelected,
-		deselectAll: deselectAll,
-		selectColor: function(color) { selectedColor = color; },
-		selectTool: function(tool) {
-			var _tool = tools[tool];
-
-			if (_tool) $('#whiteboard').awesomeCursor(_tool.name, _tool.options);
-
-			selectedTool = tool;
-		},
-		selectLineWeight: function (weight) {
-			selectedLineWeight = weight;
-		},
-		addText: function(data) {
-			currentObject = new TextObject({
-                text: data.text, 
-                width: data.width, 
-                height: data.height, 
-                offsetx: data.offset.x, 
-                offsety: data.offset.y
-            });
-			var name = makeid();
-			currentObject.name = name;
-			objects[name] = currentObject;
-			socket.emit('text', { name: name, text: data.text, width: data.width, height: data.height, offset: { x: 0, y: 0 } });
-		},
-		addImage: function(data) {
-			currentObject = new ImageObject({ 
-                href: data.href, 
-                width: data.width, 
-                height: data.height, 
-                offsetx: data.offset.x, 
-                offsety: data.offset.y 
-            });
-			var name = makeid();
-			currentObject.name = name;
-			objects[name] = currentObject;
-			socket.emit('image', { name: name, href: data.href, width: data.width, height: data.height, offset: { x: 0, y: 0 } });
-		},
+		removeSelected: objectManager.removeSelected,
+		deselectAll: objectManager.deselectAll,
+		selectColor: selectColor,
+		selectTool: selectTool,
+		selectLineWeight: selectLineWeight,
+		addText: addText,
+		addImage: addImage,
 		setSize: function(width, height) {
-			$("#whiteboard").width(width).height(height);
+			$(boardId).width(width).height(height);
+			//svg.attr("width", width).attr("height", height);
 		}
 	}
 };

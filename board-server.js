@@ -2,7 +2,7 @@ function atob(str) {
     return new Buffer(str, 'base64').toString('binary');
 }
 
- function makeid()
+function makeid()
 {
 	var text = "";
 	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -21,7 +21,7 @@ function Board(boardname) {
 	var users = {};
 	var images = {};
 
-	var commands = [ 'chat', 'newline', 'addpoint', 'move', 'remove', 'image', 'text' ];
+	var commands = [ 'chat', 'line', 'point', 'move', 'remove', 'image', 'text' ];
 
 	function getImage(res, imgid) {
 		var image = images[imgid];
@@ -56,33 +56,41 @@ function Board(boardname) {
 		'chat' : function(data) {
 			messages.push(data)
 		},
-		'newline' : function(data) {
-			objects[data.name] = { type: 'line', name: data.name, x: data.x, y: data.y, color: data.color, lineWeight: data.lineWeight, offset: { x: 0, y: 0 } }
+		'line' : function(data) {
+			objects[data.id] = data;
 		},
 		'image' : function(data) {
-			objects[data.name] = { type: 'image', name: data.name, href: data.href, width: data.width, height: data.height, offset: { x: 0, y: 0 } }
+			objects[data.id] = data;
 		},
-		'addpoint' : function(data) {
-			objects[data.name].points = objects[data.name].points || [];
-			objects[data.name].points.push({ x: data.x, y: data.y });
+		'text' : function(data) {
+			objects[data.id] = data;
+		},
+		'point' : function(data) {
+			objects[data.id].points = objects[data.id].points || [];
+			objects[data.id].points.push(data.point);
 		},
 		'move' : function(data) {
-			var offset = objects[data.name].offset
+			var offset = objects[data.id].offset;
             if(offset) {
                 offset.x += data.x;
                 offset.y += data.y;
             }
 		},
-		'text' : function(data) {
-			objects[data.name] = { type: 'text', text: data.text, font: data.font, style: data.style, size: data.size, width: data.width, height: data.height, offset: { x: 0, y: 0 } }
-		},
 		'remove' : function(data) {
-			delete objects[data.name];
+			delete objects[data.id];
 		}
 	}
 
-	function register(user, command){
-
+	function broadcast(command, data, socket) {
+		for(var key in users) {
+			if(users[key].socket != socket)
+			{
+				users[key].socket.emit(command, data);
+			}
+		}
+	}
+	
+	function register(user, command) {
 		user.socket.on(command, function (data) {
 			if (commandPreProcessor[command]) {
 				data = commandPreProcessor[command](user, data)
@@ -92,87 +100,123 @@ function Board(boardname) {
 				commandHandlers[command](data);
 			}
 
-			for(var cuser in users) {
-				if(users[cuser].socket != user.socket)
-				{
-					users[cuser].socket.emit(command, data);
-				}
-			}
+			broadcast(command, data, user.socket);
 		});
 	}
+	
 
-	function broadcast(command, data, socket) {
-		for(var cuser in users) {
-			if(users[cuser].socket != socket)
-			{
-				users[cuser].socket.emit(command, data);
-			}
+	function getUserDetails(user){
+		return {
+			id: user.id,
+			name: user.name, 
+			email: user.email, 
+			facebookId: user.facebookId  
 		}
 	}
 
+	function User(data, socket) {
+		return {
+			id: makeid(),
+			name: data.name, 
+			email: data.email, 
+			facebookId: data.facebookId,
+			socket: socket
+		}
+	}
+	
+	
 	function rejoin(socket, sessionId) {
-		for(var user in users) {
-			if(users[user].sessionId == sessionId) {
-				users[user].socket = socket;
+		
+		for(var key in users) {
+			var user = users[key];
+			
+			if(user.id == sessionId) {
+				user.socket = socket;
 
-				console.log(socket.id + " rejoins board: " + name + " as " + users[user].name);
+				console.log(socket.id + " rejoins board: " + name + " as " + user.name);
 
 				for(var j = 0; j < commands.length; j++)
 				{
-					register(users[user], commands[j]);
+					register(user, commands[j]);
 				}
 
-				socket.emit('welcome', {  name: users[user].name, sessionId: sessionId } );
+				socket.emit('welcome', getUserDetails(user));
 
-				broadcast('joined', { name: users[user].name, email: data.email, facebookId: data.facebookId  }, socket);
+				broadcast('joined', getUserDetails(user), socket);
 
-				socket.emit('replay', { objects: objects, messages: messages, users: getUsers() });
+				socket.emit('replay', { 
+					objects: objects, 
+					messages: messages, 
+					users: getUsers() 
+				});
+				
 				return;
 			}
 		}
+
 		socket.emit('joinerror', { message: 'Invalid session' });
 	}
 
     function getUsers() {
         var userlist = [];
-        for(var user in users)
+        for(var key in users)
         {
-            userlist.push({ name: users[user].name, email: users[user].email, facebookId: users[user].facebookId, });
+			var user = users[key];
+            userlist.push(getUserDetails(user));
         }
         return userlist;
     }
 
+	function isNotUndefinedOrNull(value){
+		return value !== undefined && value !== null
+	}
+
+	function isNotEmptyString(value){
+		return value !== "";
+	}
+	
+	function userExists(data) {
+		if(users[data.id] !== undefined && users[data.id] !== null) return true;
+		for(var key in users) {
+			if(isNotUndefinedOrNull(users[key].facebookId) && users[key].facebookId === data.facebookId) return true;
+			if(isNotUndefinedOrNull(users[key].email) && isNotEmptyString(users[key].email) && users[key].email === data.email) return true;
+		}
+		return false;
+	}
 
 	function join(socket, data) {
-
 		if(!data.name || data.name.length == 0) {
 			socket.emit('joinerror', { message: 'You need to enter a name to join' });
 			return;
 		}
 
-
-		if(!users[data.name]) {
-			users[data.name] = { name: data.name, email: data.email, facebookId: data.facebookId, socket: socket, sessionId: makeid() };
+		if(!userExists(data)) {
+			var newUser = new User(data, socket); 
+			
+			users[newUser.id] = newUser;
 
 			console.log(socket.id + " joins board: " + name);
 
 			// attach all message handlers to this socket
-
 			for(var j = 0; j < commands.length; j++)
 			{
-				register(users[data.name], commands[j]);
+				register(newUser, commands[j]);
 			}
 
-			socket.emit('welcome', { name: users[data.name].name, sessionId: users[data.name].sessionId } );
+			socket.emit('welcome', getUserDetails(newUser));
 
-			broadcast('joined', { name: data.name, email: data.email, facebookId: data.facebookId }, socket);
+			broadcast('joined', getUserDetails(newUser), socket);
 
-			socket.emit('replay', { objects: objects, messages: messages, users: getUsers() });
+			socket.emit('replay', { 
+				objects: objects, 
+				messages: messages, 
+				users: getUsers() 
+			});
 
 			socket.on('disconnect', function() {
-				console.log(data.name + ' has left the building');
-				broadcast('left', { name: data.name }, socket);
-				delete users[data.name];
+				console.log(newUser.name + ' has left the building');
+				broadcast('left', { id: newUser.id, name: newUser.name }, socket);
+				delete users[newUser.id];
 			});
 
 		} else {

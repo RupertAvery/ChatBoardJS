@@ -1,9 +1,11 @@
 var app = require("express")();
+var argv = require("optimist").argv;
 var Board = require("./board-server.js");
 var Entities = require('html-entities').AllHtmlEntities;
 var entities = new Entities();
 
-var server = app.listen(9000);
+var server = app.listen(argv.port || 9000);
+
 var io = require('socket.io').listen(server);
 
 app.get("/", function(req, res) {

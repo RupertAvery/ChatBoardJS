@@ -1,7 +1,7 @@
 var chatterbox = function(socket) {
 	
 	var chatBoardName = '';
-	var userInfo = { name: '', sessionId: '' };
+	var userInfo = { };
 	
 	
 	socket.on('chat', function(data){
@@ -66,11 +66,11 @@ var chatterbox = function(socket) {
 			var hash = window.md5(user.email.toLowerCase());
 			imgUrl = "http://www.gravatar.com/avatar/" + hash;
 		}
-        $("#users").append("<img id=\"" + user.name + "\" src=\"" + imgUrl + "\" style=\"width: 64px; height: 64px\" title=\"" + user.name + "\"/>");
+        $("#users").append("<img id=\"user-" + user.id + "\" src=\"" + imgUrl + "\" style=\"width: 64px; height: 64px\" title=\"" + user.name + "\"/>");
 	}
 	
 	function removeUser(user) {
-        $("#" + user.name).remove();
+        $("#user-" + user.id).remove();
 	}
 	
 	return {
