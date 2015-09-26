@@ -107,6 +107,47 @@ function WhiteBoard(d3, socket, elementId) {
 		return { x: m[0], y: m[1] };
 	}
 
+	function resize(object, dx, dy) {
+		switch (resizeHandles.getDragHandle()) {
+		case "handle1" :
+			object.move(dx, dy);
+			socket.emit('move', { id: object.id, x: dx, y: dy});
+			object.resize(-dx, -dy);
+			break;
+		case "handle2" :
+			object.move(0, dy);
+			socket.emit('move', { id: object.id, x: 0, y: dy});
+			object.resize(0, -dy);
+			break;
+		case "handle3" :
+			object.move(0, dy);
+			socket.emit('move', { id: object.id, x: 0, y: dy});
+			object.resize(dx, -dy);
+			break;
+		case "handle4" :
+			object.resize(dx, 0);
+			break;
+		case "handle5" :
+			object.resize(dx, dy);
+			break;
+		case "handle6" :
+			object.resize(0, dy);
+			break;
+		case "handle7" :
+			object.move(dx, 0);
+			socket.emit('move', { id: object.id, x: dx, y: 0});
+			object.resize(-dx, dy);
+			break;
+		case "handle8" :
+			object.move(dx, 0);
+			socket.emit('move', { id: object.id, x: dx, y: 0});
+			object.resize(-dx, 0);
+			break;
+		}
+		var scale = object.options.scale;
+		socket.emit('scale', { id: object.id, x: scale.x, y: scale.y});
+	}
+	
 	
 	/***********************************
 		Handle mouse move events
@@ -145,17 +186,10 @@ function WhiteBoard(d3, socket, elementId) {
 						var idList = [];
 						for(var i =0; i < currentSelection.length; i++)
 						{
-							currentSelection[i].resize(dx, dy);
-							var scale = currentSelection[i].options.scale;
-							
-							// change this call to move multiple objects in one message?
-							socket.emit('scale', { id: currentSelection[i].id, x: scale.x, y: scale.y});
-							idList.push(currentSelection[i].id);
+							resize(currentSelection[i], dx, dy);
 						}
-					}else {
-						currentSelection.resize(dx, dy);
-						var scale = currentSelection.options.scale;
-						socket.emit('scale', { id: currentSelection.id, x: scale.x, y: scale.y});
+					} else {
+						resize(currentSelection, dx, dy);
 					}
 				}
 				break;
@@ -246,6 +280,7 @@ function WhiteBoard(d3, socket, elementId) {
 			if (resizeHandles) {
 				if (resizeHandles.hitTest(m.x, m.y))
 				{
+					resizeHandles.setDragHandle();
 					selectedTool = "resize";
 					setCursor("resize-down");
 					return;
@@ -316,7 +351,10 @@ function WhiteBoard(d3, socket, elementId) {
 				}
 				
 				resizeHandles = new ResizeHandle(svg, { 
-					offset: { x: maxX, y: maxY }
+					x1: minX, 
+					y1: minY,
+					x2: maxX,
+					y2: maxY
 				});
 			}
 		}

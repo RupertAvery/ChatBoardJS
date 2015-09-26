@@ -7,12 +7,23 @@ function ImageObject(svg, options) {
 	var isSelected = false;
 	
 	function getExtents() {
-		return {
+		var ret =  {
 			x1: options.offset.x,
 			y1: options.offset.y,
 			x2: options.offset.x + options.scale.x * (options.width),
 			y2: options.offset.y + options.scale.y * (options.height)
 		}
+		if(options.scale.x < 0){
+			var temp = ret.x2;
+			ret.x2 = ret.x1;
+			ret.x1 = temp;
+		}
+		if(options.scale.y < 0){
+			var temp = ret.y2;
+			ret.y2 = ret.y1;
+			ret.y1 = temp;
+		}
+		return ret;
 	};
 	
 	var imgObject = svg.append("image")
