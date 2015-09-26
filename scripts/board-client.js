@@ -107,44 +107,30 @@ function WhiteBoard(d3, socket, elementId) {
 		return { x: m[0], y: m[1] };
 	}
 
+	var resizeMatrix = {
+		"handle1" : [ [ 1, 1 ], [-1,-1 ] ],
+		"handle2" : [ [ 0, 1 ], [ 0,-1 ] ],
+		"handle3" : [ [ 0, 1 ], [ 1,-1 ] ],
+		"handle4" : [ [ 0, 0 ], [ 1, 0 ] ],
+		"handle5" : [ [ 0, 0 ], [ 1, 1 ] ],
+		"handle6" : [ [ 0, 0 ], [ 0, 1 ] ],
+		"handle7" : [ [ 1, 0 ], [-1, 1 ] ],
+		"handle8" : [ [ 1, 0 ], [-1, 0 ] ]
+	}
+	
 	function resize(object, dx, dy) {
-		switch (resizeHandles.getDragHandle()) {
-		case "handle1" :
-			object.move(dx, dy);
-			socket.emit('move', { id: object.id, x: dx, y: dy});
-			object.resize(-dx, -dy);
-			break;
-		case "handle2" :
-			object.move(0, dy);
-			socket.emit('move', { id: object.id, x: 0, y: dy});
-			object.resize(0, -dy);
-			break;
-		case "handle3" :
-			object.move(0, dy);
-			socket.emit('move', { id: object.id, x: 0, y: dy});
-			object.resize(dx, -dy);
-			break;
-		case "handle4" :
-			object.resize(dx, 0);
-			break;
-		case "handle5" :
-			object.resize(dx, dy);
-			break;
-		case "handle6" :
-			object.resize(0, dy);
-			break;
-		case "handle7" :
-			object.move(dx, 0);
-			socket.emit('move', { id: object.id, x: dx, y: 0});
-			object.resize(-dx, dy);
-			break;
-		case "handle8" :
-			object.move(dx, 0);
-			socket.emit('move', { id: object.id, x: dx, y: 0});
-			object.resize(-dx, 0);
-			break;
-		}
+		var matrix = resizeMatrix[resizeHandles.getDragHandle()];
+		
+		var mx = dx * matrix[0][0];
+		var my = dy * matrix[0][1];
+		var sx = dx * matrix[1][0];
+		var sy = dy * matrix[1][1];
+		
+		object.move(mx, my);
+		object.resize(sx, sy);
+		
 		var scale = object.options.scale;
+		socket.emit('move', { id: object.id, x: mx, y: my});
 		socket.emit('scale', { id: object.id, x: scale.x, y: scale.y});
 	}
 	

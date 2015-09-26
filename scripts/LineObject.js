@@ -53,14 +53,28 @@ function LineObject (svg, options) {
 	
 	function swap(a, b, c) { var t = a[c]; a[c] = b[c]; b[c] = t; }
 
-	function getExtents() {
-			return {
-				x1: options.offset.x + minX,
-				y1: options.offset.y + minY,
-				x2: options.offset.x + minX + options.scale.x * (maxX - minX),
-				y2: options.offset.y + minY + options.scale.y * (maxY - minY)
-			}
+	function fixBounds(ret) {
+		if(options.scale.x < 0){
+			var temp = ret.x2;
+			ret.x2 = ret.x1;
+			ret.x1 = temp;
 		}
+		if(options.scale.y < 0){
+			var temp = ret.y2;
+			ret.y2 = ret.y1;
+			ret.y1 = temp;
+		}
+		return ret;
+	}
+
+	function getExtents() {
+		return {
+			x1: options.offset.x + minX,
+			y1: options.offset.y + minY,
+			x2: options.offset.x + minX + options.scale.x * (maxX - minX),
+			y2: options.offset.y + minY + options.scale.y * (maxY - minY)
+		}
+	}
 	
 	return {
 		type: 'line',
@@ -68,14 +82,14 @@ function LineObject (svg, options) {
 		options: options,
 		addPoint: addPoint,
 		containedBy: function(p1, p2) {
-			var rect = getExtents();
+			var rect = fixBounds(getExtents());
 			if(p1.x <= rect.x1 && p2.x >= rect.x2 && p1.y <= rect.y1 && p2.y >= rect.y2)
 			{
 				return true;
 			}
 		},
 		hitTest: function(x, y) {
-			var rect = getExtents();
+			var rect = fixBounds(getExtents());
 			if(x >= rect.x1 && x <= rect.x2 && y >= rect.y1 && y <= rect.y2)
 			{
 				var scaleOffsetX = minX + options.scale.x * (lineData[0].x - minX);

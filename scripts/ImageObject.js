@@ -6,13 +6,7 @@ function ImageObject(svg, options) {
 
 	var isSelected = false;
 	
-	function getExtents() {
-		var ret =  {
-			x1: options.offset.x,
-			y1: options.offset.y,
-			x2: options.offset.x + options.scale.x * (options.width),
-			y2: options.offset.y + options.scale.y * (options.height)
-		}
+	function fixBounds(ret) {
 		if(options.scale.x < 0){
 			var temp = ret.x2;
 			ret.x2 = ret.x1;
@@ -24,6 +18,15 @@ function ImageObject(svg, options) {
 			ret.y1 = temp;
 		}
 		return ret;
+	}
+	
+	function getExtents() {
+		return {
+			x1: options.offset.x,
+			y1: options.offset.y,
+			x2: options.offset.x + options.scale.x * (options.width),
+			y2: options.offset.y + options.scale.y * (options.height)
+		}
 	};
 	
 	var imgObject = svg.append("image")
@@ -44,14 +47,14 @@ function ImageObject(svg, options) {
 		id: options.id,
 		options: options,
 		containedBy: function(p1, p2) {
-			var rect = getExtents();
+			var rect = fixBounds(getExtents());
 			if(p1.x <= rect.x1 && p2.x >= rect.x2 && p1.y <= rect.y1 && p2.y >= rect.y2)
 			{
 				return true;
 			}
 		},
 		hitTest: function(x, y) {
-			var rect = getExtents();
+			var rect = fixBounds(getExtents());
 			if(x >= rect.x1 && x <= rect.x2 && y >= rect.y1 && y <= rect.y2)
 			{
 				return true;
