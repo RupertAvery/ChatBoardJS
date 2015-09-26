@@ -3,6 +3,7 @@ function LineObject (svg, options) {
 	var minX = 9999, minY = 9999, maxX = 0, maxY = 0;
 
 	options.offset = options.offset || { x: 0, y: 0 };
+	options.scale = options.scale || { x: 1.0, y: 1.0 };
 
 	var lineFunction = d3.svg.line()
 		.x(function(d) { return d.x; })
@@ -15,14 +16,16 @@ function LineObject (svg, options) {
 			.attr("d", lineFunction(lineData))
 			.attr("stroke", options.color)
 			.attr("stroke-width", options.lineWeight)
-			.attr("fill", "none")
-			.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ")");
+			.attr("vector-effect", "non-scaling-stroke")
+			.attr("fill", "none");
 
+	function transform() {
+		lineObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") translate(" + minX + " " + minY + ") scale(" + options.scale.x + " " + options.scale.y + ") translate(-" + minX + " -" + minY + ")");
+	}
+	
 	minX = maxX = options.x;
 	minY = maxY = options.y;
-
 	var isSelected = false;
-
 	var origColor = options.color;
 
 	function addPoint(point) {
@@ -31,8 +34,10 @@ function LineObject (svg, options) {
 	}
 
 	function addPointInternal(point) {
-		if(point.x < minX) { minX = point.x; } else if (point.x > maxX) { maxX = point.x; }
-		if(point.y < minY) { minY = point.y; } else if (point.y > maxY) { maxY = point.y; }
+		if (point.x < minX) { minX = point.x; }; 
+		if (point.x > maxX) { maxX = point.x; };
+		if (point.y < minY) { minY = point.y; }; 
+		if (point.y > maxY) { maxY = point.y; };
 		lineData.push(point);
 	}
 	
@@ -44,26 +49,43 @@ function LineObject (svg, options) {
 		lineObject.attr("d", lineFunction(lineData));
 	}
 
+	transform();
+	
 	function swap(a, b, c) { var t = a[c]; a[c] = b[c]; b[c] = t; }
 
+	function getExtents() {
+			return {
+				x1: options.offset.x + minX,
+				y1: options.offset.y + minY,
+				x2: options.offset.x + minX + options.scale.x * (maxX - minX),
+				y2: options.offset.y + minY + options.scale.y * (maxY - minY)
+			}
+		}
+	
 	return {
 		type: 'line',
 		id: options.id,
 		options: options,
 		addPoint: addPoint,
 		containedBy: function(p1, p2) {
-			if(p1.x <= (options.offset.x + minX) && p2.x >= (options.offset.x + maxX) && p1.y <= (options.offset.y + minY) && p2.y >= (options.offset.y + maxY))
+			var rect = getExtents();
+			if(p1.x <= rect.x1 && p2.x >= rect.x2 && p1.y <= rect.y1 && p2.y >= rect.y2)
 			{
 				return true;
 			}
 		},
 		hitTest: function(x, y) {
-			if(x >= (options.offset.x + minX) && x <= (options.offset.x + maxX) && y >= (options.offset.y + minY) && y <= (options.offset.y + maxY))
+			var rect = getExtents();
+			if(x >= rect.x1 && x <= rect.x2 && y >= rect.y1 && y <= rect.y2)
 			{
-				var _lastPoint = { x: lineData[0].x + options.offset.x, y: lineData[0].y + options.offset.y };
+				var scaleOffsetX = minX + options.scale.x * (lineData[0].x - minX);
+				var scaleOffsetY = minY + options.scale.y * (lineData[0].y - minY);
+				var _lastPoint = { x: options.offset.x + scaleOffsetX, y: options.offset.y + scaleOffsetY };
 
 				for(var i = 1; i < lineData.length; i++) {
-					var point = { x: lineData[i].x + options.offset.x, y: lineData[i].y + options.offset.y };
+					var scaleOffsetX = minX + options.scale.x * (lineData[i].x - minX);
+					var scaleOffsetY = minY + options.scale.y * (lineData[i].y - minY);
+					var point = { x: options.offset.x + scaleOffsetX, y: options.offset.y + scaleOffsetY };
 
 					if(lineCircleCollide(point, _lastPoint, { x: x, y: y }, 5))
 					{
@@ -86,6 +108,7 @@ function LineObject (svg, options) {
 			}
 			return length;
 		},
+		getExtents: getExtents,
 		select: function() {
 			isSelected = true;
 			lineObject.attr("opacity","0.5");
@@ -100,7 +123,23 @@ function LineObject (svg, options) {
 		move: function(x, y) {
 			options.offset.x += x;
 			options.offset.y += y;
-			lineObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ")");
+			transform();
+		},
+		resize: function(x, y) {
+			var w1 = (maxX - minX) * options.scale.x;
+			var w2 = w1 + x;
+			var h1 = (maxY - minY) * options.scale.y;
+			var h2 = h1 + y;
+			var scaleX = w2 / w1;
+			var scaleY = h2 / h1;
+			options.scale.x *= scaleX;
+			options.scale.y *= scaleY;
+			transform();
+		},
+		scale: function(x, y) {
+			options.scale.x = x;
+			options.scale.y = y;
+			transform();
 		}
 	}
 }

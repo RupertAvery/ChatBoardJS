@@ -1,1 +1,1 @@
-node server.js 9000
+node server.js --port=9000

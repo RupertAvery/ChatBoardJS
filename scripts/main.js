@@ -148,7 +148,6 @@ $("#cancelTextBtn").click(function() {
 
 $("#selectTool").click(function() {
 	board.selectTool("select");
-	$('#whiteboard').css('cursor', 'crosshair');
 	board.deselectAll();
 });
 

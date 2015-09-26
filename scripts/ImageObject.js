@@ -2,29 +2,46 @@ function ImageObject(svg, options) {
 	options.type = "image";
 	
 	options.offset = options.offset || { x: 0, y: 0 };
-	
+	options.scale = options.scale || { x: 1.0, y: 1.0 };
+
 	var isSelected = false;
+	
+	function getExtents() {
+		return {
+			x1: options.offset.x,
+			y1: options.offset.y,
+			x2: options.offset.x + options.scale.x * (options.width),
+			y2: options.offset.y + options.scale.y * (options.height)
+		}
+	};
 	
 	var imgObject = svg.append("image")
 			.attr("xlink:href", options.href)
 			.attr("x", "0")
 			.attr("y", "0")
 			.attr("width", options.width + "px")
-			.attr("height", options.height + "px")
-			.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ")");
-
+			.attr("height", options.height + "px");
+	
+	function transform(){ 
+		imgObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") scale(" + options.scale.x + " " + options.scale.y + ")");
+	}
+	
+	transform();
+	
 	return {
 		type: 'image',
 		id: options.id,
 		options: options,
 		containedBy: function(p1, p2) {
-			if(p1.x <= options.offset.x && p2.x >= (options.offset.x + options.width) && p1.y <= options.offset.y && p2.y >= (options.offset.y + options.height))
+			var rect = getExtents();
+			if(p1.x <= rect.x1 && p2.x >= rect.x2 && p1.y <= rect.y1 && p2.y >= rect.y2)
 			{
 				return true;
 			}
 		},
 		hitTest: function(x, y) {
-			if(x >= options.offset.x && x <= (options.offset.x + options.width) && y >= options.offset.y && y <= (options.offset.y + options.height))
+			var rect = getExtents();
+			if(x >= rect.x1 && x <= rect.x2 && y >= rect.y1 && y <= rect.y2)
 			{
 				return true;
 			}
@@ -34,6 +51,7 @@ function ImageObject(svg, options) {
 			isSelected = true;
 			imgObject.attr("opacity","0.5");
 		},
+		getExtents: getExtents,
 		deselect: function() {
 			isSelected = false;
 			imgObject.attr("opacity","1.0");
@@ -44,7 +62,23 @@ function ImageObject(svg, options) {
 		move: function(x, y) {
 			options.offset.x += x;
 			options.offset.y += y;
-			imgObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ")");
+			transform();
+		},
+		resize: function(x, y) {
+			var w1 = options.width * options.scale.x;
+			var w2 = w1 + x;
+			var h1 = options.height * options.scale.y;
+			var h2 = h1 + y;
+			var scaleX = w2 / w1;
+			var scaleY = h2 / h1;
+			options.scale.x *= scaleX;
+			options.scale.y *= scaleY;
+			transform();
+		},
+		scale: function(x, y) {
+			options.scale.x = x;
+			options.scale.y = y;
+			transform();
 		}
 	}
 }
