@@ -77,6 +77,9 @@ var chatterbox = function(socket) {
 		setBoardName: function(name) {
 			chatBoardName = name;
 		},
+		getBoardName: function() {
+			return chatBoardName;
+		},
 		setUserInfo: function(data) {
 			userInfo = data;
 		}

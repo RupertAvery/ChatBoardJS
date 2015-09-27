@@ -45,8 +45,8 @@ function Board(boardname) {
 					contentType : matches[1],
 					data: atob(matches[2])
 				};
-				console.log("Saved image:" + images[imgid]);
 				data.href = '/images/?board=' + id + '&img=' + imgid;
+				console.log("Saved image: " + data.href);
 			}
 			return data;
 		}
@@ -84,6 +84,14 @@ function Board(boardname) {
             }
 		},
 		'remove' : function(data) {
+			if(objects[data.id].type == 'image') {
+				var matchid = objects[data.id].href.match(/\/images\/\?board=[A-Za-z0-9]+&img=([A-Za-z0-9]+)/);
+				if(matchid.index >= 0) {
+					imgid = matchid[1]; 
+					delete images[imgid]
+					console.log("Removed image: " + objects[data.id].href); 
+				}
+			}
 			delete objects[data.id];
 		}
 	}

@@ -67,6 +67,13 @@ function ObjectManager() {
 		},
 		getObjectsInRect: function(point1, point2) {
 			var selection = [];
+			if (point1.x > point2.x) { 
+				var temp = point2.x; point2.x = point1.x; point1.x = temp;
+			}
+			if (point1.y > point2.y) { 
+				var temp = point2.y; point2.y = point1.y; point1.y = temp;
+			}
+			
 			for(var obj in objects) {
 				if(objects[obj].containedBy(point1, point2))
 				{

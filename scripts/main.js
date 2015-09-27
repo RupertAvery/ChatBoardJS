@@ -187,10 +187,16 @@ function convertImgToBase64URL(url, callback, outputFormat) {
 function loadImage(url) {
 	var preloadImg = new Image();
 	preloadImg.onload = function() {
+		var w = $("#whiteboard").width();
+		var h = $("#whiteboard").height();
+		var f = 1;
+		if(preloadImg.width > w) f *= w / preloadImg.width;
+		if((preloadImg.height * f) > h) f *= h / (preloadImg.height * f);
+		
 		board.addImage({
 			href: url,
-			width: preloadImg.width,
-			height: preloadImg.height,
+			width: preloadImg.width * f,
+			height: preloadImg.height * f,
 			offset: {
 				x: 0,
 				y: 0
@@ -204,6 +210,8 @@ function loadImage(url) {
 $("#addTextBtn").click(function() {
 	board.addText({
 		text: $("#myText").val(),
+		font: $("#myText_font option:selected").text(),
+		size: $("#myText_size option:selected").text(),
 		width: null,
 		height: null,
 		offset: {
@@ -251,6 +259,10 @@ $(window).load(function() {
 	resize();
 });
 
+$(window).bind('beforeunload', function(){
+  return 'You are about to leave ' + chat.getBoardName();
+});
+
 var hiddenInput = $('#hiddentext');
 
 ['cut', 'copy', 'paste'].forEach(function(event) {
@@ -277,6 +289,8 @@ var hiddenInput = $('#hiddentext');
 						case "string":
 							board.addText({
 								text: clipboardData.getData(items[i].type),
+								font: "Arial",
+								size: "12",
 								width: null,
 								height: null,
 								offset: {

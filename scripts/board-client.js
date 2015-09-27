@@ -8,10 +8,26 @@ function WhiteBoard(d3, socket, elementId) {
 	var tools = {
 		"pen": { name: "pencil", options: { hotspot: 'bottom left' } },
 		"eraser": { name: "eraser", options: { hotspot: 'bottom left' } },
-		"resize": { name: "hand-paper-o", options: { hotspot: 'top' } },
-		"resize-down": { name: "hand-grab-o", options: { hotspot: 'top' } },
-		"pointer": { name: "mouse-pointer", options: { hotspot: 'top left' } }
+		"resize": { name: "hand-paper-o", options: { hotspot: 'center' } },
+		"resize-down": { name: "hand-grab-o", options: { hotspot: 'center' } },
+		"pointer": { name: "mouse-pointer", options: { hotspot: 'top left' } },
+		"arrows": { name: "arrows", options: { hotspot: 'center' } },
+		"arrows-ew": { name: "arrows-h", options: { hotspot: 'center' } },
+		"arrows-nwse": { name: "arrows-h", options: { hotspot: 'center', rotate: 45 } },
+		"arrows-nesw": { name: "arrows-h", options: { hotspot: 'center', rotate: -45 } },
+		"arrows-ns": { name: "arrows-v", options: { hotspot: 'center' } },
 	};
+	
+	var handleTools = {
+		"handle1": "arrows-nwse",
+		"handle2": "arrows-ns",
+		"handle3": "arrows-nesw",
+		"handle4": "arrows-ew",
+		"handle5": "arrows-nwse",
+		"handle6": "arrows-ns",
+		"handle7": "arrows-nesw",
+		"handle8": "arrows-ew"
+	}
 	
 	var boardId = "#" + elementId;
 	
@@ -22,6 +38,7 @@ function WhiteBoard(d3, socket, elementId) {
 	var svg = d3.select(boardId)
 				.append("svg")
 				.attr("class", "noselect")
+				.attr("oncontextmenu", "return false")
 				.attr("width", 1920)
 				.attr("height", 1080)
 				.on("mousemove", mouseMove)
@@ -38,7 +55,7 @@ function WhiteBoard(d3, socket, elementId) {
 		if (event.which == 17) {
 			ctrlDown = true;
 		} else if (event.which == 46) {
-			objectManager.removeSelected();
+			removeSelected();
 		}
 	})
 
@@ -117,9 +134,28 @@ function WhiteBoard(d3, socket, elementId) {
 		"handle7" : [ [ 1, 0 ], [-1, 1 ] ],
 		"handle8" : [ [ 1, 0 ], [-1, 0 ] ]
 	}
+
+	var textResizeMatrix = {
+		"handle1" : [ [ 1, 0 ], [-1,-1 ] ],
+		"handle2" : [ [ 0, 0 ], [ 0,-1 ] ],
+		"handle3" : [ [ 0, 0 ], [ 1,-1 ] ],
+		"handle4" : [ [ 0, 0 ], [ 1, 0 ] ],
+		"handle5" : [ [ 0, 1 ], [ 1, 1 ] ],
+		"handle6" : [ [ 0, 1 ], [ 0, 1 ] ],
+		"handle7" : [ [ 1, 1 ], [-1, 1 ] ],
+		"handle8" : [ [ 1, 0 ], [-1, 0 ] ]
+	}
+
 	
 	function resize(object, dx, dy) {
-		var matrix = resizeMatrix[resizeHandles.getDragHandle()];
+		var matrix = [];
+		var handle = resizeHandles.getDragHandle();
+		
+		if(object.type == "text") {
+			matrix = textResizeMatrix[handle];
+		} else {
+			matrix = resizeMatrix[handle];
+		}
 		
 		var mx = dx * matrix[0][0];
 		var my = dy * matrix[0][1];
@@ -225,9 +261,17 @@ function WhiteBoard(d3, socket, elementId) {
 			switch (selectedTool) {
 			case "select":
 				if (resizeHandles && resizeHandles.hitTest(m.x, m.y)) {
-					setCursor("resize");
+					var handle = resizeHandles.getDragHandle();
+					setCursor(handleTools[handle]);
 				} else {
-					setCursor("pointer");
+					var selection = objectManager.getObjectAtPoint(m);
+					
+					if (selection != null && selection.isSelected()) {
+						setCursor("arrows");
+					}
+					else {
+						setCursor("pointer");
+					}
 				}
 				break;
 			}
@@ -268,7 +312,6 @@ function WhiteBoard(d3, socket, elementId) {
 				{
 					resizeHandles.setDragHandle();
 					selectedTool = "resize";
-					setCursor("resize-down");
 					return;
 				}
 			}
@@ -278,74 +321,85 @@ function WhiteBoard(d3, socket, elementId) {
 			
 			if (selection == null)
 			{
-				if (resizeHandles) {
-					resizeHandles.remove();
-					resizeHandles = null;
-				}
-				
-				// nothing found at that point, proceed to select via rectangle
-				currentSelection = null;
-				objectManager.deselectAll();
+				if (!ctrlDown) {
+					if (resizeHandles) {
+						resizeHandles.remove();
+						resizeHandles = null;
+					}
+					
+					// nothing found at that point, proceed to select via rectangle
+					currentSelection = null;
+					objectManager.deselectAll();
 
-				// create the selection rectangle
-				selectionRect = svg.append("g");
-				selectionRect.append("line").attr("id", "l1").attr("stroke", "black").attr("stroke-width", 2).attr("stroke-dasharray", "5, 5");
-				selectionRect.append("line").attr("id", "l2").attr("stroke", "black").attr("stroke-width", 2).attr("stroke-dasharray", "5, 5");
-				selectionRect.append("line").attr("id", "l3").attr("stroke", "black").attr("stroke-width", 2).attr("stroke-dasharray", "5, 5");
-				selectionRect.append("line").attr("id", "l4").attr("stroke", "black").attr("stroke-width", 2).attr("stroke-dasharray", "5, 5");
-			} else {
-				selection.select();
-				
-				if (resizeHandles) {
-					resizeHandles.remove();
-					resizeHandles = null;
+					// create the selection rectangle
+					selectionRect = svg.append("g");
+					selectionRect.append("line").attr("id", "l1").attr("stroke", "black").attr("stroke-width", 2).attr("stroke-dasharray", "5, 5");
+					selectionRect.append("line").attr("id", "l2").attr("stroke", "black").attr("stroke-width", 2).attr("stroke-dasharray", "5, 5");
+					selectionRect.append("line").attr("id", "l3").attr("stroke", "black").attr("stroke-width", 2).attr("stroke-dasharray", "5, 5");
+					selectionRect.append("line").attr("id", "l4").attr("stroke", "black").attr("stroke-width", 2).attr("stroke-dasharray", "5, 5");
 				}
+			} else {
 				
 				if (!currentSelection) {
 					// If nothing is selected, then set the selected object as the current object
 					objectManager.deselectAll();
+					selection.select();
 					currentSelection = selection;
 				} else {
 					if (ctrlDown) {
 						if (!Array.isArray(currentSelection)) {
 							currentSelection = [currentSelection];
 						} 
+						selection.select();
 						currentSelection.push(selection)
 					} else {
-						objectManager.deselectAll();
-						currentSelection = selection;
+						if(!selection.isSelected()){
+							objectManager.deselectAll();
+							selection.select();
+							currentSelection = selection;
+						}						
 					}
 				}
-
-				var minX = minY = 9999;
-				var maxX = maxY = -9999;
-				
-				if (Array.isArray(currentSelection)) {
-					for(var i = 0; i < currentSelection.length; i++) {
-						var r = currentSelection[i].getExtents();
-						if (r.x1 < minX) minX = r.x1;
-						if (r.y1 < minY) minY = r.y1;
-						if (r.x2 > maxX) maxX = r.x2;
-						if (r.y2 > maxY) maxY = r.y2;
-					}
-				} else {
-					var r = currentSelection.getExtents();
-					minX = r.x1;
-					minY = r.y1;
-					maxX = r.x2;
-					maxY = r.y2;
-				}
-				
-				resizeHandles = new ResizeHandle(svg, { 
-					x1: minX, 
-					y1: minY,
-					x2: maxX,
-					y2: maxY
-				});
+				createResizeHandler();
 			}
 		}
 	}
 
+	function createResizeHandler() {
+		if (resizeHandles) {
+			resizeHandles.remove();
+			resizeHandles = null;
+		}
+
+		if(currentSelection){
+			var minX = minY = 9999;
+			var maxX = maxY = -9999;
+			
+			if (Array.isArray(currentSelection)) {
+				for(var i = 0; i < currentSelection.length; i++) {
+					var r = currentSelection[i].getExtents();
+					if (r.x1 < minX) minX = r.x1;
+					if (r.y1 < minY) minY = r.y1;
+					if (r.x2 > maxX) maxX = r.x2;
+					if (r.y2 > maxY) maxY = r.y2;
+				}
+			} else {
+				var r = currentSelection.getExtents();
+				minX = r.x1;
+				minY = r.y1;
+				maxX = r.x2;
+				maxY = r.y2;
+			}
+			
+			resizeHandles = new ResizeHandle(svg, { 
+				x1: minX, 
+				y1: minY,
+				x2: maxX,
+				y2: maxY
+			});
+		}
+	}
+	
 	/***********************************
 		Handle mouseup events
 	************************************/
@@ -375,6 +429,7 @@ function WhiteBoard(d3, socket, elementId) {
 				if (currentSelection.length == 0) currentSelection = null;
 				selectionRect.remove();
 			}
+			createResizeHandler();
 			break;
 		}
 	}
@@ -394,6 +449,10 @@ function WhiteBoard(d3, socket, elementId) {
 	}
 	
 	function selectTool (tool) {
+		if (resizeHandles) {
+			resizeHandles.remove();
+			resizeHandles = null;
+		}
 		setCursor(tool);
 		selectedTool = tool;
 	}
@@ -423,21 +482,34 @@ function WhiteBoard(d3, socket, elementId) {
 		});
 		objectManager.add(newObject);
 		socket.emit('image', newObject.options);
+		selectTool("select");
 	}
 
 	function addText (data) {
 		var newObject = new TextObject(svg, {
 			id: makeid(),
 			text: data.text, 
+			font: data.font, 
+			color: selectedColor,
+			size: data.size, 
 			width: data.width, 
 			height: data.height
 		})
 		objectManager.add(newObject);
 		socket.emit('text', newObject.options);
+		selectTool("select");
 	}
 
+	function removeSelected () { 
+		objectManager.removeSelected()
+		if (resizeHandles) {
+			resizeHandles.remove();
+			resizeHandles = null;
+		}
+	}
+	
 	return {
-		removeSelected: objectManager.removeSelected,
+		removeSelected: removeSelected,
 		deselectAll: objectManager.deselectAll,
 		selectColor: selectColor,
 		selectTool: selectTool,

@@ -27,7 +27,7 @@
 	<script src="scripts/spectrum.js"></script>
 </head>
 
-<body>
+<body class="noselect">
 	<script src="scripts/fb.js"></script>
 
 	<nav class="navbar navbar-inverse">
@@ -49,7 +49,7 @@
 
 		<tr>
 			<td class="chat-container">
-				<div id="chatspace"></div>
+				<div class="select" id="chatspace"></div>
 
 				<div>
 					<input id="chatinput" type="text">
@@ -193,7 +193,27 @@
 				</div>
 
 				<div class="modal-body">
-					<input id="myText" style="width:100%" type="text" value="">
+					<div style="margin-bottom: 5px;">
+						<input id="myText" style="width:100%" type="text" value="">
+					</div>
+					<div style="">
+						<select id="myText_font">
+							<option selected="selected">Arial</option>
+							<option>Times New Roman</option>
+							<option>Helvetica</option>
+							<option>Verdana</option>
+						</select>
+						<select id="myText_size">
+							<option>8px</option>
+							<option>10px</option>
+							<option selected="selected">12px</option>
+							<option>16px</option>
+							<option>20px</option>
+							<option>24px</option>
+							<option>48px</option>
+							<option>60px</option>
+						</select>
+					</div>
 				</div>
 
 				<div class="modal-footer">

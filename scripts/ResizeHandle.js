@@ -4,38 +4,62 @@ function ResizeHandle (svg, options) {
 	var w = options.x2 - options.x1;
 	var h = options.y2 - options.y1;
 	
+	function attrRect(rect) {
+		return rect.attr("stroke", "#D6D6D6")
+			.attr("fill", "white")
+			.attr("fill-opacity", 0)
+			.attr("stroke-width", 2)
+			.attr("x", -5)
+			.attr("y", -5)
+			.attr("width", 10)
+			.attr("height", 10);
+	}
+	
 	var resizeHandles = svg.append("g");
-	var handle1 = resizeHandles.append("rect").attr("id", "r1").attr("stroke", "black").attr("stroke-width", 2).attr("x", -5).attr("y", -5).attr("width", 10).attr("height", 10);
-	var handle2 = resizeHandles.append("rect").attr("id", "r2").attr("stroke", "black").attr("stroke-width", 2).attr("x", -5).attr("y", -5).attr("width", 10).attr("height", 10);
-	var handle3 = resizeHandles.append("rect").attr("id", "r2").attr("stroke", "black").attr("stroke-width", 2).attr("x", -5).attr("y", -5).attr("width", 10).attr("height", 10);
-	var handle4 = resizeHandles.append("rect").attr("id", "r2").attr("stroke", "black").attr("stroke-width", 2).attr("x", -5).attr("y", -5).attr("width", 10).attr("height", 10);
-	var handle5 = resizeHandles.append("rect").attr("id", "r2").attr("stroke", "black").attr("stroke-width", 2).attr("x", -5).attr("y", -5).attr("width", 10).attr("height", 10);
-	var handle6 = resizeHandles.append("rect").attr("id", "r2").attr("stroke", "black").attr("stroke-width", 2).attr("x", -5).attr("y", -5).attr("width", 10).attr("height", 10);
-	var handle7 = resizeHandles.append("rect").attr("id", "r2").attr("stroke", "black").attr("stroke-width", 2).attr("x", -5).attr("y", -5).attr("width", 10).attr("height", 10);
-	var handle8 = resizeHandles.append("rect").attr("id", "r2").attr("stroke", "black").attr("stroke-width", 2).attr("x", -5).attr("y", -5).attr("width", 10).attr("height", 10);
+	var handle1 = attrRect(resizeHandles.append("rect").attr("id", "r1"));
+	var handle2 = attrRect(resizeHandles.append("rect").attr("id", "r2"));
+	var handle3 = attrRect(resizeHandles.append("rect").attr("id", "r2"));
+	var handle4 = attrRect(resizeHandles.append("rect").attr("id", "r2"));
+	var handle5 = attrRect(resizeHandles.append("rect").attr("id", "r2"));
+	var handle6 = attrRect(resizeHandles.append("rect").attr("id", "r2"));
+	var handle7 = attrRect(resizeHandles.append("rect").attr("id", "r2"));
+	var handle8 = attrRect(resizeHandles.append("rect").attr("id", "r2"));
 
 	function transform() {
+		var s = 1;
+		if(w < h) {
+			if(w < 50) s = w / 50;
+		} else {
+			if(h < 50) s = h / 50;
+		}
+		
+		if(s < 0.5) s = 0.5;
+		
 		resizeHandles.attr("transform", "translate(" + options.x1 + " " + options.y1 + ")");
-		handle2.attr("transform", "translate(" + w / 2 + " 0)");
-		handle3.attr("transform", "translate(" + w + " 0)");
-		handle4.attr("transform", "translate(" + w + " " + h / 2 + ")");
-		handle5.attr("transform", "translate(" + w + " " + h + ")");
-		handle6.attr("transform", "translate(" + w / 2 + " " + h + ")");
-		handle7.attr("transform", "translate(0 " + h + ")");
-		handle8.attr("transform", "translate(0 " + h / 2 + ")");
+		handle1.attr("transform", "translate(0 0) scale(" + s + " " + s + ")");
+		handle2.attr("transform", "translate(" + w / 2 + " 0) scale(" + s + " " + s + ")");
+		handle3.attr("transform", "translate(" + w + " 0) scale(" + s + " " + s + ")");
+		handle4.attr("transform", "translate(" + w + " " + h / 2 + ") scale(" + s + " " + s + ")");
+		handle5.attr("transform", "translate(" + w + " " + h + ") scale(" + s + " " + s + ")");
+		handle6.attr("transform", "translate(" + w / 2 + " " + h + ") scale(" + s + " " + s + ")");
+		handle7.attr("transform", "translate(0 " + h + ") scale(" + s + " " + s + ")");
+		handle8.attr("transform", "translate(0 " + h / 2 + ") scale(" + s + " " + s + ")");
 	}
 	
 	transform();
 	
 	var dragHandle = null;
 	var currentDragHandle = null;
-
+	
 	function internalHitTest(x, y, px, py) {
-		return x >= options.x1 + px - 5 && x <= options.x1 + px + 5 && y >= options.y1 + py - 5 && y <= options.y1 + py + 5;
+		return (x >= options.x1 + px - 5) && 
+			(y >= options.y1 + py - 5) && 
+			(x <= options.x1 + px + 5) && 
+			(y <= options.y1 + py + 5);
 	}
 	
 	return  {
-		getDragHandle: function () { return currentDragHandle; },
+		getDragHandle: function () { return dragHandle; },
 		remove: function () {
 			resizeHandles.remove();
 		},
