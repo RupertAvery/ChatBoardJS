@@ -27,10 +27,13 @@ function ResizeHandle (svg, options) {
 
 	function transform() {
 		var s = 1;
-		if(w < h) {
-			if(w < 50) s = w / 50;
+		var aw = Math.abs(w);
+		var ah = Math.abs(h);
+		
+		if(aw < ah) {
+			if(aw < 50) s = aw / 50;
 		} else {
-			if(h < 50) s = h / 50;
+			if(ah < 50) s = ah / 50;
 		}
 		
 		if(s < 0.5) s = 0.5;

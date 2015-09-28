@@ -28,6 +28,18 @@ function WhiteBoard(d3, socket, elementId) {
 		"handle7": "arrows-nesw",
 		"handle8": "arrows-ew"
 	}
+
+	var invertedHandleTools = {
+		"handle1": "arrows-nesw",
+		"handle2": "arrows-ns",
+		"handle3": "arrows-nwse",
+		"handle4": "arrows-ew",
+		"handle5": "arrows-nesw",
+		"handle6": "arrows-ns",
+		"handle7": "arrows-nwse",
+		"handle8": "arrows-ew"
+	}
+
 	
 	var boardId = "#" + elementId;
 	
@@ -190,6 +202,19 @@ function WhiteBoard(d3, socket, elementId) {
 		socket.emit('scale', { id: object.id, x: scale.x, y: scale.y});
 	}
 	
+	function setResizeCursor() {
+		if (resizeHandles) {
+			var handle = resizeHandles.getDragHandle();
+			var handleLookup;
+			if (Math.sign(resizeHandles.getWidth() * resizeHandles.getHeight()) == -1) {
+				handleLookup = invertedHandleTools;
+			} else {
+				handleLookup = handleTools;
+			}
+			setCursor(handleLookup[handle]);
+		}
+	}
+	
 	
 	/***********************************
 		Handle mouse move events
@@ -234,6 +259,7 @@ function WhiteBoard(d3, socket, elementId) {
 					}
 					
 					if (resizeHandles) {
+						setResizeCursor()
 						resizeHandles.move(dx, dy);
 					}
 					
@@ -295,8 +321,7 @@ function WhiteBoard(d3, socket, elementId) {
 			switch (selectedTool) {
 			case "select":
 				if (resizeHandles && resizeHandles.hitTest(m.x, m.y)) {
-					var handle = resizeHandles.getDragHandle();
-					setCursor(handleTools[handle]);
+					setResizeCursor();
 				} else {
 					var selection = objectManager.getObjectAtPoint(m);
 					

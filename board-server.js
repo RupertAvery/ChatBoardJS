@@ -82,7 +82,7 @@ function Board(boardname) {
 		'remove' : function(data) {
 			if(objects[data.id].type == 'image') {
 				var matchid = objects[data.id].href.match(/\/images\/\?board=[A-Za-z0-9]+&img=([A-Za-z0-9]+)/);
-				if(matchid.index >= 0) {
+				if(matchid && matchid.index >= 0) {
 					imgid = matchid[1]; 
 					delete images[imgid]
 					console.log("Removed image: " + objects[data.id].href); 
