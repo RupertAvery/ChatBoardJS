@@ -23,9 +23,10 @@ You may also choose to login using Facebook.  The test AppID only works with the
 * Real-time chat
 * Real-time interactive whiteboard
  * Lines (Any colors, using a color selector or a set of predefined colors, 4 selectable widths)
- * Text (currently only black, Arail 16px)
+ * Text
  * Images (upload from local or from an URL)
  * Selection (single or multiple using a selection rectangle)
+ * Scaling of selected objects
  * Moving (move single or multiple objects)
  * Paste (currently only paste text and images in clipboard via Ctrl-V)
  * Eraser
@@ -33,7 +34,6 @@ You may also choose to login using Facebook.  The test AppID only works with the
  
 ### Planned features
 
-* Scaling of selected objects
 * More shapes (circle, rectangle, straight lines)
 * Text editing and styles
 * UI improvements

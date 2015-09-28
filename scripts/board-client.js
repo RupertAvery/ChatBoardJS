@@ -48,21 +48,31 @@ function WhiteBoard(d3, socket, elementId) {
 	var objectManager = new ObjectManager();
 
 	var ctrlDown = false;
-    var ctrlKey = 17, vKey = 86, cKey = 67;
+	var shiftDown = false;
+    var shiftKey = 16, ctrlKey = 17, vKey = 86, cKey = 67, deleteKey = 46;
 
 	$(boardId).on("keydown", function () {
-		console.log(event.which);
-		if (event.which == 17) {
+		switch(event.which) {
+		case ctrlKey:
 			ctrlDown = true;
-		} else if (event.which == 46) {
+			break;
+		case shiftKey:
+			shiftDown = true;
+			break;
+		case deleteKey:
 			removeSelected();
+			break;
 		}
 	})
 
 	$(boardId).on("keyup", function () {
-		console.log(event.which);
-		if (event.which == 17) {
+		switch(event.which) {
+		case ctrlKey:
 			ctrlDown = false;
+			break;
+		case shiftKey:
+			shiftDown = false;
+			break;
 		}
 	})
 
@@ -146,6 +156,16 @@ function WhiteBoard(d3, socket, elementId) {
 		"handle8" : [ [ 1, 0 ], [-1, 0 ] ]
 	}
 
+	var limitMatrix = {
+		"handle1" : [ [ 1, 1 ], [-1,-1 ] ],
+		"handle2" : [ [ 0, 1 ], [ 0,-1 ] ],
+		"handle3" : [ [ 1,-1 ], [-1, 1 ] ],
+		"handle4" : [ [ 1, 0 ], [-1, 0 ] ],
+		"handle5" : [ [ 1, 1 ], [-1,-1 ] ],
+		"handle6" : [ [ 0, 1 ], [ 0,-1 ] ],
+		"handle7" : [ [ 1,-1 ], [-1, 1 ] ],
+		"handle8" : [ [ 1, 0 ], [-1, 0 ] ]
+	}
 	
 	function resize(object, dx, dy) {
 		var matrix = [];
@@ -163,7 +183,7 @@ function WhiteBoard(d3, socket, elementId) {
 		var sy = dy * matrix[1][1];
 		
 		object.move(mx, my);
-		object.resize(sx, sy);
+		object.resize(sx, sy, shiftDown && (matrix[1][0] * matrix[1][1] != 0));
 		
 		var scale = object.options.scale;
 		socket.emit('move', { id: object.id, x: mx, y: my});
@@ -198,6 +218,20 @@ function WhiteBoard(d3, socket, elementId) {
 					var dx = m.x - lastPoint.x;
 					var dy = m.y - lastPoint.y;
 					
+					if (shiftDown) {
+						var limits = limitMatrix[resizeHandles.getDragHandle()];
+						
+						var vx = Math.sign(dx);
+						var vy = Math.sign(dy);
+						var sx = Math.abs(dx);
+						var sy = Math.abs(dy);
+						if (sx < sy) dx = sy * vx;
+						if (sy < sx) dy = sx * vy;
+						
+						if (!((vx == limits[0][0] && vy == limits[0][1]) || (vx == limits[1][0] && vy == limits[1][1]))) {
+							return;
+						}
+					}
 					
 					if (resizeHandles) {
 						resizeHandles.move(dx, dy);

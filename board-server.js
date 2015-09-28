@@ -23,12 +23,8 @@ function Board(boardname) {
 
 	var commands = [ 'chat', 'line', 'point', 'move', 'scale', 'remove', 'image', 'text' ];
 
-	function getImage(res, imgid) {
-		var image = images[imgid];
-		if(image) {
-			res.writeHead(200, { 'Content-Type' :  image.contentType });
-			res.end(image.data, 'binary');
-		}
+	function getImage(imgid) {
+		return images[imgid];
 	}
 
 	var commandPreProcessor = {

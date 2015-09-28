@@ -171,6 +171,8 @@ function ResizeHandle (svg, options) {
 				break;
 			}
 		},
+		getWidth: function() { return w; },
+		getHeight: function() { return h; },
 		resize: function (x, y) {
 			w += x;
 			h += y;

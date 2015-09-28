@@ -139,13 +139,21 @@ function LineObject (svg, options) {
 			options.offset.y += y;
 			transform();
 		},
-		resize: function(x, y) {
+		resize: function(x, y, constrain) {
 			var w1 = (maxX - minX) * options.scale.x;
 			var w2 = w1 + x;
 			var h1 = (maxY - minY) * options.scale.y;
 			var h2 = h1 + y;
 			var scaleX = w2 / w1;
 			var scaleY = h2 / h1;
+			if (constrain) {
+				var vx = Math.sign(scaleX);
+				var vy = Math.sign(scaleY);
+				var sx = Math.abs(scaleX);
+				var sy = Math.abs(scaleY);
+				if (sx < sy) scaleX = sy * vx;
+				if (sy < sx) scaleY = sx * vy;
+			}
 			options.scale.x *= scaleX;
 			options.scale.y *= scaleY;
 			transform();

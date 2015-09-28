@@ -1,6 +1,7 @@
 var app = require("express")();
 var argv = require("optimist").argv;
 var Board = require("./board-server.js");
+var fs = require("fs");
 var Entities = require('html-entities').AllHtmlEntities;
 var entities = new Entities();
 
@@ -20,12 +21,12 @@ function clean(data) {
 	return entities.encode(data)
 }
 
-function serveStatic(request, response) {
-	console.log(request.originalUrl);
-	console.log(" => " + __dirname + request.path);
-	response.sendFile(__dirname + request.path);
+function serveStatic(req, res) {
+	console.log(req.originalUrl);
+	console.log(" => " + __dirname + req.path);
+	res.sendFile(__dirname + req.path);
 }
-	
+
 function ignoreRoute(url)
 {
 	app.get(url, serveStatic)
@@ -34,10 +35,23 @@ function ignoreRoute(url)
 app.get(/\/images\/*/, function(req, res) {
 	var board = manager.getBoardById(req.query.board);
 	if (board) {
-		board.getImage(res, req.query.img);
+		var image = board.getImage(req.query.img);
+		if (image) {
+			res.writeHead(200, { 'Content-Type' :  image.contentType });
+			res.end(image.data, 'binary');
+		} else {
+			res.writeHead(500);
+			res.end();
+		}
 	} else {
 		socket.emit('error', { message: "Board does not exist!" });
 	}
+})
+
+app.get('/scripts/fb.js', function(req, res) {
+	var data = fs.readFileSync(__dirname + '/scripts/fb.js', 'utf8');
+	res.write(data.replace("%appId%", argv.appId));
+	res.end();
 })
 
 ignoreRoute(/\/scripts\/*/);
