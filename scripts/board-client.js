@@ -64,7 +64,7 @@ function WhiteBoard(d3, socket, elementId) {
     var shiftKey = 16, ctrlKey = 17, vKey = 86, cKey = 67, deleteKey = 46;
 
 	$(boardId).on("keydown", function () {
-		switch(event.which) {
+		switch(event.which || event.keyCode) {
 		case ctrlKey:
 			ctrlDown = true;
 			break;
@@ -78,7 +78,7 @@ function WhiteBoard(d3, socket, elementId) {
 	})
 
 	$(boardId).on("keyup", function () {
-		switch(event.which) {
+		switch(event.which || event.keyCode) {
 		case ctrlKey:
 			ctrlDown = false;
 			break;

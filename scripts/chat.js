@@ -36,7 +36,7 @@ var chatterbox = function(socket) {
 	});
 
 	$("#chatinput").keypress(function(e) {
-	  if ( event.which == 13 ) {
+	  if ((event.which || event.keyCode) == 13) {
 		var msg = $("#chatinput").val();
 		addMessage({ from: userInfo.name,  message: msg });
 		socket.emit("chat", { message: msg });
