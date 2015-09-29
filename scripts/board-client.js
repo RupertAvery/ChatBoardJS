@@ -7,6 +7,9 @@ function WhiteBoard(d3, socket, elementId) {
 
 	var tools = {
 		"pen": { name: "pencil", options: { hotspot: 'bottom left' } },
+		"line": { name: "pencil", options: { hotspot: 'bottom left' } },
+		"circle": { name: "pencil", options: { hotspot: 'bottom left' } },
+		"rectangle": { name: "pencil", options: { hotspot: 'bottom left' } },
 		"eraser": { name: "eraser", options: { hotspot: 'bottom left' } },
 		"resize": { name: "hand-paper-o", options: { hotspot: 'center' } },
 		"resize-down": { name: "hand-grab-o", options: { hotspot: 'center' } },
@@ -88,10 +91,22 @@ function WhiteBoard(d3, socket, elementId) {
 		}
 	})
 
-	socket.on('line', function (data){
-		objectManager.add(new LineObject(svg, data));
+	socket.on('path', function (data) {
+		objectManager.add(new PathObject(svg, data));
 	})
 
+	socket.on('line', function (data) {
+		objectManager.add(new LineObject(svg, data));
+	})
+    
+	socket.on('ellipse', function (data) {
+		objectManager.add(new EllipseObject(svg, data));
+	})
+    
+	socket.on('rectangle', function (data) {
+		objectManager.add(new RectangleObject(svg, data));
+	})
+    
 	socket.on('image', function (data) {
 		objectManager.add(new ImageObject(svg, data));
 	})
@@ -104,8 +119,17 @@ function WhiteBoard(d3, socket, elementId) {
 		for(var key in data.objects) {
 			var object = data.objects[key];
 			switch (object.type) {
+			case 'path':
+				objectManager.add(new PathObject(svg, object));
+				break;
 			case 'line':
 				objectManager.add(new LineObject(svg, object));
+				break;
+			case 'ellipse':
+				objectManager.add(new EllipseObject(svg, object));
+				break;
+			case 'rectangle':
+				objectManager.add(new RectangleObject(svg, object));
 				break;
 			case 'image':
 				objectManager.add(new ImageObject(svg, object));
@@ -189,17 +213,20 @@ function WhiteBoard(d3, socket, elementId) {
 			matrix = resizeMatrix[handle];
 		}
 		
+
 		var mx = dx * matrix[0][0];
 		var my = dy * matrix[0][1];
 		var sx = dx * matrix[1][0];
 		var sy = dy * matrix[1][1];
 		
-		object.move(mx, my);
 		object.resize(sx, sy, shiftDown && (matrix[1][0] * matrix[1][1] != 0));
-		
 		var scale = object.options.scale;
-		socket.emit('move', { id: object.id, x: mx, y: my});
+        var o = resizeHandles.options;
+
+		object.move(dx, dy);
+		
 		socket.emit('scale', { id: object.id, x: scale.x, y: scale.y});
+		socket.emit('move', { id: object.id, x: mx, y: my});
 	}
 	
 	function setResizeCursor() {
@@ -226,12 +253,16 @@ function WhiteBoard(d3, socket, elementId) {
 		{
 			switch (selectedTool) {
 			case "pen":
-				if (currentSelection && currentSelection.type == 'line')
+				if (currentSelection && currentSelection.type == 'path')
 				{
 					currentSelection.addPoint(m);
 				}
 				socket.emit('point', { id: currentSelection.id, point: m });
 				break;
+			case "line":
+			case "ellipse":
+			case "rectangle":
+               break;
 				
 			case "eraser":
 				objectManager.removeAtPoint(m);
@@ -298,7 +329,7 @@ function WhiteBoard(d3, socket, elementId) {
 							socket.emit('move', { id: currentSelection[i].id, x: dx, y: dy});
 							idList.push(currentSelection[i].id);
 						}
-						socket.emit('move-many', { ids: idList, x: dx, y: dy});
+						//socket.emit('move-many', { ids: idList, x: dx, y: dy});
 					}else {
 						currentSelection.move(dx, dy);
 						socket.emit('move', { id: currentSelection.id, x: dx, y: dy});
@@ -352,14 +383,18 @@ function WhiteBoard(d3, socket, elementId) {
 
 		switch (selectedTool) {
 		case "pen":
-			addLine({
+			addPath({
 				x: m.x, 
 				y: m.y, 
 				color: selectedColor, 
 				lineWeight: selectedLineWeight
 			});
 			break;
-			
+        case "line":
+        case "ellipse":
+        case "rectangle":
+           break;
+							
 		case "select":
 			if (selectionRect) {
 				selectionRect.remove();
@@ -468,8 +503,8 @@ function WhiteBoard(d3, socket, elementId) {
 
 		switch (selectedTool) {
 		case "pen": 
-			// In case we started drawing a line, but didn't move the pen much, 
-			// remove the line altogether. This prevents almost invisible lines from
+			// In case we started drawing a path, but didn't move the pen much, 
+			// remove the path altogether. This prevents almost invisible lines from
 			// polluting the object list
 			if (currentSelection.length() < 2) {
 				objectManager.remove(currentSelection);
@@ -477,6 +512,39 @@ function WhiteBoard(d3, socket, elementId) {
 			}
 			currentSelection = null;
 			break;
+		case "line": 
+            addLine({
+                x: startPoint.x, 
+                y: startPoint.y, 
+                width: m.x - startPoint.x,
+                height: m.y - startPoint.y,
+                color: selectedColor, 
+                lineWeight: selectedLineWeight
+            });
+			currentSelection = null;
+			break;
+		case "ellipse": 
+            addEllipse({
+                x: startPoint.x, 
+                y: startPoint.y, 
+                width: m.x - startPoint.x,
+                height: m.y - startPoint.y,
+                color: selectedColor, 
+                lineWeight: selectedLineWeight
+            });
+			currentSelection = null;
+			break;
+		case "rectangle": 
+            addRectangle({
+                x: startPoint.x, 
+                y: startPoint.y, 
+                width: m.x - startPoint.x,
+                height: m.y - startPoint.y,
+                color: selectedColor, 
+                lineWeight: selectedLineWeight
+            });
+			currentSelection = null;
+			break;                
 		case "resize":
 			selectedTool = "select";
 			setCursor("resize");
@@ -520,8 +588,8 @@ function WhiteBoard(d3, socket, elementId) {
 		selectedLineWeight = weight;
 	}
 
-	function addLine(options) {
-		currentSelection = new LineObject(svg, {
+	function addPath(options) {
+		currentSelection = new PathObject(svg, {
 			id: makeid(),
 			x: options.x, 
 			y: options.y, 
@@ -529,8 +597,50 @@ function WhiteBoard(d3, socket, elementId) {
 			lineWeight: options.lineWeight
 		});
 		objectManager.add(currentSelection);
+		socket.emit('path', currentSelection.options);
+	}
+    
+	function addLine(options) {
+		currentSelection = new LineObject(svg, {
+			id: makeid(),
+			x: options.x, 
+			y: options.y,
+			width: options.width,
+			height: options.height,
+			color: options.color, 
+			lineWeight: options.lineWeight
+		});
+		objectManager.add(currentSelection);
 		socket.emit('line', currentSelection.options);
 	}
+    
+	function addEllipse(options) {
+		currentSelection = new EllipseObject(svg, {
+			id: makeid(),
+			x: options.x, 
+			y: options.y, 
+			width: options.width,
+			height: options.height,
+			color: options.color, 
+			lineWeight: options.lineWeight
+		});
+		objectManager.add(currentSelection);
+		socket.emit('ellipse', currentSelection.options);
+	}
+    
+	function addRectangle(options) {
+		currentSelection = new RectangleObject(svg, {
+			id: makeid(),
+			x: options.x, 
+			y: options.y, 
+			width: options.width,
+			height: options.height,
+			color: options.color, 
+			lineWeight: options.lineWeight
+		});
+		objectManager.add(currentSelection);
+		socket.emit('path', currentSelection.options);
+	}    
 	
 	function addImage(data) {
 		var newObject = new ImageObject(svg, { 

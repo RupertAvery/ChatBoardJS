@@ -130,6 +130,24 @@ $("#penTool").click(function() {
 	board.deselectAll();
 });
 
+$("#lineTool").click(function() {
+	board.selectTool("line");
+	board.deselectAll();
+});
+
+
+$("#ellipseTool").click(function() {
+	board.selectTool("ellipse");
+	board.deselectAll();
+});
+
+
+$("#rectTool").click(function() {
+	board.selectTool("rectangle");
+	board.deselectAll();
+});
+
+
 $("#eraserTool").click(function() {
 	board.selectTool("eraser");
 	board.deselectAll();

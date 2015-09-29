@@ -62,6 +62,7 @@ function ResizeHandle (svg, options) {
 	}
 	
 	return  {
+        options: options,
 		getDragHandle: function () { return dragHandle; },
 		remove: function () {
 			resizeHandles.remove();

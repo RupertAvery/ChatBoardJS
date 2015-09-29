@@ -1,26 +1,23 @@
-function LineObject (svg, options) {
+function RectangleObject (svg, options) {
+	var minX = 9999, minY = 9999, maxX = 0, maxY = 0;
+
 	options.offset = options.offset || { x: 0, y: 0 };
 	options.scale = options.scale || { x: 1.0, y: 1.0 };
 
 	options.type = "line";
-    
-    var point2 = {
-        x: options.x + options.width,
-        y: options.y + options.height 
-    }
 
 	var pathObject = svg.append("line")
-            .attr("x1", options.x)
-            .attr("y1", options.y)
-            .attr("x2", point2.x)
-            .attr("y2", point2.y)
+            .attr("x1", options.offset.x)
+            .attr("y1", options.offset.y)
+            .attr("x2", options.offset.x + options.width)
+            .attr("y2", options.offset.y + options.height)
 			.attr("stroke", options.color)
 			.attr("stroke-width", options.lineWeight)
 			.attr("vector-effect", "non-scaling-stroke")
 			.attr("fill", "none");
 
 	function transform() {
-		pathObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") translate(" + options.x + " " + options.y + ") scale(" + options.scale.x + " " + options.scale.y + ") translate(-" + options.x + " -" + options.y + ")");
+		pathObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") scale(" + options.scale.x + " " + options.scale.y + ")");
 	}
 	
 	var isSelected = false;
@@ -42,40 +39,18 @@ function LineObject (svg, options) {
 		}
 		return ret;
 	}
-    
-    
-	function fixBounds2(ret) {
-		if(ret.x2 < ret.x1){
-			var temp = ret.x2;
-			ret.x2 = ret.x1;
-			ret.x1 = temp;
-		}
-		if(ret.y2 < ret.y1){
-			var temp = ret.y2;
-			ret.y2 = ret.y1;
-			ret.y1 = temp;
-		}
-		return ret;
-	}
 
 	function getExtents() {
 		return {
-			x1: options.offset.x + options.x,
-			y1: options.offset.y + options.y,
-			x2: options.offset.x + options.x + options.scale.x * options.width,
-			y2: options.offset.y + options.y + options.scale.y * options.height
+			x1: options.offset.x,
+			y1: options.offset.y,
+			x2: options.offset.x + options.scale.x * (options.width),
+			y2: options.offset.y + options.scale.y * (options.height)
 		}
 	}
-    
-    function getOffsetPoint(point) {
-        return { 
-            x: options.offset.x + point.x,
-            y: options.offset.y + point.y
-        }
-    }
 	
 	return {
-		type: 'line',
+		type: 'rectangle',
 		id: options.id,
 		options: options,
 		containedBy: function(p1, p2) {
@@ -86,14 +61,14 @@ function LineObject (svg, options) {
 			}
 		},
 		hitTest: function(x, y) {
-			var rect = getExtents();
-            if(lineCircleCollide({ x: rect.x1, y: rect.y1 }, { x: rect.x2, y: rect.y2 }, { x: x, y: y }, 5))
-            {
-                return true;
-            }
+			var rect = fixBounds(getExtents());
+			if(x >= rect.x1 && x <= rect.x2 && y >= rect.y1 && y <= rect.y2)
+			{
+				return false;
+			}
 		},
 		isSelected: function() { return isSelected; },
-		getExtents: function() { return fixBounds2(getExtents()); },
+		getExtents: getExtents,
 		select: function() {
 			isSelected = true;
 			pathObject.attr("opacity","0.5");
@@ -106,8 +81,8 @@ function LineObject (svg, options) {
 			pathObject.remove();
 		},
 		move: function(x, y) {
-            options.offset.x += x;
-            options.offset.y += y;
+			options.offset.x += x;
+			options.offset.y += y;
 			transform();
 		},
 		resize: function(x, y, constrain) {

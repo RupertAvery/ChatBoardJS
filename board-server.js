@@ -21,7 +21,7 @@ function Board(boardname) {
 	var users = {};
 	var images = {};
 
-	var commands = [ 'chat', 'line', 'point', 'move', 'scale', 'remove', 'image', 'text' ];
+	var commands = [ 'chat', 'path', 'line', 'ellipse', 'rectangle', 'point', 'move', 'scale', 'remove', 'image', 'text' ];
 
 	function getImage(imgid) {
 		return images[imgid];
@@ -47,25 +47,26 @@ function Board(boardname) {
 			return data;
 		}
 	}
+    
+    function handleObject(data) {
+		objects[data.id] = data;
+    }
 
 	var commandHandlers = {
 		'chat' : function(data) {
 			messages.push(data)
 		},
-		'line' : function(data) {
-			objects[data.id] = data;
-		},
-		'image' : function(data) {
-			objects[data.id] = data;
-		},
-		'text' : function(data) {
-			objects[data.id] = data;
-		},
+		'path' : handleObject,
+		'line' : handleObject,
+		'ellipse' : handleObject,
+		'rectangle' : handleObject,
+		'image' : handleObject,
+		'text'  : handleObject,
 		'point' : function(data) {
 			objects[data.id].points = objects[data.id].points || [];
 			objects[data.id].points.push(data.point);
 		},
-		'move' : function(data) {
+		'move'  : function(data) {
 			var offset = objects[data.id].offset;
             if(offset) {
                 offset.x += data.x;

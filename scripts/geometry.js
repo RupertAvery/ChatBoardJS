@@ -1,3 +1,12 @@
+/***********************************************************************************
+
+Adapted from:
+
+https://github.com/mattdesl/point-circle-collision
+https://github.com/mattdesl/line-circle-collision
+
+************************************************************************************/
+
 
 	var tmp = [0, 0]
 
