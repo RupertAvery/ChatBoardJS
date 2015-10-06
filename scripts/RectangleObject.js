@@ -1,23 +1,22 @@
 function RectangleObject (svg, options) {
-	var minX = 9999, minY = 9999, maxX = 0, maxY = 0;
 
 	options.offset = options.offset || { x: 0, y: 0 };
 	options.scale = options.scale || { x: 1.0, y: 1.0 };
 
-	options.type = "line";
+	options.type = "rectangle";
 
-	var pathObject = svg.append("line")
-            .attr("x1", options.offset.x)
-            .attr("y1", options.offset.y)
-            .attr("x2", options.offset.x + options.width)
-            .attr("y2", options.offset.y + options.height)
+	var pathObject = svg.append("rect")
+            .attr("x", options.x)
+            .attr("y", options.y)
+            .attr("width", options.width)
+            .attr("height", options.height)
 			.attr("stroke", options.color)
 			.attr("stroke-width", options.lineWeight)
 			.attr("vector-effect", "non-scaling-stroke")
 			.attr("fill", "none");
 
 	function transform() {
-		pathObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") scale(" + options.scale.x + " " + options.scale.y + ")");
+		pathObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") translate(" + options.x + " " + options.y + ") scale(" + options.scale.x + " " + options.scale.y + ") translate(-" + options.x + " -" + options.y + ")");
 	}
 	
 	var isSelected = false;
@@ -42,10 +41,10 @@ function RectangleObject (svg, options) {
 
 	function getExtents() {
 		return {
-			x1: options.offset.x,
-			y1: options.offset.y,
-			x2: options.offset.x + options.scale.x * (options.width),
-			y2: options.offset.y + options.scale.y * (options.height)
+			x1: options.x + options.offset.x,
+			y1: options.y + options.offset.y,
+			x2: options.x + options.offset.x + options.scale.x * (options.width),
+			y2: options.y + options.offset.y + options.scale.y * (options.height)
 		}
 	}
 	
@@ -62,10 +61,23 @@ function RectangleObject (svg, options) {
 		},
 		hitTest: function(x, y) {
 			var rect = fixBounds(getExtents());
-			if(x >= rect.x1 && x <= rect.x2 && y >= rect.y1 && y <= rect.y2)
-			{
-				return false;
-			}
+            if(lineCircleCollide({ x: rect.x1, y: rect.y1 }, { x: rect.x2, y: rect.y1 }, { x: x, y: y }, 5))
+            {
+                return true;
+            }
+            if(lineCircleCollide({ x: rect.x2, y: rect.y1 }, { x: rect.x2, y: rect.y2 }, { x: x, y: y }, 5))
+            {
+                return true;
+            }			
+            if(lineCircleCollide({ x: rect.x2, y: rect.y2 }, { x: rect.x1, y: rect.y2 }, { x: x, y: y }, 5))
+            {
+                return true;
+            }
+            if(lineCircleCollide({ x: rect.x1, y: rect.y2 }, { x: rect.x1, y: rect.y1 }, { x: x, y: y }, 5))
+            {
+                return true;
+            }
+			return false;
 		},
 		isSelected: function() { return isSelected; },
 		getExtents: getExtents,

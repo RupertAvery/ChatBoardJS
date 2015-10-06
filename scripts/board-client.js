@@ -4,7 +4,8 @@ function WhiteBoard(d3, socket, elementId) {
 	var startPoint = null;
 	var selectionRect = null;
 	var resizeHandles = null;
-
+	var preDrawObject = null;
+	
 	var tools = {
 		"pen": { name: "pencil", options: { hotspot: 'bottom left' } },
 		"line": { name: "pencil", options: { hotspot: 'bottom left' } },
@@ -223,7 +224,7 @@ function WhiteBoard(d3, socket, elementId) {
 		var scale = object.options.scale;
         var o = resizeHandles.options;
 
-		object.move(dx, dy);
+		object.move(mx, my);
 		
 		socket.emit('scale', { id: object.id, x: scale.x, y: scale.y});
 		socket.emit('move', { id: object.id, x: mx, y: my});
@@ -260,9 +261,20 @@ function WhiteBoard(d3, socket, elementId) {
 				socket.emit('point', { id: currentSelection.id, point: m });
 				break;
 			case "line":
+				preDrawObject.attr("x2", m.x).attr("y2", m.y);
+				break;
+				
 			case "ellipse":
+				preDrawObject
+					.attr("cx", startPoint.x + ((m.x - startPoint.x) / 2))
+					.attr("cy", startPoint.y + ((m.y - startPoint.y) / 2))
+					.attr("rx", Math.abs(m.x - startPoint.x) / 2)
+					.attr("ry", Math.abs(m.y - startPoint.y) / 2);
+				break;
+				
 			case "rectangle":
-               break;
+				preDrawObject.attr("width", m.x - startPoint.x).attr("height", m.y - startPoint.y);
+				break;
 				
 			case "eraser":
 				objectManager.removeAtPoint(m);
@@ -390,11 +402,35 @@ function WhiteBoard(d3, socket, elementId) {
 				lineWeight: selectedLineWeight
 			});
 			break;
-        case "line":
-        case "ellipse":
-        case "rectangle":
-           break;
-							
+		case "line":
+			preDrawObject = svg.append("line")
+				.attr("x1", m.x)
+				.attr("y1", m.y)
+				.attr("x2", m.x)
+				.attr("y2", m.y)
+				.attr("stroke", selectedColor)
+				.attr("stroke-width", selectedLineWeight);
+			break;
+		case "ellipse":
+			preDrawObject = svg.append("ellipse")
+				.attr("cx", m.x)
+				.attr("cy", m.y)
+				.attr("rx", 0)
+				.attr("ry", 0)
+				.attr("stroke", selectedColor)
+				.attr("stroke-width", selectedLineWeight)
+				.attr("fill", "none");
+			break;
+		case "rectangle":
+			preDrawObject = svg.append("rect")
+				.attr("x", m.x)
+				.attr("y", m.y)
+				.attr("width", 0)
+				.attr("height", 0)
+				.attr("stroke", selectedColor)
+				.attr("stroke-width", selectedLineWeight)
+				.attr("fill", "none");
+			break;
 		case "select":
 			if (selectionRect) {
 				selectionRect.remove();
@@ -513,6 +549,7 @@ function WhiteBoard(d3, socket, elementId) {
 			currentSelection = null;
 			break;
 		case "line": 
+			preDrawObject.remove();
             addLine({
                 x: startPoint.x, 
                 y: startPoint.y, 
@@ -524,17 +561,21 @@ function WhiteBoard(d3, socket, elementId) {
 			currentSelection = null;
 			break;
 		case "ellipse": 
+			preDrawObject.remove();
             addEllipse({
-                x: startPoint.x, 
-                y: startPoint.y, 
-                width: m.x - startPoint.x,
-                height: m.y - startPoint.y,
+                x: startPoint.x + ((m.x - startPoint.x) / 2),
+                y: startPoint.y + ((m.y - startPoint.y) / 2), 
+                radius: {
+					x: Math.abs(m.x - startPoint.x) / 2,
+					y: Math.abs(m.y - startPoint.y) / 2
+				},
                 color: selectedColor, 
                 lineWeight: selectedLineWeight
             });
 			currentSelection = null;
 			break;
 		case "rectangle": 
+			preDrawObject.remove();
             addRectangle({
                 x: startPoint.x, 
                 y: startPoint.y, 
@@ -619,8 +660,10 @@ function WhiteBoard(d3, socket, elementId) {
 			id: makeid(),
 			x: options.x, 
 			y: options.y, 
-			width: options.width,
-			height: options.height,
+			radius: {
+				x: options.radius.x,
+				y: options.radius.y
+			},
 			color: options.color, 
 			lineWeight: options.lineWeight
 		});

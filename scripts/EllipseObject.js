@@ -4,20 +4,20 @@ function EllipseObject (svg, options) {
 	options.offset = options.offset || { x: 0, y: 0 };
 	options.scale = options.scale || { x: 1.0, y: 1.0 };
 
-	options.type = "line";
+	options.type = "ellipse";
 
-	var pathObject = svg.append("line")
-            .attr("x1", options.offset.x)
-            .attr("y1", options.offset.y)
-            .attr("x2", options.offset.x + options.width)
-            .attr("y2", options.offset.y + options.height)
-			.attr("stroke", options.color)
-			.attr("stroke-width", options.lineWeight)
-			.attr("vector-effect", "non-scaling-stroke")
-			.attr("fill", "none");
+	var pathObject = svg.append("ellipse")
+		.attr("cx", options.x)
+		.attr("cy", options.y)
+		.attr("rx", options.radius.x)
+		.attr("ry", options.radius.y)
+		.attr("stroke", options.color)
+		.attr("stroke-width", options.lineWeight)
+		.attr("vector-effect", "non-scaling-stroke")
+		.attr("fill", "none");
 
 	function transform() {
-		pathObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") scale(" + options.scale.x + " " + options.scale.y + ")");
+		pathObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") translate(" + options.x + " " + options.y + ") scale(" + options.scale.x + " " + options.scale.y + ") translate(-" + options.x + " -" + options.y + ")");
 	}
 	
 	var isSelected = false;
@@ -41,12 +41,17 @@ function EllipseObject (svg, options) {
 	}
 
 	function getExtents() {
+		var cx = options.offset.x + options.x;
+		var cy = options.offset.y + options.y;
+		var rx = options.radius.x;
+		var ry = options.radius.y;
 		return {
-			x1: options.offset.x,
-			y1: options.offset.y,
-			x2: options.offset.x + options.scale.x * (options.width),
-			y2: options.offset.y + options.scale.y * (options.height)
+			x1: cx - options.scale.x * rx,
+			y1: cy - options.scale.y * ry,
+			x2: cx + options.scale.x * rx,
+			y2: cy + options.scale.y * ry
 		}
+		
 	}
 	
 	return {
@@ -62,10 +67,19 @@ function EllipseObject (svg, options) {
 		},
 		hitTest: function(x, y) {
 			var rect = fixBounds(getExtents());
-			if(x >= rect.x1 && x <= rect.x2 && y >= rect.y1 && y <= rect.y2)
-			{
-				return false;
+			var x1 = x - options.x - options.offset.x;
+			var y1 = y - options.y - options.offset.y;
+			var x2 = x1 * x1;
+			var y2 = y1 * y1;
+			var rx = options.scale.x * options.radius.x;
+			var ry = options.scale.y * options.radius.y;
+			var a2 = rx * rx;
+			var b2 = ry * ry;
+			var r = (x2/a2) + (y2/b2);
+			if (r >= 0.8 && r <= 1.2) {
+				return true;
 			}
+			return false;
 		},
 		isSelected: function() { return isSelected; },
 		getExtents: getExtents,
@@ -86,9 +100,9 @@ function EllipseObject (svg, options) {
 			transform();
 		},
 		resize: function(x, y, constrain) {
-			var w1 = (options.width) * options.scale.x;
+			var w1 = 2 * options.scale.x * options.radius.x;
 			var w2 = w1 + x;
-			var h1 = (options.height) * options.scale.y;
+			var h1 = 2 * options.scale.y * options.radius.y;
 			var h2 = h1 + y;
 			var scaleX = w2 / w1;
 			var scaleY = h2 / h1;
@@ -100,6 +114,8 @@ function EllipseObject (svg, options) {
 				if (sx < sy) scaleX = sy * vx;
 				if (sy < sx) scaleY = sx * vy;
 			}
+			options.offset.x += x / 2;
+			options.offset.y += y / 2;
 			options.scale.x *= scaleX;
 			options.scale.y *= scaleY;
 			transform();
