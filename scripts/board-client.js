@@ -149,6 +149,10 @@ function WhiteBoard(d3, socket, elementId) {
 	socket.on('scale', function (data){
 		objectManager.getObject(data.id).scale(data.x, data.y);
 	})
+
+	socket.on('transform', function (data){
+		objectManager.getObject(data.id).transform(data.offset, data.scale);
+	})
 	
 	socket.on('remove', function (data){
 		objectManager.getObject(data.id).remove();
@@ -220,14 +224,25 @@ function WhiteBoard(d3, socket, elementId) {
 		var sx = dx * matrix[1][0];
 		var sy = dy * matrix[1][1];
 		
+		object.move(mx, my);
 		object.resize(sx, sy, shiftDown && (matrix[1][0] * matrix[1][1] != 0));
 		var scale = object.options.scale;
+		var offset = object.options.offset;
         var o = resizeHandles.options;
 
-		object.move(mx, my);
-		
-		socket.emit('scale', { id: object.id, x: scale.x, y: scale.y});
-		socket.emit('move', { id: object.id, x: mx, y: my});
+
+		socket.emit('transform', 
+			{ 
+				id: object.id, 
+				scale: {
+					x: scale.x, 
+					y: scale.y
+				},
+				offset: {
+					x: offset.x, 
+					y: offset.y
+				},
+			});
 	}
 	
 	function setResizeCursor() {
@@ -682,7 +697,7 @@ function WhiteBoard(d3, socket, elementId) {
 			lineWeight: options.lineWeight
 		});
 		objectManager.add(currentSelection);
-		socket.emit('path', currentSelection.options);
+		socket.emit('rectangle', currentSelection.options);
 	}    
 	
 	function addImage(data) {

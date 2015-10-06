@@ -21,7 +21,7 @@ function Board(boardname) {
 	var users = {};
 	var images = {};
 
-	var commands = [ 'chat', 'path', 'line', 'ellipse', 'rectangle', 'point', 'move', 'scale', 'remove', 'image', 'text' ];
+	var commands = [ 'chat', 'path', 'line', 'ellipse', 'rectangle', 'point', 'move', 'scale', 'remove', 'image', 'text', 'transform' ];
 
 	function getImage(imgid) {
 		return images[imgid];
@@ -78,6 +78,17 @@ function Board(boardname) {
             if(scale) {
 				scale.x = data.x;
 				scale.y = data.y;
+            }
+		},
+		'transform'  : function(data) {
+			var object = objects[data.id];
+            if(object.scale && data.scale) {
+				object.scale.x = data.scale.x;
+				object.scale.y = data.scale.y;
+            }
+            if(object.offset && data.offset) {
+                object.offset.x = data.offset.x;
+                object.offset.y = data.offset.y;
             }
 		},
 		'remove' : function(data) {

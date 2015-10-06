@@ -99,6 +99,13 @@ function EllipseObject (svg, options) {
 			options.offset.y += y;
 			transform();
 		},
+		transform: function(offset, scale) {
+			options.offset.x = offset.x;
+			options.offset.y = offset.y;
+			options.scale.x = scale.x;
+			options.scale.y = scale.y;
+			transform();
+		},		
 		resize: function(x, y, constrain) {
 			var w1 = 2 * options.scale.x * options.radius.x;
 			var w2 = w1 + x;
