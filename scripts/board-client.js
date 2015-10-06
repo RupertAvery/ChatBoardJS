@@ -100,6 +100,10 @@ function WhiteBoard(d3, socket, elementId) {
 		objectManager.add(new LineObject(svg, data));
 	})
     
+	socket.on('text', function (data) {
+		objectManager.add(new TextObject(svg, data));
+	})
+    
 	socket.on('ellipse', function (data) {
 		objectManager.add(new EllipseObject(svg, data));
 	})
@@ -143,7 +147,13 @@ function WhiteBoard(d3, socket, elementId) {
 	});
 
 	socket.on('move', function (data){
-		objectManager.getObject(data.id).move(data.x, data.y);
+		if (Array.isArray(data.id)) {
+			for (var i = 0; i < data.id.length; i++) {
+				objectManager.getObject(data.id[i]).move(data.x, data.y);
+			}
+		} else {
+			objectManager.getObject(data.id).move(data.x, data.y);
+		}
 	})
 
 	socket.on('scale', function (data){
@@ -151,7 +161,13 @@ function WhiteBoard(d3, socket, elementId) {
 	})
 
 	socket.on('transform', function (data){
-		objectManager.getObject(data.id).transform(data.offset, data.scale);
+		if (Array.isArray(data.id)) {
+			for (var i = 0; i < data.id.length; i++) {
+				objectManager.getObject(data.id[i]).transform(data.offset, data.scale);
+			}
+		} else {
+			objectManager.getObject(data.id).transform(data.offset, data.scale);
+		}
 	})
 	
 	socket.on('remove', function (data){
@@ -352,17 +368,25 @@ function WhiteBoard(d3, socket, elementId) {
 						for(var i =0; i < currentSelection.length; i++)
 						{
 							currentSelection[i].move(dx, dy);
-							// change this call to move multiple objects in one message?
-							socket.emit('move', { id: currentSelection[i].id, x: dx, y: dy});
 							idList.push(currentSelection[i].id);
 						}
-						//socket.emit('move-many', { ids: idList, x: dx, y: dy});
-					}else {
+						socket.emit('move', 
+							{ 
+								id: idList, 
+								x: dx, 
+								y: dy
+							});						
+					} else {
 						currentSelection.move(dx, dy);
-						socket.emit('move', { id: currentSelection.id, x: dx, y: dy});
+						socket.emit('move', 
+							{ 
+								id: currentSelection.id, 
+								x: dx, 
+								y: dy
+							});						
 					}
 				} else {
-					// otherwise, we are probbaly selecting with a rectangle
+					// otherwise, we are probably selecting with a rectangle
 					if (selectionRect) {
 						// update the selection rectangle
 						selectionRect.select("#l1").attr("x1", startPoint.x).attr("y1", startPoint.y).attr("x2", m.x).attr("y2", startPoint.y);

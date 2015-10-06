@@ -67,11 +67,21 @@ function Board(boardname) {
 			objects[data.id].points.push(data.point);
 		},
 		'move'  : function(data) {
-			var offset = objects[data.id].offset;
-            if(offset) {
-                offset.x += data.x;
-                offset.y += data.y;
-            }
+			if (Array.isArray(data.id)) {
+				for (var i = 0; i < data.id.length; i++) {
+					var offset = objects[data.id[i]].offset;
+					if (offset) {
+						offset.x += data.x;
+						offset.y += data.y;
+					}
+				}
+			} else {
+				var offset = objects[data.id].offset;
+				if (offset) {
+					offset.x += data.x;
+					offset.y += data.y;
+				}
+			}
 		},
 		'scale' : function(data) {
 			var scale = objects[data.id].scale;
