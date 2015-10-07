@@ -48,7 +48,7 @@ $('#closeName').click(function() {
 	socket.emit('join', {
 		id: id,
 		name: $('#myName').val(),
-		email: $('#myEmail').val()
+		gravatarId: window.md5($('#myEmail').val().trim().toLowerCase())
 	});
 });
 
@@ -89,7 +89,7 @@ $("#fblogin").click(function() {
 			// they are logged into this app or not.
 		}
 	}, {
-		scope: 'public_profile,email'
+		scope: 'public_profile'
 	});
 });
 
@@ -181,6 +181,18 @@ $("#cancelImageBtn").click(function() {
 	$("#imgUploadModal").modal("hide")
 });
 
+$("#emoticons").click(function(event) {
+	var offset = $("#emoticons").offset();
+	$("#emoticons_for_comments").css({top: offset.top - 300, left: offset.left, position:'absolute'}).show();
+	event.stopPropagation();
+});
+
+$("#emoticons_for_comments div span").click(function() {
+	$("#chatinput").val($("#chatinput").val() + $(this).attr("data-emoticon"));
+	$("#emoticons_for_comments").hide();
+});
+
+
 $("#selectTool").click();
 
 board.selectColor("black");
@@ -268,6 +280,10 @@ function selectLineWeight(weight) {
 
 	board.selectLineWeight(weight);
 }
+
+$(document).click(function() {
+	$("#emoticons_for_comments").hide();
+})
 
 $(window).resize(function() {
 	resize();

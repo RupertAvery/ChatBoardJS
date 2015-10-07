@@ -33,18 +33,22 @@ function ignoreRoute(url)
 }
 
 app.get(/\/images\/*/, function(req, res) {
-	var board = manager.getBoardById(req.query.board);
-	if (board) {
-		var image = board.getImage(req.query.img);
-		if (image) {
-			res.writeHead(200, { 'Content-Type' :  image.contentType });
-			res.end(image.data, 'binary');
+	if(req.query.board) {
+		var board = manager.getBoardById(req.query.board);
+		if (board) {
+			var image = board.getImage(req.query.img);
+			if (image) {
+				res.writeHead(200, { 'Content-Type' :  image.contentType });
+				res.end(image.data, 'binary');
+			} else {
+				res.writeHead(500);
+				res.end();
+			}
 		} else {
-			res.writeHead(500);
-			res.end();
+			socket.emit('error', { message: "Board does not exist!" });
 		}
 	} else {
-		socket.emit('error', { message: "Board does not exist!" });
+		serveStatic(req, res);
 	}
 })
 
@@ -128,7 +132,5 @@ io.on('connection', function (socket) {
 	registerRejoin(socket);
 	registerCreate(socket);
 	registerGetBoardInfo(socket);
-
-
 });
 

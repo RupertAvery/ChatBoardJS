@@ -8,6 +8,7 @@
 	<link href="css/spectrum.css" rel="stylesheet" type="text/css">
 	<link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet" type="text/css">
 	<link href="css/site.css" rel="stylesheet" type="text/css">
+	<link href="css/emoticons.css" rel="stylesheet" type="text/css">
 	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script charset="utf-8" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
 	<script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
@@ -59,6 +60,7 @@
 
 				<div>
 					<input id="chatinput" type="text">
+					<span id="emoticons" class="fse2-emoticon fse2smile " data-emoticon=":)" data-hasqtip="18" oldtitle="Smiley face" title="" aria-describedby="qtip-18"></span>
 				</div>
 			</td>
 
@@ -252,6 +254,484 @@
 	</div>
     <!-- END Confirm Exit Dialog -->
 
+	<div id="emoticons_for_comments">
+		<h3>Emoticons</h3>
+		<div class="fse2-emos-tab">
+			<span class="fse2-emoticon fse2smile " data-emoticon=":)" data-hasqtip="18" oldtitle="Smiley face" title="" aria-describedby="qtip-18"></span>
+			<span class="fse2-emoticon fse2frown " data-emoticon=":(" data-hasqtip="19" oldtitle="Frown" title="" aria-describedby="qtip-19"></span>
+			<span class="fse2-emoticon fse2tongue " data-emoticon=":P" data-hasqtip="20" oldtitle="Tongue" title="" aria-describedby="qtip-20"></span>
+			<span class="fse2-emoticon fse2grin " data-emoticon=":D" data-hasqtip="21" oldtitle="Big smile" title="" aria-describedby="qtip-21"></span>
+			<span class="fse2-emoticon fse2gasp " data-emoticon=":o" data-hasqtip="22" oldtitle="Surprised" title="" aria-describedby="qtip-22"></span>
+			<span class="fse2-emoticon fse2wink " data-emoticon=";)" data-hasqtip="23" oldtitle="Wink" title="" aria-describedby="qtip-23"></span>
+			<span class="fse2-emoticon fse2glasses " data-emoticon="8-)" data-hasqtip="24" oldtitle="glasses" title="" aria-describedby="qtip-24"></span>
+			<span class="fse2-emoticon fse2sunglasses " data-emoticon="B|" data-hasqtip="25" oldtitle="Sunglasses" title="" aria-describedby="qtip-25"></span>
+			<span class="fse2-emoticon fse2grumpy " data-emoticon=">:(" data-hasqtip="26" oldtitle="Grumpy" title="" aria-describedby="qtip-26"></span>
+			<span class="fse2-emoticon fse2unsure " data-emoticon=":/" data-hasqtip="27" oldtitle="Unsure" title="" aria-describedby="qtip-27"></span>
+			<span class="fse2-emoticon fse2cry " data-emoticon=":'(" data-hasqtip="28" oldtitle="Crying" title=""></span>
+			<span class="fse2-emoticon fse2angel " data-emoticon="O:)" data-hasqtip="29" oldtitle="Angel" title=""></span>
+			<span class="fse2-emoticon fse2kiss " data-emoticon=":*" data-hasqtip="30" oldtitle="Kiss" title=""></span>
+			<span class="fse2-emoticon fse2kiki " data-emoticon="^_^" data-hasqtip="31" oldtitle="Kiki" title=""></span>
+			<span class="fse2-emoticon fse2squint " data-emoticon="-_-" data-hasqtip="32" oldtitle="Squint" title=""></span>
+			<span class="fse2-emoticon fse2confused " data-emoticon="o.O" data-hasqtip="33" oldtitle="Confused" title=""></span>
+			<span class="fse2-emoticon fse2confused_rev " data-emoticon="O.o" data-hasqtip="34" oldtitle="Confused" title="" aria-describedby="qtip-34"></span>
+			<span class="fse2-emoticon fse2colonthree " data-emoticon=":3" data-hasqtip="35" oldtitle="Curly lips" title="" aria-describedby="qtip-35"></span>
+			<span class="fse2-emoticon fse2upset " data-emoticon=">:o" data-hasqtip="36" oldtitle="Upset" title=""></span>
+			<span class="fse2-emoticon fse2pacman " data-emoticon=":v" data-hasqtip="37" oldtitle="Pacman" title="" aria-describedby="qtip-37"></span>
+			<span class="fse2-emoticon fse21f604 " data-emoticon="😄" data-hasqtip="38" oldtitle="Big smile" title="" aria-describedby="qtip-38"></span>
+			<span class="fse2-emoticon fse21f603 " data-emoticon="😃" data-hasqtip="39" oldtitle="Smiling" title=""></span>
+			<span class="fse2-emoticon fse21f60a " data-emoticon="😊" data-hasqtip="40" oldtitle="Blushing" title=""></span>
+			<span class="fse2-emoticon fse2263a " data-emoticon="☺" data-hasqtip="41" oldtitle="Blushing" title=""></span>
+			<span class="fse2-emoticon fse21f609 " data-emoticon="😉" data-hasqtip="42" oldtitle="Winking" title="" aria-describedby="qtip-42"></span>
+			<span class="fse2-emoticon fse21f60d " data-emoticon="😍" data-hasqtip="43" oldtitle="In love" title="" aria-describedby="qtip-43"></span>
+			<span class="fse2-emoticon fse21f618 " data-emoticon="😘" data-hasqtip="44" oldtitle="Kiss" title=""></span>
+			<span class="fse2-emoticon fse21f61a " data-emoticon="😚" data-hasqtip="45" oldtitle="Kissing" title=""></span>
+			<span class="fse2-emoticon fse21f61c " data-emoticon="😜" data-hasqtip="46" oldtitle="Tongue wink" title=""></span>
+			<span class="fse2-emoticon fse21f61d " data-emoticon="😝" data-hasqtip="47" oldtitle="Tongue out" title=""></span>
+			<span class="fse2-emoticon fse21f633 " data-emoticon="😳" data-hasqtip="48" oldtitle="Shocked" title=""></span>
+			<span class="fse2-emoticon fse21f601 " data-emoticon="😁" data-hasqtip="49" oldtitle="Grinning" title=""></span>
+			<span class="fse2-emoticon fse21f614 " data-emoticon="😔" data-hasqtip="50" oldtitle="Sad face" title=""></span>
+			<span class="fse2-emoticon fse21f60c " data-emoticon="😌" data-hasqtip="51" oldtitle="Satisfied" title=""></span>
+			<span class="fse2-emoticon fse21f612 " data-emoticon="😒" data-hasqtip="52" oldtitle="Unamused" title=""></span>
+			<span class="fse2-emoticon fse21f61e " data-emoticon="😞" data-hasqtip="53" oldtitle="Disappointed" title="" aria-describedby="qtip-53"></span>
+			<span class="fse2-emoticon fse21f623 " data-emoticon="😣" data-hasqtip="54" oldtitle="Persevering" title=""></span>
+			<span class="fse2-emoticon fse21f622 " data-emoticon="😢" data-hasqtip="55" oldtitle="Crying" title="" aria-describedby="qtip-55"></span>
+			<span class="fse2-emoticon fse21f602 " data-emoticon="😂" data-hasqtip="56" oldtitle="Tears of joy" title="" aria-describedby="qtip-56"></span>
+			<span class="fse2-emoticon fse21f62d " data-emoticon="😭" data-hasqtip="57" oldtitle="Loudly crying" title=""></span>
+			<span class="fse2-emoticon fse21f62a " data-emoticon="😪" data-hasqtip="58" oldtitle="Sleepy" title="" aria-describedby="qtip-58"></span>
+			<span class="fse2-emoticon fse21f625 " data-emoticon="😥" data-hasqtip="59" oldtitle="Relieved" title=""></span>
+			<span class="fse2-emoticon fse21f630 " data-emoticon="😰" data-hasqtip="60" oldtitle="Fearful" title=""></span>
+			<span class="fse2-emoticon fse21f613 " data-emoticon="😓" data-hasqtip="61" oldtitle="Cold sweat" title=""></span>
+			<span class="fse2-emoticon fse21f629 " data-emoticon="😩" data-hasqtip="62" oldtitle="Weary" title="" aria-describedby="qtip-62"></span>
+			<span class="fse2-emoticon fse21f62b " data-emoticon="😫" data-hasqtip="63" oldtitle="Tired" title=""></span>
+			<span class="fse2-emoticon fse21f628 " data-emoticon="😨" data-hasqtip="64" oldtitle="Scared" title=""></span>
+			<span class="fse2-emoticon fse21f631 " data-emoticon="😱" data-hasqtip="65" oldtitle="Screaming" title=""></span>
+			<span class="fse2-emoticon fse21f620 " data-emoticon="😠" data-hasqtip="66" oldtitle="Angry" title=""></span>
+			<span class="fse2-emoticon fse21f621 " data-emoticon="😡" data-hasqtip="67" oldtitle="Mad" title=""></span>
+			<span class="fse2-emoticon fse21f624 " data-emoticon="😤" data-hasqtip="68" oldtitle="Big grin" title="" aria-describedby="qtip-68"></span>
+			<span class="fse2-emoticon fse21f616 " data-emoticon="😖" data-hasqtip="69" oldtitle="Confounded" title=""></span>
+			<span class="fse2-emoticon fse21f606 " data-emoticon="😆" data-hasqtip="70" oldtitle="Closed eyes" title=""></span>
+			<span class="fse2-emoticon fse21f637 " data-emoticon="😷" data-hasqtip="71" oldtitle="Medic" title=""></span>
+			<span class="fse2-emoticon fse21f635 " data-emoticon="😵" data-hasqtip="72" oldtitle="Dizzy" title=""></span>
+			<span class="fse2-emoticon fse21f632 " data-emoticon="😲" data-hasqtip="73" oldtitle="Astonished" title="" aria-describedby="qtip-73"></span>
+			<span class="fse2-emoticon fse21f60f " data-emoticon="😏" data-hasqtip="74" oldtitle="Smirking" title="" aria-describedby="qtip-74"></span>
+			<span class="fse2-emoticon fse21f385 " data-emoticon="🎅" data-hasqtip="75" oldtitle="Santa" title=""></span>
+			<span class="fse2-emoticon fse2poop " data-emoticon=":poop:" data-hasqtip="76" oldtitle="Poop" title=""></span>
+			<span class="fse2-emoticon fse2robot " data-emoticon=":|]" data-hasqtip="77" oldtitle="Robot" title="" aria-describedby="qtip-77"></span>
+			<span class="fse2-emoticon fse21f383 " data-emoticon="🎃" data-hasqtip="78" oldtitle="Jack-o-lantern" title=""></span>
+			<span class="fse2-emoticon fse21f47b " data-emoticon="👻" data-hasqtip="79" oldtitle="Ghost" title=""></span>
+			<span class="fse2-emoticon fse21f480 " data-emoticon="💀" data-hasqtip="80" oldtitle="Skull" title=""></span>
+			<span class="fse2-emoticon fse21f47f " data-emoticon="👿" data-hasqtip="81" oldtitle="Imp" title=""></span>
+			<span class="fse2-emoticon fse2devil " data-emoticon="3:)" data-hasqtip="82" oldtitle="Devil" title=""></span>
+			<span class="fse2-emoticon fse21f47d " data-emoticon="👽" data-hasqtip="83" oldtitle="Alien" title=""></span>
+			<span class="fse2-emoticon fse21f47e " data-emoticon="👾" data-hasqtip="84" oldtitle="Monster" title=""></span>
+			<span class="fse2-emoticon fse2putnam " data-emoticon=" :putnam:" data-hasqtip="85" oldtitle="Putnam" title=""></span>
+			<span class="fse2-emoticon fse21f472 " data-emoticon="👲" data-hasqtip="86" oldtitle="Beanie cap" title=""></span>
+			<span class="fse2-emoticon fse21f473 " data-emoticon="👳" data-hasqtip="87" oldtitle="Turban" title=""></span>
+			<span class="fse2-emoticon fse21f46e " data-emoticon="👮" data-hasqtip="88" oldtitle="Policeman" title="" aria-describedby="qtip-88"></span>
+			<span class="fse2-emoticon fse21f477 " data-emoticon="👷" data-hasqtip="89" oldtitle="Hard hat" title=""></span>
+			<span class="fse2-emoticon fse21f482 " data-emoticon="💂" data-hasqtip="90" oldtitle="Guardsman" title="" aria-describedby="qtip-90"></span>
+			<span class="fse2-emoticon fse21f476 " data-emoticon="👶" data-hasqtip="91" oldtitle="Baby" title=""></span>
+			<span class="fse2-emoticon fse21f466 " data-emoticon="👦" data-hasqtip="92" oldtitle="Boy" title=""></span>
+			<span class="fse2-emoticon fse21f467 " data-emoticon="👧" data-hasqtip="93" oldtitle="Girl" title=""></span>
+			<span class="fse2-emoticon fse21f468 " data-emoticon="👨" data-hasqtip="94" oldtitle="Man" title="" aria-describedby="qtip-94"></span>
+			<span class="fse2-emoticon fse21f469 " data-emoticon="👩" data-hasqtip="95" oldtitle="Woman" title="" aria-describedby="qtip-95"></span>
+			<span class="fse2-emoticon fse21f474 " data-emoticon="👴" data-hasqtip="96" oldtitle="Grandpa" title="" aria-describedby="qtip-96"></span>
+			<span class="fse2-emoticon fse21f475 " data-emoticon="👵" data-hasqtip="97" oldtitle="Granny" title=""></span>
+			<span class="fse2-emoticon fse21f471 " data-emoticon="👱" data-hasqtip="98" oldtitle="Blonde" title=""></span>
+			<span class="fse2-emoticon fse21f47c " data-emoticon="👼" data-hasqtip="99" oldtitle="Angel" title=""></span>
+			<span class="fse2-emoticon fse21f478 " data-emoticon="👸" data-hasqtip="100" oldtitle="Princess" title=""></span>
+			<span class="fse2-emoticon fse21f483 " data-emoticon="💃" data-hasqtip="101" oldtitle="Dancer" title=""></span>
+			<span class="fse2-emoticon fse21f46b " data-emoticon="👫" data-hasqtip="102" oldtitle="Man&amp;woman" title=""></span>
+			<span class="fse2-emoticon fse21f48f " data-emoticon="💏" data-hasqtip="103" oldtitle="kiss" title=""></span>
+			<span class="fse2-emoticon fse21f491 " data-emoticon="💑" data-hasqtip="104" oldtitle="Love couple" title=""></span>
+			<span class="fse2-emoticon fse21f46f " data-emoticon="👯" data-hasqtip="105" oldtitle="Bunny ears" title=""></span>
+			<span class="fse2-emoticon fse21f38e " data-emoticon="🎎" data-hasqtip="106" oldtitle="Boy &amp; girl" title=""></span>
+			<span class="fse2-emoticon fse21f4a4 " data-emoticon="💤" data-hasqtip="107" oldtitle="Sleeping" title=""></span>
+			<span class="fse2-emoticon fse21f442 " data-emoticon="👂" data-hasqtip="108" oldtitle="Ear" title="" aria-describedby="qtip-108"></span>
+			<span class="fse2-emoticon fse21f440 " data-emoticon="👀" data-hasqtip="109" oldtitle="Eyes" title=""></span>
+			<span class="fse2-emoticon fse21f443 " data-emoticon="👃" data-hasqtip="110" oldtitle="Nose" title=""></span>
+			<span class="fse2-emoticon fse21f485 " data-emoticon="💅" data-hasqtip="111" oldtitle="Nail polish" title=""></span>
+			<span class="fse2-emoticon fse21f48b " data-emoticon="💋" data-hasqtip="112" oldtitle="Kiss mark" title=""></span>
+			<span class="fse2-emoticon fse21f444 " data-emoticon="👄" data-hasqtip="113" oldtitle="Lips" title=""></span>
+			<span class="fse2-emoticon fse21f44d " data-emoticon="👍" data-hasqtip="114" oldtitle="Like" title=""></span>
+			<span class="fse2-emoticon fse21f44e " data-emoticon="👎" data-hasqtip="115" oldtitle="Unlike" title=""></span>
+			<span class="fse2-emoticon fse21f44c " data-emoticon="👌" data-hasqtip="116" oldtitle="OK" title=""></span>
+			<span class="fse2-emoticon fse21f44a " data-emoticon="👊" data-hasqtip="117" oldtitle="Fist" title=""></span>
+			<span class="fse2-emoticon fse2270a " data-emoticon="✊" data-hasqtip="118" oldtitle="Clenched fist" title=""></span>
+			<span class="fse2-emoticon fse2270c " data-emoticon="✌" data-hasqtip="119" oldtitle="Peace" title=""></span>
+			<span class="fse2-emoticon fse21f64b " data-emoticon="🙋" data-hasqtip="120" oldtitle="Raising hand" title=""></span>
+			<span class="fse2-emoticon fse21f44b " data-emoticon="👋" data-hasqtip="121" oldtitle="Waving hand" title=""></span>
+			<span class="fse2-emoticon fse2270b " data-emoticon="✋" data-hasqtip="122" oldtitle="High five" title=""></span>
+			<span class="fse2-emoticon fse21f450 " data-emoticon="👐" data-hasqtip="123" oldtitle="Open hands" title="" aria-describedby="qtip-123"></span>
+			<span class="fse2-emoticon fse21f446 " data-emoticon="👆" data-hasqtip="124" oldtitle="Up" title=""></span>
+			<span class="fse2-emoticon fse21f447 " data-emoticon="👇" data-hasqtip="125" oldtitle="Down" title=""></span>
+			<span class="fse2-emoticon fse21f449 " data-emoticon="👉" data-hasqtip="126" oldtitle="Right" title=""></span>
+			<span class="fse2-emoticon fse21f448 " data-emoticon="👈" data-hasqtip="127" oldtitle="Left" title=""></span>
+			<span class="fse2-emoticon fse21f64c " data-emoticon="🙌" data-hasqtip="128" oldtitle="Raising hands" title="" aria-describedby="qtip-128"></span>
+			<span class="fse2-emoticon fse21f64f " data-emoticon="🙏" data-hasqtip="129" oldtitle="Folded hands" title="" aria-describedby="qtip-129"></span>
+			<span class="fse2-emoticon fse2261d " data-emoticon="☝" data-hasqtip="130" oldtitle="Index finger" title="" aria-describedby="qtip-130"></span>
+			<span class="fse2-emoticon fse21f44f " data-emoticon="👏" data-hasqtip="131" oldtitle="Clapping" title="" aria-describedby="qtip-131"></span>
+			<span class="fse2-emoticon fse21f4aa " data-emoticon="💪" data-hasqtip="132" oldtitle="Flexed biceps" title="" aria-describedby="qtip-132"></span>
+			<span class="fse2-emoticon fse21f48c " data-emoticon="💌" data-hasqtip="133" oldtitle="Love letter" title="" aria-describedby="qtip-133"></span>
+			<span class="fse2-emoticon fse21f49f " data-emoticon="💟" data-hasqtip="134" oldtitle="White heart" title="" aria-describedby="qtip-134"></span>
+			<span class="fse2-emoticon fse21f49b " data-emoticon="💛" data-hasqtip="135" oldtitle="Yellow heart" title=""></span>
+			<span class="fse2-emoticon fse21f499 " data-emoticon="💙" data-hasqtip="136" oldtitle="Blue heart" title="" aria-describedby="qtip-136"></span>
+			<span class="fse2-emoticon fse21f49c " data-emoticon="💜" data-hasqtip="137" oldtitle="Purple heart" title="" aria-describedby="qtip-137"></span>
+			<span class="fse2-emoticon fse21f49a " data-emoticon="💚" data-hasqtip="138" oldtitle="Green heart" title=""></span>
+			<span class="fse2-emoticon fse22764 " data-emoticon="❤" data-hasqtip="139" oldtitle="Pink heart" title=""></span>
+			<span class="fse2-emoticon fse21f494 " data-emoticon="💔" data-hasqtip="140" oldtitle="Broken heart" title="" aria-describedby="qtip-140"></span>
+			<span class="fse2-emoticon fse21f497 " data-emoticon="💗" data-hasqtip="141" oldtitle="Growing heart" title="" aria-describedby="qtip-141"></span>
+			<span class="fse2-emoticon fse21f493 " data-emoticon="💓" data-hasqtip="142" oldtitle="Beating heart" title=""></span>
+			<span class="fse2-emoticon fse2heart " data-emoticon=" <3" data-hasqtip="143" oldtitle="Heart" title=""></span>
+			<span class="fse2-emoticon fse21f496 " data-emoticon="💖" data-hasqtip="144" oldtitle="Sparkling heart" title="" aria-describedby="qtip-144"></span>
+			<span class="fse2-emoticon fse21f49d " data-emoticon="💝" data-hasqtip="145" oldtitle="heart with ribbon" title=""></span>
+			<span class="fse2-emoticon fse21f49e " data-emoticon="💞" data-hasqtip="146" oldtitle="Revolving hearts" title=""></span>
+			<span class="fse2-emoticon fse21f498 " data-emoticon="💘" data-hasqtip="147" oldtitle="Heart with arrow" title="" aria-describedby="qtip-147"></span>
+		</div>
+		<h3>Objects</h3>
+		<div class="fse2-emos-tab">
+			<span class="fse2-emoticon fse22615 " data-emoticon="☕" data-hasqtip="148" oldtitle="Coffee" title=""></span>
+			<span class="fse2-emoticon fse21f375 " data-emoticon="🍵" data-hasqtip="149" oldtitle="Teacup" title=""></span>
+			<span class="fse2-emoticon fse21f376 " data-emoticon="🍶" data-hasqtip="150" oldtitle="Bottle" title="" aria-describedby="qtip-150"></span>
+			<span class="fse2-emoticon fse21f37a " data-emoticon="🍺" data-hasqtip="151" oldtitle="Beer" title="" aria-describedby="qtip-151"></span>
+			<span class="fse2-emoticon fse21f37b " data-emoticon="🍻" data-hasqtip="152" oldtitle="Clinking beer" title=""></span>
+			<span class="fse2-emoticon fse21f378 " data-emoticon="🍸" data-hasqtip="153" oldtitle="Cocktail" title=""></span>
+			<span class="fse2-emoticon fse21f374 " data-emoticon="🍴" data-hasqtip="154" oldtitle="Fork and knife" title=""></span>
+			<span class="fse2-emoticon fse21f354 " data-emoticon="🍔" data-hasqtip="155" oldtitle="Hamburger" title="" aria-describedby="qtip-155"></span>
+			<span class="fse2-emoticon fse21f35f " data-emoticon="🍟" data-hasqtip="156" oldtitle="French fries" title="" aria-describedby="qtip-156"></span>
+			<span class="fse2-emoticon fse21f35d " data-emoticon="🍝" data-hasqtip="157" oldtitle="Spaghetti" title=""></span>
+			<span class="fse2-emoticon fse22668 " data-emoticon="♨" data-hasqtip="158" oldtitle="Hot plate" title=""></span>
+			<span class="fse2-emoticon fse21f35b " data-emoticon="🍛" data-hasqtip="159" oldtitle="Curry and rice" title="" aria-describedby="qtip-159"></span>
+			<span class="fse2-emoticon fse21f371 " data-emoticon="🍱" data-hasqtip="160" oldtitle="Bento box" title="" aria-describedby="qtip-160"></span>
+			<span class="fse2-emoticon fse21f363 " data-emoticon="🍣" data-hasqtip="161" oldtitle="Sushi" title=""></span>
+			<span class="fse2-emoticon fse21f359 " data-emoticon="🍙" data-hasqtip="162" oldtitle="Rice ball" title=""></span>
+			<span class="fse2-emoticon fse21f358 " data-emoticon="🍘" data-hasqtip="163" oldtitle="Rice cracker" title=""></span>
+			<span class="fse2-emoticon fse21f35a " data-emoticon="🍚" data-hasqtip="164" oldtitle="Cooked rice" title=""></span>
+			<span class="fse2-emoticon fse21f35c " data-emoticon="🍜" data-hasqtip="165" oldtitle="Steaming bowl" title=""></span>
+			<span class="fse2-emoticon fse21f372 " data-emoticon="🍲" data-hasqtip="166" oldtitle="Pot of food" title="" aria-describedby="qtip-166"></span>
+			<span class="fse2-emoticon fse21f362 " data-emoticon="🍢" data-hasqtip="167" oldtitle="Oden" title=""></span>
+			<span class="fse2-emoticon fse21f361 " data-emoticon="🍡" data-hasqtip="168" oldtitle="Dango" title="" aria-describedby="qtip-168"></span>
+			<span class="fse2-emoticon fse21f373 " data-emoticon="🍳" data-hasqtip="169" oldtitle="Frying pan" title="" aria-describedby="qtip-169"></span>
+			<span class="fse2-emoticon fse21f35e " data-emoticon="🍞" data-hasqtip="170" oldtitle="Bread" title="" aria-describedby="qtip-170"></span>
+			<span class="fse2-emoticon fse21f366 " data-emoticon="🍦" data-hasqtip="171" oldtitle="Ice cream" title="" aria-describedby="qtip-171"></span>
+			<span class="fse2-emoticon fse21f367 " data-emoticon="🍧" data-hasqtip="172" oldtitle="Shaved ice" title="" aria-describedby="qtip-172"></span>
+			<span class="fse2-emoticon fse21f370 " data-emoticon="🍰" data-hasqtip="173" oldtitle="Shortcake" title="" aria-describedby="qtip-173"></span>
+			<span class="fse2-emoticon fse21f34e " data-emoticon="🍎" data-hasqtip="174" oldtitle="Red apple" title=""></span>
+			<span class="fse2-emoticon fse21f34a " data-emoticon="🍊" data-hasqtip="175" oldtitle="Orange" title=""></span>
+			<span class="fse2-emoticon fse21f349 " data-emoticon="🍉" data-hasqtip="176" oldtitle="Watermelon" title=""></span>
+			<span class="fse2-emoticon fse21f353 " data-emoticon="🍓" data-hasqtip="177" oldtitle="Strawberry" title=""></span>
+			<span class="fse2-emoticon fse21f346 " data-emoticon="🍆" data-hasqtip="178" oldtitle="Aubergine" title=""></span>
+			<span class="fse2-emoticon fse21f345 " data-emoticon="🍅" data-hasqtip="179" oldtitle="Tomato" title=""></span>
+			<span class="fse2-emoticon fse21f3c8 " data-emoticon="🏈" data-hasqtip="180" oldtitle="American football" title=""></span>
+			<span class="fse2-emoticon fse21f3c0 " data-emoticon="🏀" data-hasqtip="181" oldtitle="Basketball" title=""></span>
+			<span class="fse2-emoticon fse226bd " data-emoticon="⚽" data-hasqtip="182" oldtitle="Soccer" title=""></span>
+			<span class="fse2-emoticon fse226be " data-emoticon="⚾" data-hasqtip="183" oldtitle="Baseball" title=""></span>
+			<span class="fse2-emoticon fse21f3be " data-emoticon="🎾" data-hasqtip="184" oldtitle="Tennis" title=""></span>
+			<span class="fse2-emoticon fse21f3b1 " data-emoticon="🎱" data-hasqtip="185" oldtitle="8-ball" title=""></span>
+			<span class="fse2-emoticon fse226f3 " data-emoticon="⛳" data-hasqtip="186" oldtitle="Golf hole" title=""></span>
+			<span class="fse2-emoticon fse21f3bf " data-emoticon="🎿" data-hasqtip="187" oldtitle="Skis" title=""></span>
+			<span class="fse2-emoticon fse21f004 " data-emoticon="🀄" data-hasqtip="188" oldtitle="Mahjong tile" title=""></span>
+			<span class="fse2-emoticon fse21f3af " data-emoticon="🎯" data-hasqtip="189" oldtitle="Bullseye" title=""></span>
+			<span class="fse2-emoticon fse21f3c1 " data-emoticon="🏁" data-hasqtip="190" oldtitle="Chequered flag" title=""></span>
+			<span class="fse2-emoticon fse21f3c6 " data-emoticon="🏆" data-hasqtip="191" oldtitle="Trophy" title=""></span>
+			<span class="fse2-emoticon fse21f38c " data-emoticon="🎌" data-hasqtip="192" oldtitle="Crossed flags" title=""></span>
+			<span class="fse2-emoticon fse21f3a8 " data-emoticon="🎨" data-hasqtip="193" oldtitle="Palette" title=""></span>
+			<span class="fse2-emoticon fse21f3ac " data-emoticon="🎬" data-hasqtip="194" oldtitle="Clapper board" title=""></span>
+			<span class="fse2-emoticon fse21f3a4 " data-emoticon="🎤" data-hasqtip="195" oldtitle="Microphone" title=""></span>
+			<span class="fse2-emoticon fse21f3a7 " data-emoticon="🎧" data-hasqtip="196" oldtitle="Headphone" title=""></span>
+			<span class="fse2-emoticon fse21f3bc " data-emoticon="🎼" data-hasqtip="197" oldtitle="Musical score" title=""></span>
+			<span class="fse2-emoticon fse21f3b5 " data-emoticon="🎵" data-hasqtip="198" oldtitle="Musical note" title=""></span>
+			<span class="fse2-emoticon fse21f3b6 " data-emoticon="🎶" data-hasqtip="199" oldtitle="Musical notes" title=""></span>
+			<span class="fse2-emoticon fse21f3ba " data-emoticon="🎺" data-hasqtip="200" oldtitle="Trumpet" title=""></span>
+			<span class="fse2-emoticon fse21f3b7 " data-emoticon="🎷" data-hasqtip="201" oldtitle="Saxophone" title="" aria-describedby="qtip-201"></span>
+			<span class="fse2-emoticon fse21f3b8 " data-emoticon="🎸" data-hasqtip="202" oldtitle="Guitar" title="" aria-describedby="qtip-202"></span>
+			<span class="fse2-emoticon fse21f48d " data-emoticon="💍" data-hasqtip="203" oldtitle="Ring" title=""></span>
+			<span class="fse2-emoticon fse21f48e " data-emoticon="💎" data-hasqtip="204" oldtitle="Gem stone" title="" aria-describedby="qtip-204"></span>
+			<span class="fse2-emoticon fse21f4b0 " data-emoticon="💰" data-hasqtip="205" oldtitle="Money bag" title=""></span>
+			<span class="fse2-emoticon fse21f4b2 " data-emoticon="💲" data-hasqtip="206" oldtitle="Dollar sign" title=""></span>
+			<span class="fse2-emoticon fse21f4b5 " data-emoticon="💵" data-hasqtip="207" oldtitle="Dollar bill" title=""></span>
+			<span class="fse2-emoticon fse21f4b4 " data-emoticon="💴" data-hasqtip="208" oldtitle="Yen bill" title=""></span>
+			<span class="fse2-emoticon fse21f3a9 " data-emoticon="🎩" data-hasqtip="209" oldtitle="Top hat" title=""></span>
+			<span class="fse2-emoticon fse21f451 " data-emoticon="👑" data-hasqtip="210" oldtitle="Crown" title=""></span>
+			<span class="fse2-emoticon fse21f452 " data-emoticon="👒" data-hasqtip="211" oldtitle="Womans hat" title=""></span>
+			<span class="fse2-emoticon fse21f45f " data-emoticon="👟" data-hasqtip="212" oldtitle="Athletic shoe" title=""></span>
+			<span class="fse2-emoticon fse21f461 " data-emoticon="👡" data-hasqtip="213" oldtitle="Womans sandal" title=""></span>
+			<span class="fse2-emoticon fse21f460 " data-emoticon="👠" data-hasqtip="214" oldtitle="High-heeled shoe" title=""></span>
+			<span class="fse2-emoticon fse21f462 " data-emoticon="👢" data-hasqtip="215" oldtitle="Womans boots" title=""></span>
+			<span class="fse2-emoticon fse21f455 " data-emoticon="👕" data-hasqtip="216" oldtitle="T-shirt" title=""></span>
+			<span class="fse2-emoticon fse21f454 " data-emoticon="👔" data-hasqtip="217" oldtitle="Tie" title=""></span>
+			<span class="fse2-emoticon fse21f457 " data-emoticon="👗" data-hasqtip="218" oldtitle="Dress" title=""></span>
+			<span class="fse2-emoticon fse21f458 " data-emoticon="👘" data-hasqtip="219" oldtitle="Kimono" title=""></span>
+			<span class="fse2-emoticon fse21f459 " data-emoticon="👙" data-hasqtip="220" oldtitle="Bikini" title=""></span>
+			<span class="fse2-emoticon fse21f4bc " data-emoticon="💼" data-hasqtip="221" oldtitle="Briefcase" title=""></span>
+			<span class="fse2-emoticon fse21f45c " data-emoticon="👜" data-hasqtip="222" oldtitle="Handbag" title=""></span>
+			<span class="fse2-emoticon fse21f380 " data-emoticon="🎀" data-hasqtip="223" oldtitle="Ribbon" title="" aria-describedby="qtip-223"></span>
+			<span class="fse2-emoticon fse22614 " data-emoticon="☔" data-hasqtip="224" oldtitle="Umbrella" title=""></span>
+			<span class="fse2-emoticon fse21f302 " data-emoticon="🌂" data-hasqtip="225" oldtitle="Closed umbrella" title=""></span>
+			<span class="fse2-emoticon fse21f484 " data-emoticon="💄" data-hasqtip="226" oldtitle="Lipstick" title=""></span>
+			<span class="fse2-emoticon fse21f38d " data-emoticon="🎍" data-hasqtip="227" oldtitle="Pine decoration" title=""></span>
+			<span class="fse2-emoticon fse21f392 " data-emoticon="🎒" data-hasqtip="228" oldtitle="School bag" title=""></span>
+			<span class="fse2-emoticon fse21f38f " data-emoticon="🎏" data-hasqtip="229" oldtitle="Streamers" title=""></span>
+			<span class="fse2-emoticon fse21f390 " data-emoticon="🎐" data-hasqtip="230" oldtitle="Wind chime" title="" aria-describedby="qtip-230"></span>
+			<span class="fse2-emoticon fse21f384 " data-emoticon="🎄" data-hasqtip="231" oldtitle="Christmas tree" title=""></span>
+			<span class="fse2-emoticon fse21f381 " data-emoticon="🎁" data-hasqtip="232" oldtitle="Present" title="" aria-describedby="qtip-232"></span>
+			<span class="fse2-emoticon fse21f389 " data-emoticon="🎉" data-hasqtip="233" oldtitle="Party popper" title=""></span>
+			<span class="fse2-emoticon fse21f388 " data-emoticon="🎈" data-hasqtip="234" oldtitle="Balloon" title=""></span>
+			<span class="fse2-emoticon fse21f3a6 " data-emoticon="🎦" data-hasqtip="235" oldtitle="Cinema" title=""></span>
+			<span class="fse2-emoticon fse21f3a5 " data-emoticon="🎥" data-hasqtip="236" oldtitle="Movie camera" title=""></span>
+			<span class="fse2-emoticon fse21f4f7 " data-emoticon="📷" data-hasqtip="237" oldtitle="Camera" title=""></span>
+			<span class="fse2-emoticon fse21f4fc " data-emoticon="📼" data-hasqtip="238" oldtitle="Bideocassette" title=""></span>
+			<span class="fse2-emoticon fse21f4bf " data-emoticon="💿" data-hasqtip="239" oldtitle="Optical disc" title=""></span>
+			<span class="fse2-emoticon fse21f4c0 " data-emoticon="📀" data-hasqtip="240" oldtitle="Dvd" title=""></span>
+			<span class="fse2-emoticon fse21f4bd " data-emoticon="💽" data-hasqtip="241" oldtitle="Minidisc" title=""></span>
+			<span class="fse2-emoticon fse21f4be " data-emoticon="💾" data-hasqtip="242" oldtitle="Floppy disk" title="" aria-describedby="qtip-242"></span>
+			<span class="fse2-emoticon fse21f4bb " data-emoticon="💻" data-hasqtip="243" oldtitle="Personal computer" title=""></span>
+			<span class="fse2-emoticon fse21f4f1 " data-emoticon="📱" data-hasqtip="244" oldtitle="Mobile phone" title=""></span>
+			<span class="fse2-emoticon fse2260e " data-emoticon="☎" data-hasqtip="245" oldtitle="Telephone" title=""></span>
+			<span class="fse2-emoticon fse21f4de " data-emoticon="📞" data-hasqtip="246" oldtitle="Phne" title=""></span>
+			<span class="fse2-emoticon fse21f4e0 " data-emoticon="📠" data-hasqtip="247" oldtitle="Fax machine" title=""></span>
+			<span class="fse2-emoticon fse21f4e1 " data-emoticon="📡" data-hasqtip="248" oldtitle="Satellite" title=""></span>
+			<span class="fse2-emoticon fse21f4fa " data-emoticon="📺" data-hasqtip="249" oldtitle="Television" title="" aria-describedby="qtip-249"></span>
+			<span class="fse2-emoticon fse21f4fb " data-emoticon="📻" data-hasqtip="250" oldtitle="Radio" title=""></span>
+			<span class="fse2-emoticon fse21f508 " data-emoticon="🔈" data-hasqtip="251" oldtitle="Dpeaker" title=""></span>
+			<span class="fse2-emoticon fse21f514 " data-emoticon="🔔" data-hasqtip="252" oldtitle="Bell" title=""></span>
+			<span class="fse2-emoticon fse21f4e2 " data-emoticon="📢" data-hasqtip="253" oldtitle="Loudspeaker" title=""></span>
+			<span class="fse2-emoticon fse21f4e3 " data-emoticon="📣" data-hasqtip="254" oldtitle="Megaphone" title=""></span>
+			<span class="fse2-emoticon fse21f513 " data-emoticon="🔓" data-hasqtip="255" oldtitle="Open lock" title=""></span>
+			<span class="fse2-emoticon fse21f512 " data-emoticon="🔒" data-hasqtip="256" oldtitle="Lock" title=""></span>
+			<span class="fse2-emoticon fse21f510 " data-emoticon="🔐" data-hasqtip="257" oldtitle="Closed lock with key" title=""></span>
+			<span class="fse2-emoticon fse21f511 " data-emoticon="🔑" data-hasqtip="258" oldtitle="Key" title=""></span>
+			<span class="fse2-emoticon fse21f50e " data-emoticon="🔎" data-hasqtip="259" oldtitle="Magnifying" title=""></span>
+			<span class="fse2-emoticon fse21f4a1 " data-emoticon="💡" data-hasqtip="260" oldtitle="Light bulb" title="" aria-describedby="qtip-260"></span>
+			<span class="fse2-emoticon fse21f6c0 " data-emoticon="🛀" data-hasqtip="261" oldtitle="Bath" title=""></span>
+			<span class="fse2-emoticon fse21f6bd " data-emoticon="🚽" data-hasqtip="262" oldtitle="Toilet" title=""></span>
+			<span class="fse2-emoticon fse21f528 " data-emoticon="🔨" data-hasqtip="263" oldtitle="Hammer" title=""></span>
+			<span class="fse2-emoticon fse21f6ac " data-emoticon="🚬" data-hasqtip="264" oldtitle="Cigarette" title="" aria-describedby="qtip-264"></span>
+			<span class="fse2-emoticon fse21f4a3 " data-emoticon="💣" data-hasqtip="265" oldtitle="Bomb" title=""></span>
+			<span class="fse2-emoticon fse21f52b " data-emoticon="🔫" data-hasqtip="266" oldtitle="Pistol" title=""></span>
+			<span class="fse2-emoticon fse21f48a " data-emoticon="💊" data-hasqtip="267" oldtitle="Pill" title=""></span>
+			<span class="fse2-emoticon fse21f489 " data-emoticon="💉" data-hasqtip="268" oldtitle="Syringe" title=""></span>
+			<span class="fse2-emoticon fse21f4f2 " data-emoticon="📲" data-hasqtip="269" oldtitle="Mobile phone" title=""></span>
+			<span class="fse2-emoticon fse22709 " data-emoticon="✉" data-hasqtip="270" oldtitle="Envelope" title=""></span>
+			<span class="fse2-emoticon fse21f4e9 " data-emoticon="📩" data-hasqtip="271" oldtitle="Sending mail" title=""></span>
+			<span class="fse2-emoticon fse21f4e8 " data-emoticon="📨" data-hasqtip="272" oldtitle="Incoming mail" title=""></span>
+			<span class="fse2-emoticon fse21f4eb " data-emoticon="📫" data-hasqtip="273" oldtitle="Full mailbox" title=""></span>
+			<span class="fse2-emoticon fse21f4ea " data-emoticon="📪" data-hasqtip="274" oldtitle="Mailbox" title=""></span>
+			<span class="fse2-emoticon fse21f4dd " data-emoticon="📝" data-hasqtip="275" oldtitle="Memo" title=""></span>
+			<span class="fse2-emoticon fse22702 " data-emoticon="✂" data-hasqtip="276" oldtitle="Scissors" title=""></span>
+			<span class="fse2-emoticon fse21f4d6 " data-emoticon="📖" data-hasqtip="277" oldtitle="Open book" title="" aria-describedby="qtip-277"></span>
+		</div>
+		<h3>Nature</h3>
+		<div class="fse2-emos-tab">
+			<span class="fse2-emoticon fse21f436 " data-emoticon="🐶" data-hasqtip="278" oldtitle="Puppy" title=""></span>
+			<span class="fse2-emoticon fse21f43a " data-emoticon="🐺" data-hasqtip="279" oldtitle="Wolf" title=""></span>
+			<span class="fse2-emoticon fse21f431 " data-emoticon="🐱" data-hasqtip="280" oldtitle="Cat" title=""></span>
+			<span class="fse2-emoticon fse21f42d " data-emoticon="🐭" data-hasqtip="281" oldtitle="Mouse" title=""></span>
+			<span class="fse2-emoticon fse21f439 " data-emoticon="🐹" data-hasqtip="282" oldtitle="Hamster" title=""></span>
+			<span class="fse2-emoticon fse21f430 " data-emoticon="🐰" data-hasqtip="283" oldtitle="Rabbit" title="" aria-describedby="qtip-283"></span>
+			<span class="fse2-emoticon fse21f438 " data-emoticon="🐸" data-hasqtip="284" oldtitle="Frog" title=""></span>
+			<span class="fse2-emoticon fse21f42f " data-emoticon="🐯" data-hasqtip="285" oldtitle="Tiger" title=""></span>
+			<span class="fse2-emoticon fse21f428 " data-emoticon="🐨" data-hasqtip="286" oldtitle="Koala" title="" aria-describedby="qtip-286"></span>
+			<span class="fse2-emoticon fse21f43b " data-emoticon="🐻" data-hasqtip="287" oldtitle="Teddy" title="" aria-describedby="qtip-287"></span>
+			<span class="fse2-emoticon fse21f437 " data-emoticon="🐷" data-hasqtip="288" oldtitle="Piggy" title="" aria-describedby="qtip-288"></span>
+			<span class="fse2-emoticon fse21f42e " data-emoticon="🐮" data-hasqtip="289" oldtitle="Cow" title="" aria-describedby="qtip-289"></span>
+			<span class="fse2-emoticon fse21f417 " data-emoticon="🐗" data-hasqtip="290" oldtitle="Boar" title=""></span>
+			<span class="fse2-emoticon fse21f435 " data-emoticon="🐵" data-hasqtip="291" oldtitle="Monkey" title=""></span>
+			<span class="fse2-emoticon fse21f412 " data-emoticon="🐒" data-hasqtip="292" oldtitle="Monkey" title=""></span>
+			<span class="fse2-emoticon fse21f434 " data-emoticon="🐴" data-hasqtip="293" oldtitle="Horse" title=""></span>
+			<span class="fse2-emoticon fse21f411 " data-emoticon="🐑" data-hasqtip="294" oldtitle="Sheep" title="" aria-describedby="qtip-294"></span>
+			<span class="fse2-emoticon fse21f418 " data-emoticon="🐘" data-hasqtip="295" oldtitle="Elephant" title=""></span>
+			<span class="fse2-emoticon fse21f427 " data-emoticon="🐧" data-hasqtip="296" oldtitle="Penguin" title=""></span>
+			<span class="fse2-emoticon fse2penguin " data-emoticon="<(&quot;)" data-hasqtip="297" oldtitle="Penguin" title="" aria-describedby="qtip-297"></span>
+			<span class="fse2-emoticon fse21f426 " data-emoticon="🐦" data-hasqtip="298" oldtitle="Blue bird" title=""></span>
+			<span class="fse2-emoticon fse21f425 " data-emoticon="🐥" data-hasqtip="299" oldtitle="Yellow chick" title=""></span>
+			<span class="fse2-emoticon fse21f414 " data-emoticon="🐔" data-hasqtip="300" oldtitle="Chicken" title=""></span>
+			<span class="fse2-emoticon fse21f40d " data-emoticon="🐍" data-hasqtip="301" oldtitle="Snake" title=""></span>
+			<span class="fse2-emoticon fse21f41b " data-emoticon="🐛" data-hasqtip="302" oldtitle="Bug" title="" aria-describedby="qtip-302"></span>
+			<span class="fse2-emoticon fse21f419 " data-emoticon="🐙" data-hasqtip="303" oldtitle="Octopus" title=""></span>
+			<span class="fse2-emoticon fse21f41a " data-emoticon="🐚" data-hasqtip="304" oldtitle="Spiral shell" title=""></span>
+			<span class="fse2-emoticon fse21f420 " data-emoticon="🐠" data-hasqtip="305" oldtitle="Tropical fish" title=""></span>
+			<span class="fse2-emoticon fse21f41f " data-emoticon="🐟" data-hasqtip="306" oldtitle="Fish" title=""></span>
+			<span class="fse2-emoticon fse21f42c " data-emoticon="🐬" data-hasqtip="307" oldtitle="Dolphin" title=""></span>
+			<span class="fse2-emoticon fse2shark " data-emoticon="(^^^)" data-hasqtip="308" oldtitle="Shark" title=""></span>
+			<span class="fse2-emoticon fse21f433 " data-emoticon="🐳" data-hasqtip="309" oldtitle="Whale" title="" aria-describedby="qtip-309"></span>
+			<span class="fse2-emoticon fse21f40e " data-emoticon="🐎" data-hasqtip="310" oldtitle="Horse" title=""></span>
+			<span class="fse2-emoticon fse21f421 " data-emoticon="🐡" data-hasqtip="311" oldtitle="Blowfish" title=""></span>
+			<span class="fse2-emoticon fse21f42b " data-emoticon="🐫" data-hasqtip="312" oldtitle="Camel" title=""></span>
+			<span class="fse2-emoticon fse21f429 " data-emoticon="🐩" data-hasqtip="313" oldtitle="Poodle" title=""></span>
+			<span class="fse2-emoticon fse21f490 " data-emoticon="💐" data-hasqtip="314" oldtitle="Bouquet" title=""></span>
+			<span class="fse2-emoticon fse21f338 " data-emoticon="🌸" data-hasqtip="315" oldtitle="Cherry blossom" title=""></span>
+			<span class="fse2-emoticon fse21f337 " data-emoticon="🌷" data-hasqtip="316" oldtitle="Tulip" title=""></span>
+			<span class="fse2-emoticon fse21f340 " data-emoticon="🍀" data-hasqtip="317" oldtitle="Four leaf clover" title="" aria-describedby="qtip-317"></span>
+			<span class="fse2-emoticon fse21f339 " data-emoticon="🌹" data-hasqtip="318" oldtitle="Rose" title="" aria-describedby="qtip-318"></span>
+			<span class="fse2-emoticon fse21f33b " data-emoticon="🌻" data-hasqtip="319" oldtitle="Sunflower" title=""></span>
+			<span class="fse2-emoticon fse21f33a " data-emoticon="🌺" data-hasqtip="320" oldtitle="Hibiscus" title=""></span>
+			<span class="fse2-emoticon fse21f341 " data-emoticon="🍁" data-hasqtip="321" oldtitle="Maple leaf" title=""></span>
+			<span class="fse2-emoticon fse21f343 " data-emoticon="🍃" data-hasqtip="322" oldtitle="Leaf" title=""></span>
+			<span class="fse2-emoticon fse21f342 " data-emoticon="🍂" data-hasqtip="323" oldtitle="Fallen leaf" title="" aria-describedby="qtip-323"></span>
+			<span class="fse2-emoticon fse21f33e " data-emoticon="🌾" data-hasqtip="324" oldtitle="Ear of rice" title="" aria-describedby="qtip-324"></span>
+			<span class="fse2-emoticon fse21f335 " data-emoticon="🌵" data-hasqtip="325" oldtitle="Cactus" title=""></span>
+			<span class="fse2-emoticon fse21f334 " data-emoticon="🌴" data-hasqtip="326" oldtitle="Palm tree" title=""></span>
+			<span class="fse2-emoticon fse21f331 " data-emoticon="🌱" data-hasqtip="327" oldtitle="Seedling" title=""></span>
+			<span class="fse2-emoticon fse21f319 " data-emoticon="🌙" data-hasqtip="328" oldtitle="Moon" title="" aria-describedby="qtip-328"></span>
+			<span class="fse2-emoticon fse22b50 " data-emoticon="⭐" data-hasqtip="329" oldtitle="White star" title=""></span>
+			<span class="fse2-emoticon fse226a1 " data-emoticon="⚡" data-hasqtip="330" oldtitle="Lightning" title=""></span>
+			<span class="fse2-emoticon fse22600 " data-emoticon="☀" data-hasqtip="331" oldtitle="Sun" title=""></span>
+			<span class="fse2-emoticon fse21f525 " data-emoticon="🔥" data-hasqtip="332" oldtitle="Fire" title=""></span>
+			<span class="fse2-emoticon fse22728 " data-emoticon="✨" data-hasqtip="333" oldtitle="Stars" title=""></span>
+			<span class="fse2-emoticon fse21f31f " data-emoticon="🌟" data-hasqtip="334" oldtitle="Glowing star" title=""></span>
+			<span class="fse2-emoticon fse22734 " data-emoticon="✴" data-hasqtip="335" oldtitle="Gray star" title=""></span>
+			<span class="fse2-emoticon fse21f4a8 " data-emoticon="💨" data-hasqtip="336" oldtitle="Wind" title=""></span>
+			<span class="fse2-emoticon fse22601 " data-emoticon="☁" data-hasqtip="337" oldtitle="Cloud" title="" aria-describedby="qtip-337"></span>
+			<span class="fse2-emoticon fse21f4a7 " data-emoticon="💧" data-hasqtip="338" oldtitle="Droplet" title="" aria-describedby="qtip-338"></span>
+			<span class="fse2-emoticon fse21f4a6 " data-emoticon="💦" data-hasqtip="339" oldtitle="Droplets" title=""></span>
+			<span class="fse2-emoticon fse21f30a " data-emoticon="🌊" data-hasqtip="340" oldtitle="Wave" title=""></span>
+			<span class="fse2-emoticon fse22733 " data-emoticon="✳" data-hasqtip="341" oldtitle="Snowflake" title=""></span>
+			<span class="fse2-emoticon fse226c4 " data-emoticon="⛄" data-hasqtip="342" oldtitle="Snowman" title="" aria-describedby="qtip-342"></span>
+			<span class="fse2-emoticon fse21f300 " data-emoticon="🌀" data-hasqtip="343" oldtitle="Cyclone" title=""></span>
+			<span class="fse2-emoticon fse21f308 " data-emoticon="🌈" data-hasqtip="344" oldtitle="Rainbow" title=""></span>
+			<span class="fse2-emoticon fse21f304 " data-emoticon="🌄" data-hasqtip="345" oldtitle="Sunrise over mountains" title=""></span>
+			<span class="fse2-emoticon fse21f305 " data-emoticon="🌅" data-hasqtip="346" oldtitle="Sunrise" title=""></span>
+			<span class="fse2-emoticon fse21f307 " data-emoticon="🌇" data-hasqtip="347" oldtitle="Sunset" title=""></span>
+			<span class="fse2-emoticon fse21f306 " data-emoticon="🌆" data-hasqtip="348" oldtitle="Dusk" title=""></span>
+			<span class="fse2-emoticon fse21f303 " data-emoticon="🌃" data-hasqtip="349" oldtitle="Starry night" title=""></span>
+		</div>
+		<h3>Places</h3>
+		<div class="fse2-emos-tab">
+			<span class="fse2-emoticon fse21f3e0 " data-emoticon="🏠" data-hasqtip="350" oldtitle="House" title=""></span>
+			<span class="fse2-emoticon fse21f3e1 " data-emoticon="🏡" data-hasqtip="351" oldtitle="House with garden" title=""></span>
+			<span class="fse2-emoticon fse21f3eb " data-emoticon="🏫" data-hasqtip="352" oldtitle="School" title=""></span>
+			<span class="fse2-emoticon fse21f3e2 " data-emoticon="🏢" data-hasqtip="353" oldtitle="Office" title=""></span>
+			<span class="fse2-emoticon fse21f3e3 " data-emoticon="🏣" data-hasqtip="354" oldtitle="Japanese post office" title=""></span>
+			<span class="fse2-emoticon fse21f3e5 " data-emoticon="🏥" data-hasqtip="355" oldtitle="Hospital" title=""></span>
+			<span class="fse2-emoticon fse21f3e6 " data-emoticon="🏦" data-hasqtip="356" oldtitle="Bank" title=""></span>
+			<span class="fse2-emoticon fse21f3ea " data-emoticon="🏪" data-hasqtip="357" oldtitle="Convenience store" title=""></span>
+			<span class="fse2-emoticon fse21f3e9 " data-emoticon="🏩" data-hasqtip="358" oldtitle="Love hotel" title=""></span>
+			<span class="fse2-emoticon fse21f3e8 " data-emoticon="🏨" data-hasqtip="359" oldtitle="Hotel" title=""></span>
+			<span class="fse2-emoticon fse21f492 " data-emoticon="💒" data-hasqtip="360" oldtitle="Wedding" title=""></span>
+			<span class="fse2-emoticon fse226ea " data-emoticon="⛪" data-hasqtip="361" oldtitle="Church" title=""></span>
+			<span class="fse2-emoticon fse21f3ec " data-emoticon="🏬" data-hasqtip="362" oldtitle="Mall" title=""></span>
+			<span class="fse2-emoticon fse21f3ef " data-emoticon="🏯" data-hasqtip="363" oldtitle="Japanese castle" title=""></span>
+			<span class="fse2-emoticon fse21f3f0 " data-emoticon="🏰" data-hasqtip="364" oldtitle="European castle" title=""></span>
+			<span class="fse2-emoticon fse226fa " data-emoticon="⛺" data-hasqtip="365" oldtitle="Tent" title=""></span>
+			<span class="fse2-emoticon fse21f3ed " data-emoticon="🏭" data-hasqtip="366" oldtitle="Factory" title=""></span>
+			<span class="fse2-emoticon fse21f5fc " data-emoticon="🗼" data-hasqtip="367" oldtitle="Tokyo tower" title=""></span>
+			<span class="fse2-emoticon fse21f5fb " data-emoticon="🗻" data-hasqtip="368" oldtitle="Mountain" title=""></span>
+			<span class="fse2-emoticon fse21f5fd " data-emoticon="🗽" data-hasqtip="369" oldtitle="Statue of Liberty" title=""></span>
+			<span class="fse2-emoticon fse21f3a1 " data-emoticon="🎡" data-hasqtip="370" oldtitle="Ferris wheel" title=""></span>
+			<span class="fse2-emoticon fse226f2 " data-emoticon="⛲" data-hasqtip="371" oldtitle="Fountain" title=""></span>
+			<span class="fse2-emoticon fse21f3a2 " data-emoticon="🎢" data-hasqtip="372" oldtitle="Roller coaster" title=""></span>
+			<span class="fse2-emoticon fse21f6a2 " data-emoticon="🚢" data-hasqtip="373" oldtitle="Ship" title=""></span>
+			<span class="fse2-emoticon fse226f5 " data-emoticon="⛵" data-hasqtip="374" oldtitle="Sailboat" title="" aria-describedby="qtip-374"></span>
+			<span class="fse2-emoticon fse21f6a4 " data-emoticon="🚤" data-hasqtip="375" oldtitle="Speedboat" title=""></span>
+			<span class="fse2-emoticon fse21f680 " data-emoticon="🚀" data-hasqtip="376" oldtitle="Rocket" title=""></span>
+			<span class="fse2-emoticon fse22708 " data-emoticon="✈" data-hasqtip="377" oldtitle="Airplane" title=""></span>
+			<span class="fse2-emoticon fse21f4ba " data-emoticon="💺" data-hasqtip="378" oldtitle="Seat" title=""></span>
+			<span class="fse2-emoticon fse21f689 " data-emoticon="🚉" data-hasqtip="379" oldtitle="Station" title=""></span>
+			<span class="fse2-emoticon fse21f684 " data-emoticon="🚄" data-hasqtip="380" oldtitle="Speed train" title=""></span>
+			<span class="fse2-emoticon fse21f685 " data-emoticon="🚅" data-hasqtip="381" oldtitle="Train" title=""></span>
+			<span class="fse2-emoticon fse21f683 " data-emoticon="🚃" data-hasqtip="382" oldtitle="Tram" title=""></span>
+			<span class="fse2-emoticon fse21f68c " data-emoticon="🚌" data-hasqtip="383" oldtitle="Bus" title=""></span>
+			<span class="fse2-emoticon fse21f699 " data-emoticon="🚙" data-hasqtip="384" oldtitle="Red car" title=""></span>
+			<span class="fse2-emoticon fse21f697 " data-emoticon="🚗" data-hasqtip="385" oldtitle="Blue car" title=""></span>
+			<span class="fse2-emoticon fse21f695 " data-emoticon="🚕" data-hasqtip="386" oldtitle="Taxi" title=""></span>
+			<span class="fse2-emoticon fse21f69a " data-emoticon="🚚" data-hasqtip="387" oldtitle="Truck" title=""></span>
+			<span class="fse2-emoticon fse21f693 " data-emoticon="🚓" data-hasqtip="388" oldtitle="Police car" title=""></span>
+			<span class="fse2-emoticon fse21f692 " data-emoticon="🚒" data-hasqtip="389" oldtitle="Fire truck" title=""></span>
+			<span class="fse2-emoticon fse21f691 " data-emoticon="🚑" data-hasqtip="390" oldtitle="Ambulance" title=""></span>
+			<span class="fse2-emoticon fse21f6b2 " data-emoticon="🚲" data-hasqtip="391" oldtitle="Bicycle" title=""></span>
+			<span class="fse2-emoticon fse21f488 " data-emoticon="💈" data-hasqtip="392" oldtitle="Barber pole" title=""></span>
+			<span class="fse2-emoticon fse21f68f " data-emoticon="🚏" data-hasqtip="393" oldtitle="Bus stop" title=""></span>
+			<span class="fse2-emoticon fse21f3ab " data-emoticon="🎫" data-hasqtip="394" oldtitle="Ticket" title=""></span>
+			<span class="fse2-emoticon fse21f6a5 " data-emoticon="🚥" data-hasqtip="395" oldtitle="Traffic light" title=""></span>
+			<span class="fse2-emoticon fse21f6a7 " data-emoticon="🚧" data-hasqtip="396" oldtitle="Construction" title=""></span>
+			<span class="fse2-emoticon fse226fd " data-emoticon="⛽" data-hasqtip="397" oldtitle="Fuel pump" title=""></span>
+			<span class="fse2-emoticon fse21f393 " data-emoticon="🎓" data-hasqtip="398" oldtitle="University" title=""></span>
+			<span class="fse2-emoticon fse21f3ad " data-emoticon="🎭" data-hasqtip="399" oldtitle="Theater" title=""></span>
+		</div>
+		<h3>Symbols</h3>
+		<div class="fse2-emos-tab">
+			<span class="fse2-emoticon fse22b06 " data-emoticon="⬆" data-hasqtip="400" oldtitle="Upwards" title=""></span>
+			<span class="fse2-emoticon fse22b07 " data-emoticon="⬇" data-hasqtip="401" oldtitle="Downwards" title=""></span>
+			<span class="fse2-emoticon fse22b05 " data-emoticon="⬅" data-hasqtip="402" oldtitle="Leftwards" title=""></span>
+			<span class="fse2-emoticon fse227a1 " data-emoticon="➡" data-hasqtip="403" oldtitle="Rightwards" title=""></span>
+			<span class="fse2-emoticon fse22197 " data-emoticon="↗" data-hasqtip="404" oldtitle="North east" title=""></span>
+			<span class="fse2-emoticon fse22196 " data-emoticon="↖" data-hasqtip="405" oldtitle="North west" title=""></span>
+			<span class="fse2-emoticon fse22198 " data-emoticon="↘" data-hasqtip="406" oldtitle="South east" title=""></span>
+			<span class="fse2-emoticon fse22199 " data-emoticon="↙" data-hasqtip="407" oldtitle="South west" title="" aria-describedby="qtip-407"></span>
+			<span class="fse2-emoticon fse22935 " data-emoticon="⤵" data-hasqtip="408" oldtitle="Down right" title="" aria-describedby="qtip-408"></span>
+			<span class="fse2-emoticon fse22934 " data-emoticon="⤴" data-hasqtip="409" oldtitle="Up right" title=""></span>
+			<span class="fse2-emoticon fse21f199 " data-emoticon="🆙" data-hasqtip="410" oldtitle="UP!" title=""></span>
+			<span class="fse2-emoticon fse21f192 " data-emoticon="🆒" data-hasqtip="411" oldtitle="COOL" title=""></span>
+			<span class="fse2-emoticon fse21f4f6 " data-emoticon="📶" data-hasqtip="412" oldtitle="Signal" title=""></span>
+			<span class="fse2-emoticon fse21f201 " data-emoticon="🈁" data-hasqtip="413" oldtitle="&quot;Here&quot;" title=""></span>
+			<span class="fse2-emoticon fse21f22f " data-emoticon="🈯" data-hasqtip="414" oldtitle="&quot;Finger point&quot;" title=""></span>
+			<span class="fse2-emoticon fse21f233 " data-emoticon="🈳" data-hasqtip="415" oldtitle="&quot;Available&quot;" title=""></span>
+			<span class="fse2-emoticon fse21f235 " data-emoticon="🈵" data-hasqtip="416" oldtitle="&quot;Full&quot;" title=""></span>
+			<span class="fse2-emoticon fse21f250 " data-emoticon="🉐" data-hasqtip="417" oldtitle="&quot;bargain&quot;" title=""></span>
+			<span class="fse2-emoticon fse21f239 " data-emoticon="🈹" data-hasqtip="418" oldtitle="&quot;Sale&quot;" title=""></span>
+			<span class="fse2-emoticon fse21f23a " data-emoticon="🈺" data-hasqtip="419" oldtitle="&quot;Work&quot;" title=""></span>
+			<span class="fse2-emoticon fse21f236 " data-emoticon="🈶" data-hasqtip="420" oldtitle="&quot;To own&quot;" title=""></span>
+			<span class="fse2-emoticon fse21f21a " data-emoticon="🈚" data-hasqtip="421" oldtitle="&quot;Nothing&quot;" title=""></span>
+			<span class="fse2-emoticon fse21f6bb " data-emoticon="🚻" data-hasqtip="422" oldtitle="Couple symbol" title=""></span>
+			<span class="fse2-emoticon fse21f6b9 " data-emoticon="🚹" data-hasqtip="423" oldtitle="Man symbol" title=""></span>
+			<span class="fse2-emoticon fse21f6ba " data-emoticon="🚺" data-hasqtip="424" oldtitle="Women symbol" title=""></span>
+			<span class="fse2-emoticon fse21f6bc " data-emoticon="🚼" data-hasqtip="425" oldtitle="Baby symbol" title=""></span>
+			<span class="fse2-emoticon fse21f6be " data-emoticon="🚾" data-hasqtip="426" oldtitle="WC symbol" title=""></span>
+			<span class="fse2-emoticon fse2267f " data-emoticon="♿" data-hasqtip="427" oldtitle="Wheelchair symbol" title=""></span>
+			<span class="fse2-emoticon fse21f6ad " data-emoticon="🚭" data-hasqtip="428" oldtitle="No smoking symbol" title=""></span>
+			<span class="fse2-emoticon fse21f237 " data-emoticon="🈷" data-hasqtip="429" oldtitle="&quot;Month&quot;" title=""></span>
+			<span class="fse2-emoticon fse21f238 " data-emoticon="🈸" data-hasqtip="430" oldtitle="&quot;Request&quot;" title=""></span>
+			<span class="fse2-emoticon fse21f202 " data-emoticon="🈂" data-hasqtip="431" oldtitle="&quot;Free&quot;" title=""></span>
+			<span class="fse2-emoticon fse23299 " data-emoticon="㊙" data-hasqtip="432" oldtitle="&quot;Secret&quot;" title=""></span>
+			<span class="fse2-emoticon fse23297 " data-emoticon="㊗" data-hasqtip="433" oldtitle="&quot;Congratulation&quot;" title=""></span>
+			<span class="fse2-emoticon fse21f51e " data-emoticon="🔞" data-hasqtip="434" oldtitle="No under 18 symbol" title=""></span>
+			<span class="fse2-emoticon fse226d4 " data-emoticon="⛔" data-hasqtip="435" oldtitle="No entry" title=""></span>
+			<span class="fse2-emoticon fse2274e " data-emoticon="❎" data-hasqtip="436" oldtitle="Cross mark" title=""></span>
+			<span class="fse2-emoticon fse21f4a2 " data-emoticon="💢" data-hasqtip="437" oldtitle="Anger symbol" title=""></span>
+			<span class="fse2-emoticon fse21f43e " data-emoticon="🐾" data-hasqtip="438" oldtitle="Footprints" title=""></span>
+			<span class="fse2-emoticon fse21f19a " data-emoticon="🆚" data-hasqtip="439" oldtitle="VS" title=""></span>
+			<span class="fse2-emoticon fse21f4f3 " data-emoticon="📳" data-hasqtip="440" oldtitle="Vibration mode" title=""></span>
+			<span class="fse2-emoticon fse21f4f4 " data-emoticon="📴" data-hasqtip="441" oldtitle="Mobile phone off" title="" aria-describedby="qtip-441"></span>
+			<span class="fse2-emoticon fse21f4a0 " data-emoticon="💠" data-hasqtip="442" oldtitle="Diamond" title=""></span>
+			<span class="fse2-emoticon fse227bf " data-emoticon="➿" data-hasqtip="443" oldtitle="Curly loops" title=""></span>
+			<span class="fse2-emoticon fse21f3e7 " data-emoticon="🏧" data-hasqtip="444" oldtitle="ATM" title=""></span>
+			<span class="fse2-emoticon fse2274c " data-emoticon="❌" data-hasqtip="445" oldtitle="Cross mark" title="" aria-describedby="qtip-445"></span>
+			<span class="fse2-emoticon fse226a0 " data-emoticon="⚠" data-hasqtip="446" oldtitle="Warning sign" title=""></span>
+			<span class="fse2-emoticon fse22757 " data-emoticon="❗" data-hasqtip="447" oldtitle="Exclamation1" title=""></span>
+			<span class="fse2-emoticon fse22753 " data-emoticon="❓" data-hasqtip="448" oldtitle="Exclamation2" title=""></span>
+			<span class="fse2-emoticon fse22755 " data-emoticon="❕" data-hasqtip="449" oldtitle="Exclamation3" title=""></span>
+			<span class="fse2-emoticon fse22754 " data-emoticon="❔" data-hasqtip="450" oldtitle="Question mark" title=""></span>
+			<span class="fse2-emoticon fse22b55 " data-emoticon="⭕" data-hasqtip="451" oldtitle="Red Circle" title=""></span>
+			<span class="fse2-emoticon fse22716 " data-emoticon="✖" data-hasqtip="452" oldtitle="Multiplication" title=""></span>
+			<span class="fse2-emoticon fse22660 " data-emoticon="♠" data-hasqtip="453" oldtitle="Spades" title=""></span>
+			<span class="fse2-emoticon fse22665 " data-emoticon="♥" data-hasqtip="454" oldtitle="Hearts" title=""></span>
+			<span class="fse2-emoticon fse22663 " data-emoticon="♣" data-hasqtip="455" oldtitle="Clubs" title=""></span>
+			<span class="fse2-emoticon fse22666 " data-emoticon="♦" data-hasqtip="456" oldtitle="Diamonds" title=""></span>
+			<span class="fse2-emoticon fse2303d " data-emoticon="〽" data-hasqtip="457" oldtitle="Chart line" title=""></span>
+			<span class="fse2-emoticon fse21f531 " data-emoticon="🔱" data-hasqtip="458" oldtitle="Trident" title=""></span>
+			<span class="fse2-emoticon fse21f530 " data-emoticon="🔰" data-hasqtip="459" oldtitle="Beginner symbol" title=""></span>
+			<span class="fse2-emoticon fse21f532 " data-emoticon="🔲" data-hasqtip="460" oldtitle="Black square" title=""></span>
+			<span class="fse2-emoticon fse21f533 " data-emoticon="🔳" data-hasqtip="461" oldtitle="White square" title=""></span>
+			<span class="fse2-emoticon fse22b1b " data-emoticon="⬛" data-hasqtip="462" oldtitle="Black large square" title=""></span>
+			<span class="fse2-emoticon fse22b1c " data-emoticon="⬜" data-hasqtip="463" oldtitle="White large square" title=""></span>
+			<span class="fse2-emoticon fse225fc " data-emoticon="◼" data-hasqtip="464" oldtitle="Black medium square" title=""></span>
+			<span class="fse2-emoticon fse225fb " data-emoticon="◻" data-hasqtip="465" oldtitle="White medium square" title=""></span>
+			<span class="fse2-emoticon fse225fe " data-emoticon="◾" data-hasqtip="466" oldtitle="Black square" title=""></span>
+			<span class="fse2-emoticon fse225fd " data-emoticon="◽" data-hasqtip="467" oldtitle="White square" title=""></span>
+			<span class="fse2-emoticon fse225aa " data-emoticon="▪" data-hasqtip="468" oldtitle="Black small square" title="" aria-describedby="qtip-468"></span>
+			<span class="fse2-emoticon fse225ab " data-emoticon="▫" data-hasqtip="469" oldtitle="White small square" title=""></span>
+			<span class="fse2-emoticon fse226ab " data-emoticon="⚫" data-hasqtip="470" oldtitle="Black circle" title=""></span>
+			<span class="fse2-emoticon fse226aa " data-emoticon="⚪" data-hasqtip="471" oldtitle="White circle" title=""></span>
+			<span class="fse2-emoticon fse21f534 " data-emoticon="🔴" data-hasqtip="472" oldtitle="Red circle" title=""></span>
+			<span class="fse2-emoticon fse21f535 " data-emoticon="🔵" data-hasqtip="473" oldtitle="Blue circle" title=""></span>
+			<span class="fse2-emoticon fse21f536 " data-emoticon="🔶" data-hasqtip="474" oldtitle="Orange diamond" title=""></span>
+			<span class="fse2-emoticon fse21f537 " data-emoticon="🔷" data-hasqtip="475" oldtitle="Blue diamond" title="" aria-describedby="qtip-475"></span>
+			<span class="fse2-emoticon fse21f538 " data-emoticon="🔸" data-hasqtip="476" oldtitle="Small orange diamond" title="" aria-describedby="qtip-476"></span>
+			<span class="fse2-emoticon fse21f539 " data-emoticon="🔹" data-hasqtip="477" oldtitle="Small blue diamond" title="" aria-describedby="qtip-477"></span>
+		</div>
+	</div>	
+	
 	<script src="scripts/main.js"></script>
 </body>
 </html>

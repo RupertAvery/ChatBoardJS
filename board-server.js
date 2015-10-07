@@ -1,72 +1,55 @@
-function atob(str) {
-    return new Buffer(str, 'base64').toString('binary');
-}
-
-function makeid()
-{
-	var text = "";
-	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-	for( var i=0; i < 24; i++ )
-		text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-	return text;
-}
+var Helpers = require("./common/helpers.js");
 
 function Board(boardname) {
-	var id = makeid();
+	var id = Helpers.makeid();
 	var name = boardname;
 	var messages = [];
 	var objects = {};
 	var users = {};
 	var images = {};
+	var polls = {};
 
 	var commands = [ 'chat', 'path', 'line', 'ellipse', 'rectangle', 'point', 'move', 'scale', 'remove', 'image', 'text', 'transform' ];
 
 	function getImage(imgid) {
 		return images[imgid];
 	}
-
-	var commandPreProcessor = {
-		'chat' : function(user, data) {
-			data.from = user.name;
-			return data;
-		},
-		'image' : function(user, data) {
-			if(data.href.substring(0,5) == 'data:') {
-				var imgid = makeid();
-				var regex = /^data:.(.+);base64,(.*)$/;
-				var matches = data.href.match(regex);
-				images[imgid] = {
-					contentType : matches[1],
-					data: atob(matches[2])
-				};
-				data.href = '/images/?board=' + id + '&img=' + imgid;
-				console.log("Saved image: " + data.href);
-			}
-			return data;
-		}
-	}
-    
-    function handleObject(data) {
+  
+    function handleObject(user, data) {
+		data.createdBy = user.name;
+		data.createdDate = new Date();
 		objects[data.id] = data;
     }
 
 	var commandHandlers = {
-		'chat' : function(data) {
+		'chat' : function(user, data) {
+			data.from = getUserDetails(user);
 			messages.push(data)
 		},
 		'path' : handleObject,
 		'line' : handleObject,
 		'ellipse' : handleObject,
 		'rectangle' : handleObject,
-		'image' : handleObject,
+		'image' : function(user, data) {
+			if (data.href.substring(0,5) == 'data:') {
+				var imgid = Helpers.makeid();
+				var regex = /^data:.(.+);base64,(.*)$/;
+				var matches = data.href.match(regex);
+				images[imgid] = {
+					contentType : matches[1],
+					data: Helpers.atob(matches[2])
+				};
+				data.href = '/images/?board=' + id + '&img=' + imgid;
+				console.log("Saved image: " + data.href);
+			}
+			handleObject(user, data);
+		},
 		'text'  : handleObject,
-		'point' : function(data) {
+		'point' : function(user, data) {
 			objects[data.id].points = objects[data.id].points || [];
 			objects[data.id].points.push(data.point);
 		},
-		'move'  : function(data) {
+		'move'  : function(user, data) {
 			if (Array.isArray(data.id)) {
 				for (var i = 0; i < data.id.length; i++) {
 					var offset = objects[data.id[i]].offset;
@@ -82,15 +65,16 @@ function Board(boardname) {
 					offset.y += data.y;
 				}
 			}
+			
 		},
-		'scale' : function(data) {
+		'scale' : function(user, data) {
 			var scale = objects[data.id].scale;
             if(scale) {
 				scale.x = data.x;
 				scale.y = data.y;
             }
 		},
-		'transform'  : function(data) {
+		'transform' : function(user, data) {
 			var object = objects[data.id];
             if(object.scale && data.scale) {
 				object.scale.x = data.scale.x;
@@ -101,7 +85,7 @@ function Board(boardname) {
                 object.offset.y = data.offset.y;
             }
 		},
-		'remove' : function(data) {
+		'remove' : function(user, data) {
 			if(objects[data.id].type == 'image') {
 				var matchid = objects[data.id].href.match(/\/images\/\?board=[A-Za-z0-9]+&img=([A-Za-z0-9]+)/);
 				if(matchid && matchid.index >= 0) {
@@ -125,12 +109,9 @@ function Board(boardname) {
 	
 	function register(user, command) {
 		user.socket.on(command, function (data) {
-			if (commandPreProcessor[command]) {
-				data = commandPreProcessor[command](user, data)
-			}
 
 			if(commandHandlers[command]) {
-				commandHandlers[command](data);
+				commandHandlers[command](user, data);
 			}
 
 			broadcast(command, data, user.socket);
@@ -138,25 +119,51 @@ function Board(boardname) {
 	}
 	
 
+	// Gets only relevant user information (strips out socket)
 	function getUserDetails(user){
 		return {
 			id: user.id,
 			name: user.name, 
-			email: user.email, 
+			gravatarId: user.gravatarId, 
 			facebookId: user.facebookId  
 		}
 	}
 
 	function User(data, socket) {
 		return {
-			id: makeid(),
+			id: Helpers.makeid(),
 			name: data.name, 
-			email: data.email, 
+			gravatarId: data.gravatarId, 
 			facebookId: data.facebookId,
 			socket: socket
 		}
 	}
 	
+	function init_connection(socket, user) {
+		// attach all message handlers to this socket
+		for(var j = 0; j < commands.length; j++)
+		{
+			register(user, commands[j]);
+		}
+
+		var details = getUserDetails(user);
+		
+		socket.emit('welcome', details);
+		
+		// notify everyone else that someone has joined
+		broadcast('joined', details, socket);
+
+		socket.emit('replay', { 
+			objects: objects, 
+			messages: messages, 
+			users: getUsers() 
+		});
+		
+		socket.on('disconnect', function() {
+			broadcast('left', { id: user.id, name: user.name }, socket);
+			delete users[user.id];
+		});	
+	}
 	
 	function rejoin(socket, sessionId) {
 		
@@ -168,21 +175,7 @@ function Board(boardname) {
 
 				console.log(socket.id + " rejoins board: " + name + " as " + user.name);
 
-				for(var j = 0; j < commands.length; j++)
-				{
-					register(user, commands[j]);
-				}
-
-				socket.emit('welcome', getUserDetails(user));
-
-				broadcast('joined', getUserDetails(user), socket);
-
-				socket.emit('replay', { 
-					objects: objects, 
-					messages: messages, 
-					users: getUsers() 
-				});
-				
+				init_connection(socket, user);
 				return;
 			}
 		}
@@ -212,7 +205,7 @@ function Board(boardname) {
 		if(users[data.id] !== undefined && users[data.id] !== null) return true;
 		for(var key in users) {
 			if(isNotUndefinedOrNull(users[key].facebookId) && users[key].facebookId === data.facebookId) return true;
-			if(isNotUndefinedOrNull(users[key].email) && isNotEmptyString(users[key].email) && users[key].email === data.email) return true;
+			if(isNotUndefinedOrNull(users[key].gravatarId) && isNotEmptyString(users[key].gravatarId) && users[key].gravatarId === data.gravatarId) return true;
 		}
 		return false;
 	}
@@ -230,27 +223,7 @@ function Board(boardname) {
 
 			console.log(socket.id + " joins board: " + name);
 
-			// attach all message handlers to this socket
-			for(var j = 0; j < commands.length; j++)
-			{
-				register(newUser, commands[j]);
-			}
-
-			socket.emit('welcome', getUserDetails(newUser));
-
-			broadcast('joined', getUserDetails(newUser), socket);
-
-			socket.emit('replay', { 
-				objects: objects, 
-				messages: messages, 
-				users: getUsers() 
-			});
-
-			socket.on('disconnect', function() {
-				console.log(newUser.name + ' has left the building');
-				broadcast('left', { id: newUser.id, name: newUser.name }, socket);
-				delete users[newUser.id];
-			});
+			init_connection(socket, newUser);
 
 		} else {
 			socket.emit('joinerror', { message: 'That name is already in use!' });
