@@ -123,7 +123,14 @@ function WhiteBoard(d3, socket, elementId) {
 	})
 	
 	socket.on('update', function (data){
-		objectManager.getObject(data.id).update(data);
+		if(Array.isArray(data.id)) {
+			idList = [];
+			for(var i = 0; i < data.id.length; i++) {
+				objectManager.getObject(data.id[i]).update(data.attributes);
+			}
+		} else {
+			objectManager.getObject(data.id).update(data.attributes);
+		}
 	})
 
 	socket.on('replay', function (data) {
@@ -180,18 +187,6 @@ function WhiteBoard(d3, socket, elementId) {
 		objectManager.getObject(data.id).remove();
 		objectManager.remove(data.id)
 	})
-
-
-	function makeid()
-	{
-		var text = "";
-		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-		for( var i=0; i < 24; i++ )
-			text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-		return text;
-	}
 
 	function toPoint(m) {
 		return { x: m[0], y: m[1] };
@@ -652,15 +647,22 @@ function WhiteBoard(d3, socket, elementId) {
 	
 	function updateSelection(attributes) {
 		if(currentSelection) {
+			var idList = null;
 			if(Array.isArray(currentSelection)) {
+				idList = [];
 				for(var i = 0; i < currentSelection.length; i++) {
 					currentSelection[i].update(attributes);
+					idList.push(currentSelection[i].id);
 				}
 			} else {
 				currentSelection.update(attributes);
+				idList = currentSelection.id;
 			}
+			socket.emit('update', { 
+				id: idList,
+				attributes: attributes
+			});
 			createResizeHandler();
-			socket.emit('update', currentSelection.options);
 		}
 	}
 	
@@ -699,7 +701,7 @@ function WhiteBoard(d3, socket, elementId) {
 
 	function addPath(options) {
 		currentSelection = new PathObject(svg, {
-			id: makeid(),
+			id: Helpers.makeid(),
 			x: options.x, 
 			y: options.y, 
 			color: options.color, 
@@ -712,7 +714,7 @@ function WhiteBoard(d3, socket, elementId) {
     
 	function addLine(options) {
 		currentSelection = new LineObject(svg, {
-			id: makeid(),
+			id: Helpers.makeid(),
 			x: options.x, 
 			y: options.y,
 			width: options.width,
@@ -726,7 +728,7 @@ function WhiteBoard(d3, socket, elementId) {
     
 	function addEllipse(options) {
 		currentSelection = new EllipseObject(svg, {
-			id: makeid(),
+			id: Helpers.makeid(),
 			x: options.x, 
 			y: options.y, 
 			radius: {
@@ -743,7 +745,7 @@ function WhiteBoard(d3, socket, elementId) {
     
 	function addRectangle(options) {
 		currentSelection = new RectangleObject(svg, {
-			id: makeid(),
+			id: Helpers.makeid(),
 			x: options.x, 
 			y: options.y, 
 			width: options.width,
@@ -758,7 +760,7 @@ function WhiteBoard(d3, socket, elementId) {
 	
 	function addImage(data) {
 		var newObject = new ImageObject(svg, { 
-			id: makeid(), 
+			id: Helpers.makeid(), 
 			href: data.href, 
 			width: data.width, 
 			height: data.height
@@ -770,7 +772,7 @@ function WhiteBoard(d3, socket, elementId) {
 
 	function addText (data) {
 		var newObject = new TextObject(svg, {
-			id: makeid(),
+			id: Helpers.makeid(),
 			text: data.text, 
 			font: data.font, 
 			color: selectedColor,

@@ -58,6 +58,7 @@ app.get('/scripts/fb.js', function(req, res) {
 	res.end();
 })
 
+ignoreRoute(/\/common\/*/);
 ignoreRoute(/\/scripts\/*/);
 ignoreRoute(/\/css\/*/);
 ignoreRoute(/\/fonts\/*/);

@@ -88,8 +88,14 @@ function EllipseObject (svg, options) {
 			var a2 = rx * rx;
 			var b2 = ry * ry;
 			var r = (x2/a2) + (y2/b2);
-			if (r >= 0.8 && r <= 1.2) {
-				return true;
+			if(options.fill === 'none') {
+				if (r >= 0.8 && r <= 1.2) {
+					return true;
+				}
+			} else {
+				if (r <= 1.0) {
+					return true;
+				}
 			}
 			return false;
 		},

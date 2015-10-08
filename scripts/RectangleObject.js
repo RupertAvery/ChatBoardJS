@@ -12,7 +12,7 @@ function RectangleObject (svg, options) {
             .attr("width", options.width)
             .attr("height", options.height)
 			.attr("vector-effect", "non-scaling-stroke");
-
+			
 	function applyAttributes() {
 		pathObject
 			.attr("stroke", options.color)
@@ -73,22 +73,30 @@ function RectangleObject (svg, options) {
 		},
 		hitTest: function(x, y) {
 			var rect = fixBounds(getExtents());
-            if(lineCircleCollide({ x: rect.x1, y: rect.y1 }, { x: rect.x2, y: rect.y1 }, { x: x, y: y }, 5))
-            {
-                return true;
-            }
-            if(lineCircleCollide({ x: rect.x2, y: rect.y1 }, { x: rect.x2, y: rect.y2 }, { x: x, y: y }, 5))
-            {
-                return true;
-            }			
-            if(lineCircleCollide({ x: rect.x2, y: rect.y2 }, { x: rect.x1, y: rect.y2 }, { x: x, y: y }, 5))
-            {
-                return true;
-            }
-            if(lineCircleCollide({ x: rect.x1, y: rect.y2 }, { x: rect.x1, y: rect.y1 }, { x: x, y: y }, 5))
-            {
-                return true;
-            }
+			if(options.fill === 'none') {
+				if(lineCircleCollide({ x: rect.x1, y: rect.y1 }, { x: rect.x2, y: rect.y1 }, { x: x, y: y }, 5))
+				{
+					return true;
+				}
+				if(lineCircleCollide({ x: rect.x2, y: rect.y1 }, { x: rect.x2, y: rect.y2 }, { x: x, y: y }, 5))
+				{
+					return true;
+				}			
+				if(lineCircleCollide({ x: rect.x2, y: rect.y2 }, { x: rect.x1, y: rect.y2 }, { x: x, y: y }, 5))
+				{
+					return true;
+				}
+				if(lineCircleCollide({ x: rect.x1, y: rect.y2 }, { x: rect.x1, y: rect.y1 }, { x: x, y: y }, 5))
+				{
+					return true;
+				}
+			} else {
+				if(x >= rect.x1 && x <= rect.x2 && y >= rect.y1 && y <= rect.y2)
+				{
+					return true;
+				}
+			}
+			
 			return false;
 		},
 		isSelected: function() { return isSelected; },

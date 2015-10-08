@@ -1,4 +1,4 @@
-var Helpers = require("./common/helpers.js");
+var Helpers = require("./common/helpers.js")();
 
 function Board(boardname) {
 	var id = Helpers.makeid();
@@ -8,7 +8,7 @@ function Board(boardname) {
 	var users = {};
 	var images = {};
 	var polls = {};
-
+	
 	var commands = [ 'chat', 'path', 'line', 'ellipse', 'rectangle', 'point', 'move', 'scale', 'remove', 'image', 'text', 'transform', 'update' ];
 
 	function getImage(imgid) {
@@ -21,15 +21,27 @@ function Board(boardname) {
 		objects[data.id] = data;
     }
 
+	function updateObject(object, name, attributes) {
+		Helpers.extend(object, {
+			updatedBy: name,
+			updatedDate: new Date()
+		});
+		Helpers.extend(object, attributes);
+	}
+	
 	var commandHandlers = {
 		'chat' : function(user, data) {
 			data.from = getUserDetails(user);
 			messages.push(data)
 		},
 		'update': function(user, data) {
-			data.udpatedBy = user.name;
-			data.updatedDate = new Date();
-			objects[data.id] = data;
+			if(Array.isArray(data.id)) {
+				for(var i = 0; i < data.id.length; i++) {
+					updateObject(objects[data.id[i]], user.name, data.attributes);
+				}
+			} else {
+				updateObject(objects[data.id], user.name, data.attributes);
+			}
 		},
 		'path' : handleObject,
 		'line' : handleObject,
