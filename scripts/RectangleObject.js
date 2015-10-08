@@ -2,6 +2,7 @@ function RectangleObject (svg, options) {
 
 	options.offset = options.offset || { x: 0, y: 0 };
 	options.scale = options.scale || { x: 1.0, y: 1.0 };
+	options.fill = options.fill || "none";
 
 	options.type = "rectangle";
 
@@ -10,17 +11,22 @@ function RectangleObject (svg, options) {
             .attr("y", options.y)
             .attr("width", options.width)
             .attr("height", options.height)
+			.attr("vector-effect", "non-scaling-stroke");
+
+	function applyAttributes() {
+		pathObject
 			.attr("stroke", options.color)
 			.attr("stroke-width", options.lineWeight)
-			.attr("vector-effect", "non-scaling-stroke")
-			.attr("fill", "none");
-
+			.attr("fill", options.fill);
+	}			
+			
 	function transform() {
 		pathObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") translate(" + options.x + " " + options.y + ") scale(" + options.scale.x + " " + options.scale.y + ") translate(-" + options.x + " -" + options.y + ")");
 	}
 	
 	var isSelected = false;
-
+	
+	applyAttributes();
 	transform();
 	
 	function swap(a, b, c) { var t = a[c]; a[c] = b[c]; b[c] = t; }
@@ -52,6 +58,12 @@ function RectangleObject (svg, options) {
 		type: 'rectangle',
 		id: options.id,
 		options: options,
+		update: function(newOptions) {
+			options.color = newOptions.color || options.color;
+			options.lineWeight = newOptions.lineWeight || options.lineWeight;
+			options.fill = newOptions.fill || options.fill;
+			applyAttributes();
+		},
 		containedBy: function(p1, p2) {
 			var rect = fixBounds(getExtents());
 			if(p1.x <= rect.x1 && p2.x >= rect.x2 && p1.y <= rect.y1 && p2.y >= rect.y2)

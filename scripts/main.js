@@ -100,6 +100,21 @@ $('#colorPicker').spectrum({
 	}
 });
 
+$('#fillPicker').spectrum({
+	allowEmpty: true,
+	showAlpha: true,
+	change: function(color) {
+		if (color == null) {
+			board.selectFill("none");
+			$(this).children('span').css("background-color", "").css("background", "url(./images/no-color.png) -1px -1px no-repeat no-repeat");
+		} else {
+			board.selectFill(color.toRgbString());
+			$(this).children('span').css("background", "").css("background-color", color.toRgbString());
+		}
+	}
+});
+
+
 $("#red").click(function() {
 	board.selectColor("red");
 	$('#colorPicker').children('span').css("background-color", "red");
@@ -156,6 +171,10 @@ $("#eraserTool").click(function() {
 $("#textTool").click(function() {
 	//board.selectTool("text");
 	board.deselectAll();
+	var selection = board.getSelection();
+	if(selection && !Array.isArray(selection) && selection.type == 'text') {
+		$("#myText").val(selection.options.text);
+	}
 	$("#textModal").modal("show");
 	$("#myText").focus().select();
 });
@@ -238,17 +257,27 @@ function loadImage(url) {
 }
 
 $("#addTextBtn").click(function() {
-	board.addText({
-		text: $("#myText").val(),
-		font: $("#myText_font option:selected").text(),
-		size: $("#myText_size option:selected").text(),
-		width: null,
-		height: null,
-		offset: {
-			x: 0,
-			y: 0
-		}
-	});
+	var selection = board.getSelection();
+	if(selection && !Array.isArray(selection) && selection.type == 'text') {
+		board.updateSelection({ 
+			text: $("#myText").val(),
+			font: $("#myText_font option:selected").text(),
+			size: $("#myText_size option:selected").text(),
+		});
+	} else {
+		board.addText({
+			text: $("#myText").val(),
+			font: $("#myText_font option:selected").text(),
+			size: $("#myText_size option:selected").text(),
+			width: null,
+			height: null,
+			offset: {
+				x: 0,
+				y: 0
+			}
+		});
+	}
+	
 	$("#textModal").modal("hide");
 	$("#myText").val(null);
 });

@@ -76,6 +76,16 @@ line-height: 50px;
 	display: inline-block
 }
 
+.my-chat-message  > .chat-message  > a {
+	text-decoration: underline;
+	color: #ffffff;
+}
+
+.other-chat-message   > .chat-message  > a {
+	text-decoration: underline;
+	color: #000000;
+}
+
 .my-chat-message  > .chat-message {
 	background: #076AD0;
 	color: #ffffff;

@@ -9,7 +9,7 @@ function Board(boardname) {
 	var images = {};
 	var polls = {};
 
-	var commands = [ 'chat', 'path', 'line', 'ellipse', 'rectangle', 'point', 'move', 'scale', 'remove', 'image', 'text', 'transform' ];
+	var commands = [ 'chat', 'path', 'line', 'ellipse', 'rectangle', 'point', 'move', 'scale', 'remove', 'image', 'text', 'transform', 'update' ];
 
 	function getImage(imgid) {
 		return images[imgid];
@@ -25,6 +25,11 @@ function Board(boardname) {
 		'chat' : function(user, data) {
 			data.from = getUserDetails(user);
 			messages.push(data)
+		},
+		'update': function(user, data) {
+			data.udpatedBy = user.name;
+			data.updatedDate = new Date();
+			objects[data.id] = data;
 		},
 		'path' : handleObject,
 		'line' : handleObject,

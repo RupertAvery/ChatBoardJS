@@ -4,6 +4,7 @@ function PathObject (svg, options) {
 
 	options.offset = options.offset || { x: 0, y: 0 };
 	options.scale = options.scale || { x: 1.0, y: 1.0 };
+	options.fill = options.fill || "none";
 
 	var lineFunction = d3.svg.line()
 		.x(function(d) { return d.x; })
@@ -14,10 +15,14 @@ function PathObject (svg, options) {
 
 	var pathObject = svg.append("path")
 			.attr("d", lineFunction(pathData))
+			.attr("vector-effect", "non-scaling-stroke");
+
+	function applyAttributes() {
+		pathObject
 			.attr("stroke", options.color)
 			.attr("stroke-width", options.lineWeight)
-			.attr("vector-effect", "non-scaling-stroke")
-			.attr("fill", "none");
+			.attr("fill", options.fill);
+	}
 
 	function transform() {
 		pathObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") translate(" + minX + " " + minY + ") scale(" + options.scale.x + " " + options.scale.y + ") translate(-" + minX + " -" + minY + ")");
@@ -49,6 +54,7 @@ function PathObject (svg, options) {
 		pathObject.attr("d", lineFunction(pathData));
 	}
 
+	applyAttributes();
 	transform();
 	
 	function swap(a, b, c) { var t = a[c]; a[c] = b[c]; b[c] = t; }
@@ -81,6 +87,13 @@ function PathObject (svg, options) {
 		id: options.id,
 		options: options,
 		addPoint: addPoint,
+		update: function(newOptions) {
+			console.log(this);
+			options.color = newOptions.color || options.color;
+			options.lineWeight = newOptions.lineWeight || options.lineWeight;
+			options.fill = newOptions.fill || options.fill;
+			applyAttributes();
+		},
 		containedBy: function(p1, p2) {
 			var rect = fixBounds(getExtents());
 			if(p1.x <= rect.x1 && p2.x >= rect.x2 && p1.y <= rect.y1 && p2.y >= rect.y2)

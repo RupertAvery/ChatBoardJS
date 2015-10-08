@@ -14,17 +14,22 @@ function LineObject (svg, options) {
             .attr("y1", options.y)
             .attr("x2", point2.x)
             .attr("y2", point2.y)
-			.attr("stroke", options.color)
-			.attr("stroke-width", options.lineWeight)
 			.attr("vector-effect", "non-scaling-stroke")
 			.attr("fill", "none");
 
+	function applyAttributes() {
+		pathObject
+			.attr("stroke", options.color)
+			.attr("stroke-width", options.lineWeight);
+	}		
+	
 	function transform() {
 		pathObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") translate(" + options.x + " " + options.y + ") scale(" + options.scale.x + " " + options.scale.y + ") translate(-" + options.x + " -" + options.y + ")");
 	}
 	
 	var isSelected = false;
 
+	applyAttributes();
 	transform();
 	
 	function swap(a, b, c) { var t = a[c]; a[c] = b[c]; b[c] = t; }
@@ -78,6 +83,11 @@ function LineObject (svg, options) {
 		type: 'line',
 		id: options.id,
 		options: options,
+		update: function(newOptions) {
+			options.color = newOptions.color || options.color;
+			options.lineWeight = newOptions.lineWeight || options.lineWeight;
+			applyAttributes();
+		},
 		containedBy: function(p1, p2) {
 			var rect = fixBounds(getExtents());
 			if(p1.x <= rect.x1 && p2.x >= rect.x2 && p1.y <= rect.y1 && p2.y >= rect.y2)
@@ -108,6 +118,13 @@ function LineObject (svg, options) {
 		move: function(x, y) {
             options.offset.x += x;
             options.offset.y += y;
+			transform();
+		},
+		transform: function(offset, scale) {
+			options.offset.x = offset.x;
+			options.offset.y = offset.y;
+			options.scale.x = scale.x;
+			options.scale.y = scale.y;
 			transform();
 		},
 		resize: function(x, y, constrain) {

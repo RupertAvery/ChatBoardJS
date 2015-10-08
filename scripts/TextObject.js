@@ -3,6 +3,7 @@ function TextObject(svg, options) {
 	options.font = options.font || "Arial";
 	options.size = options.size || "16";
 	options.color = options.color || "black";
+
 	var height = parseInt(options.size, 10) || 16;
 	var extents = getTextSize(options.text, height + "px " + options.font);
 	var width = extents.width;
@@ -14,16 +15,26 @@ function TextObject(svg, options) {
 
 	var txtObject = svg.append("text")
 			.attr("x", "0")
-			.attr("y", "0")
+			.attr("y", "0");
+	
+	function applyAttributes() {
+		txtObject
 			.attr("font-family", options.font)
 			.attr("font-size", options.size)
 			.attr("fill", options.color)
 			.text(options.text);
-	
+
+		height = parseInt(options.size, 10) || 16;
+		extents = getTextSize(options.text, height + "px " + options.font);
+		width = extents.width;
+	}		
+
 	function transform() {
 		txtObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") scale(" + options.scale.x + " " + options.scale.y + ")");
 	}
 	
+	applyAttributes();
+
 	transform();
 
 	function getTextSize(text, font) {
@@ -63,14 +74,12 @@ function TextObject(svg, options) {
 		type: 'text',
 		id: options.id,
 		options: options,
-		editText: function (options) {
-			options.font = options.font || "Arial";
-			options.size = options.size || "16";
-			options.color = options.color || "black";
-			height = parseInt(options.size, 10) || 16;
-			txtObject.text(options.text);
-			extents = getTextSize(options.text, height + "px " + options.font);
-			width = extents.width;
+		update: function(newOptions) {
+			options.color = newOptions.color || options.color;
+			options.size = newOptions.size || options.size;
+			options.font = newOptions.font || options.font;
+			options.text = newOptions.text || options.text;
+			applyAttributes();
 		},
 		containedBy: function(p1, p2) {
 			var rect = fixBounds(getExtents());

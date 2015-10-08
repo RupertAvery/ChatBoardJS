@@ -78,6 +78,13 @@ function ImageObject(svg, options) {
 			options.offset.y += y;
 			transform();
 		},
+		transform: function(offset, scale) {
+			options.offset.x = offset.x;
+			options.offset.y = offset.y;
+			options.scale.x = scale.x;
+			options.scale.y = scale.y;
+			transform();
+		},
 		resize: function(x, y, constrain) {
 			var w1 = options.width * options.scale.x;
 			var w2 = w1 + x;

@@ -50,6 +50,8 @@ function WhiteBoard(d3, socket, elementId) {
 	var selectedObject = null;
 	var selectedLineWeight = 2;
 	var currentSelection = null;
+	var selectedColor = "";
+	var selectedFill = "none";
 
 	var svg = d3.select(boardId)
 				.append("svg")
@@ -62,7 +64,7 @@ function WhiteBoard(d3, socket, elementId) {
 				.on("mouseup", mouseUp);
 
 	var objectManager = new ObjectManager();
-
+	
 	var ctrlDown = false;
 	var shiftDown = false;
     var shiftKey = 16, ctrlKey = 17, vKey = 86, cKey = 67, deleteKey = 46;
@@ -118,6 +120,10 @@ function WhiteBoard(d3, socket, elementId) {
 
 	socket.on('point', function (data){
 		objectManager.getObject(data.id).addPoint(data.point);
+	})
+	
+	socket.on('update', function (data){
+		objectManager.getObject(data.id).update(data);
 	})
 
 	socket.on('replay', function (data) {
@@ -438,6 +444,7 @@ function WhiteBoard(d3, socket, elementId) {
 				x: m.x, 
 				y: m.y, 
 				color: selectedColor, 
+				fill: selectedFill, 
 				lineWeight: selectedLineWeight
 			});
 			break;
@@ -458,7 +465,7 @@ function WhiteBoard(d3, socket, elementId) {
 				.attr("ry", 0)
 				.attr("stroke", selectedColor)
 				.attr("stroke-width", selectedLineWeight)
-				.attr("fill", "none");
+				.attr("fill", selectedFill);
 			break;
 		case "rectangle":
 			preDrawObject = svg.append("rect")
@@ -468,7 +475,7 @@ function WhiteBoard(d3, socket, elementId) {
 				.attr("height", 0)
 				.attr("stroke", selectedColor)
 				.attr("stroke-width", selectedLineWeight)
-				.attr("fill", "none");
+				.attr("fill", selectedFill);
 			break;
 		case "select":
 			if (selectionRect) {
@@ -609,6 +616,7 @@ function WhiteBoard(d3, socket, elementId) {
 					y: Math.abs(m.y - startPoint.y) / 2
 				},
                 color: selectedColor, 
+                fill: selectedFill, 
                 lineWeight: selectedLineWeight
             });
 			currentSelection = null;
@@ -621,6 +629,7 @@ function WhiteBoard(d3, socket, elementId) {
                 width: m.x - startPoint.x,
                 height: m.y - startPoint.y,
                 color: selectedColor, 
+                fill: selectedFill, 
                 lineWeight: selectedLineWeight
             });
 			currentSelection = null;
@@ -641,10 +650,34 @@ function WhiteBoard(d3, socket, elementId) {
 		}
 	}
 	
+	function updateSelection(attributes) {
+		if(currentSelection) {
+			if(Array.isArray(currentSelection)) {
+				for(var i = 0; i < currentSelection.length; i++) {
+					currentSelection[i].update(attributes);
+				}
+			} else {
+				currentSelection.update(attributes);
+			}
+			createResizeHandler();
+			socket.emit('update', currentSelection.options);
+		}
+	}
 	
 	function selectColor (color) { 
 		selectedColor = color; 
+		updateSelection({ color: selectedColor });
 	}
+	
+	function selectFill (color) { 
+		selectedFill = color; 
+		updateSelection({ fill: selectedFill });
+	}
+	
+	function selectLineWeight(weight) {
+		selectedLineWeight = weight;
+		updateSelection({ lineWeight: selectedLineWeight });
+	}	
 	
 	function setCursor(tool) {
 		var _tool = tools[tool];
@@ -663,10 +696,6 @@ function WhiteBoard(d3, socket, elementId) {
 		setCursor(tool);
 		selectedTool = tool;
 	}
-	
-	function selectLineWeight(weight) {
-		selectedLineWeight = weight;
-	}
 
 	function addPath(options) {
 		currentSelection = new PathObject(svg, {
@@ -674,6 +703,7 @@ function WhiteBoard(d3, socket, elementId) {
 			x: options.x, 
 			y: options.y, 
 			color: options.color, 
+			fill: options.fill,
 			lineWeight: options.lineWeight
 		});
 		objectManager.add(currentSelection);
@@ -704,6 +734,7 @@ function WhiteBoard(d3, socket, elementId) {
 				y: options.radius.y
 			},
 			color: options.color, 
+			fill: options.fill,
 			lineWeight: options.lineWeight
 		});
 		objectManager.add(currentSelection);
@@ -718,6 +749,7 @@ function WhiteBoard(d3, socket, elementId) {
 			width: options.width,
 			height: options.height,
 			color: options.color, 
+			fill: options.fill,
 			lineWeight: options.lineWeight
 		});
 		objectManager.add(currentSelection);
@@ -759,13 +791,20 @@ function WhiteBoard(d3, socket, elementId) {
 		}
 	}
 	
+	var _callbacks = {}
+	
 	return {
+		getSelection: function() {
+			return currentSelection;
+		},
 		removeSelected: removeSelected,
 		deselectAll: objectManager.deselectAll,
 		selectColor: selectColor,
+		selectFill: selectFill,
 		selectTool: selectTool,
 		selectLineWeight: selectLineWeight,
 		addText: addText,
+		updateSelection: updateSelection,
 		addImage: addImage,
 		setSize: function (width, height) {
 			$(boardId).width(width).height(height);
