@@ -181,7 +181,9 @@ board.onCreateText(function (selection, x, y) {
 		textpos = { x: x, y: y };
 	}
 	$("#textModal").modal("show");
-	$("#myText").focus().select();
+	$("#textModal").on("shown.bs.modal", function() {
+		$("#myText").focus().select();
+	});
 })
 
 $("#addTextBtn").click(function() {
