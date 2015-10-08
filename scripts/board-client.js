@@ -7,6 +7,7 @@ function WhiteBoard(d3, socket, elementId) {
 	var preDrawObject = null;
 	
 	var tools = {
+		"text": { name: "i-cursor", options: { hotspot: 'center' } },
 		"pen": { name: "pencil", options: { hotspot: 'bottom left' } },
 		"line": { name: "pencil", options: { hotspot: 'bottom left' } },
 		"circle": { name: "pencil", options: { hotspot: 'bottom left' } },
@@ -61,6 +62,7 @@ function WhiteBoard(d3, socket, elementId) {
 				.attr("height", 1080)
 				.on("mousemove", mouseMove)
 				.on("mousedown", mouseDown)
+				.on("dblclick", dblClick)
 				.on("mouseup", mouseUp);
 
 	var objectManager = new ObjectManager();
@@ -275,6 +277,15 @@ function WhiteBoard(d3, socket, elementId) {
 		}
 	}
 	
+	function dblClick() {
+		var m = toPoint(d3.mouse(this));
+		switch (selectedTool) {
+		case "select":		
+			if(currentSelection && !Array.isArray(currentSelection) && currentSelection.type == 'text') {
+				_fnCreateText(currentSelection, m.x, m.y);
+			}
+		}
+	}
 	
 	/***********************************
 		Handle mouse move events
@@ -442,6 +453,9 @@ function WhiteBoard(d3, socket, elementId) {
 				fill: selectedFill, 
 				lineWeight: selectedLineWeight
 			});
+			break;
+		case "text": 
+			_fnCreateText(null, m.x, m.y);
 			break;
 		case "line":
 			preDrawObject = svg.append("line")
@@ -767,12 +781,15 @@ function WhiteBoard(d3, socket, elementId) {
 		});
 		objectManager.add(newObject);
 		socket.emit('image', newObject.options);
+		socket.emit('image', newObject.options);
 		selectTool("select");
 	}
 
 	function addText (data) {
 		var newObject = new TextObject(svg, {
 			id: Helpers.makeid(),
+			x: data.x, 
+			y: data.y, 
 			text: data.text, 
 			font: data.font, 
 			color: selectedColor,
@@ -794,8 +811,12 @@ function WhiteBoard(d3, socket, elementId) {
 	}
 	
 	var _callbacks = {}
+	var _fnCreateText = null;
 	
 	return {
+		onCreateText: function (fnCreateText) {
+			_fnCreateText = fnCreateText;
+		},
 		getSelection: function() {
 			return currentSelection;
 		},

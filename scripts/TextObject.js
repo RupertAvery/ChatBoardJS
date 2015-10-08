@@ -8,14 +8,14 @@ function TextObject(svg, options) {
 	var extents = getTextSize(options.text, height + "px " + options.font);
 	var width = extents.width;
 
-	options.offset = options.offset || { x: 20, y: height };
+	options.offset = options.offset || { x: 0, y: 0 };
 	options.scale = options.scale || { x: 1.0, y: 1.0 };
 
 	var isSelected = false;
 
 	var txtObject = svg.append("text")
-			.attr("x", "0")
-			.attr("y", "0");
+			.attr("x", options.x)
+			.attr("y", options.y);
 	
 	function applyAttributes() {
 		txtObject
@@ -30,7 +30,7 @@ function TextObject(svg, options) {
 	}		
 
 	function transform() {
-		txtObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") scale(" + options.scale.x + " " + options.scale.y + ")");
+		txtObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") translate(" + options.x + " " + options.y + ") scale(" + options.scale.x + " " + options.scale.y + ") translate(-" + options.x + " -" + options.y + ")");
 	}
 	
 	applyAttributes();
@@ -63,10 +63,10 @@ function TextObject(svg, options) {
 
 	function getExtents() {
 		return {
-			x1: options.offset.x,
-			y1: options.offset.y - (options.scale.y * height),
-			x2: options.offset.x + (options.scale.x * width),
-			y2: options.offset.y 
+			x1: options.offset.x + options.x,
+			y1: options.offset.y + options.y - (options.scale.y * height),
+			x2: options.offset.x + options.x + (options.scale.x * width),
+			y2: options.offset.y + options.y
 		}
 	}
 		

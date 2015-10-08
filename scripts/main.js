@@ -168,15 +168,51 @@ $("#eraserTool").click(function() {
 	board.deselectAll();
 });
 
-$("#textTool").click(function() {
-	//board.selectTool("text");
-	board.deselectAll();
-	var selection = board.getSelection();
-	if(selection && !Array.isArray(selection) && selection.type == 'text') {
+var _selection = null;
+var textpos = null;
+
+board.onCreateText(function (selection, x, y) {
+	if(selection) {
+		_selection = selection;
 		$("#myText").val(selection.options.text);
+		$("#myText_font option:contains('" + selection.options.font + "')").attr('selected','selected');
+		$("#myText_size option:contains('" + selection.options.size + "')").attr('selected','selected');
+	} else {
+		textpos = { x: x, y: y };
 	}
 	$("#textModal").modal("show");
 	$("#myText").focus().select();
+})
+
+$("#addTextBtn").click(function() {
+	if(_selection && !Array.isArray(_selection) && _selection.type == 'text') {
+		board.updateSelection({ 
+			text: $("#myText").val(),
+			font: $("#myText_font option:selected").text(),
+			size: $("#myText_size option:selected").text(),
+		});
+		_selection = null;
+	} else {
+		board.addText({
+			text: $("#myText").val(),
+			font: $("#myText_font option:selected").text(),
+			size: $("#myText_size option:selected").text(),
+			width: null,
+			height: null,
+			x: textpos.x,
+			y: textpos.y
+		});
+		textpos = null;
+	}
+	
+	$("#textModal").modal("hide");
+	$("#myText").val(null);
+});
+
+
+$("#textTool").click(function() {
+	board.selectTool("text");
+	board.deselectAll();
 });
 
 $("#cancelTextBtn").click(function() {
@@ -256,31 +292,6 @@ function loadImage(url) {
 	preloadImg.src = url;
 }
 
-$("#addTextBtn").click(function() {
-	var selection = board.getSelection();
-	if(selection && !Array.isArray(selection) && selection.type == 'text') {
-		board.updateSelection({ 
-			text: $("#myText").val(),
-			font: $("#myText_font option:selected").text(),
-			size: $("#myText_size option:selected").text(),
-		});
-	} else {
-		board.addText({
-			text: $("#myText").val(),
-			font: $("#myText_font option:selected").text(),
-			size: $("#myText_size option:selected").text(),
-			width: null,
-			height: null,
-			offset: {
-				x: 0,
-				y: 0
-			}
-		});
-	}
-	
-	$("#textModal").modal("hide");
-	$("#myText").val(null);
-});
 
 $("#uploadImageBtn").click(function() {
 	if ($("#url-tab").hasClass("active")) {
