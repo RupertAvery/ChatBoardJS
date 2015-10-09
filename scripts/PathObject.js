@@ -1,5 +1,6 @@
 function PathObject (svg, options) {
-	var pathData = [];
+	var pathData = [],
+		scaledPathData = [];
 	var minX = 9999, minY = 9999, maxX = 0, maxY = 0;
 
 	options.offset = options.offset || { x: 0, y: 0 };
@@ -13,19 +14,29 @@ function PathObject (svg, options) {
 
 	options.type = "path";
 
+	// var group = svg.append("g");
+	// var realPathObject = group.append("path")
+			// .attr("vector-effect", "non-scaling-stroke");
+
 	var pathObject = svg.append("path")
-			.attr("d", lineFunction(pathData))
 			.attr("vector-effect", "non-scaling-stroke");
 
+			
 	function applyAttributes() {
 		pathObject
 			.attr("stroke", options.color)
 			.attr("stroke-width", options.lineWeight)
 			.attr("fill", options.fill);
+		// realPathObject
+			// .attr("stroke", "red")
+			// .attr("stroke-width", options.lineWeight)
+			// .attr("fill", "none");
 	}
 
 	function transform() {
 		pathObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") translate(" + minX + " " + minY + ") scale(" + options.scale.x + " " + options.scale.y + ") translate(-" + minX + " -" + minY + ")");
+		scaledPathData = simplifyPath(transformToLocal(pathData), 1);
+//		realPathObject.attr("transform", "translate(" + options.offset.x + " " + options.offset.y + ") translate(" + minX + " " + minY + ") scale(" + options.scale.x + " " + options.scale.y + ") translate(-" + minX + " -" + minY + ")");
 	}
 	
 	minX = maxX = options.x;
@@ -34,10 +45,39 @@ function PathObject (svg, options) {
 	var origColor = options.color;
 
 	function addPoint(point) {
+		var origPath = [];
+		for(var i = 0; i < pathData.length; i++)
+		{
+			origPath.push({ x: pathData[i].x, y: pathData[i].y });
+		}
 		addPointInternal(point);
+		var newPath = simplifyPath(pathData, 1);
+		var diffPath = [];
+		for(var i = 0; i < newPath.length; i++)
+		{
+			if(origPath[i] === undefined || newPath[i].x !== origPath[i].x || newPath[i].y !== origPath[i].y) {
+				diffPath.push({index: i, x: newPath[i].x, y: newPath[i].y });
+			}
+		}
+		pathData = newPath;
 		pathObject.attr("d", lineFunction(pathData));
+		scaledPathData = simplifyPath(transformToLocal(pathData), 1);
+		return { length: newPath.length, points: diffPath };
+//		realPathObject.attr("d", lineFunction(pathData));
 	}
-
+	
+	function updatePoints(length, points) {
+		if(length < pathData.length) {
+			pathData.splice(length, pathData.length - length)
+		}		
+		for(var i = 0; i < points.length; i++)
+		{
+			pathData[points[i].index] = { x: points[i].x, y: points[i].y };
+		}
+		pathObject.attr("d", lineFunction(pathData));
+		scaledPathData = simplifyPath(transformToLocal(pathData), 1);
+	}
+	
 	function addPointInternal(point) {
 		if (point.x < minX) { minX = point.x; }; 
 		if (point.x > maxX) { maxX = point.x; };
@@ -46,12 +86,18 @@ function PathObject (svg, options) {
 		pathData.push(point);
 	}
 	
+	function addPointExternal(point) {
+		addPointInternal(point);
+		pathObject.attr("d", lineFunction(pathData));
+	}
+	
 	if(options.points)
 	{
 		for(var i = 0; i < options.points.length; i++) {
 			addPointInternal(options.points[i], true);
 		}
 		pathObject.attr("d", lineFunction(pathData));
+//		realPathObject.attr("d", lineFunction(pathData));
 	}
 
 	applyAttributes();
@@ -82,11 +128,24 @@ function PathObject (svg, options) {
 		}
 	}
 	
+	function transformToLocal(path)
+	{
+		var transformedPath = []
+		for(var i = 0; i < path.length; i++) {
+			var scaleOffsetX = minX + options.scale.x * (path[i].x - minX);
+			var scaleOffsetY = minY + options.scale.y * (path[i].y - minY);
+			transformedPath.push({ x: options.offset.x + scaleOffsetX, y: options.offset.y + scaleOffsetY });
+		}
+		return transformedPath;
+	}
+	
 	return {
 		type: 'path',
 		id: options.id,
 		options: options,
 		addPoint: addPoint,
+		addPointExternal: addPointExternal,
+		updatePoints: updatePoints,
 		update: function(newOptions) {
 			console.log(this);
 			options.color = newOptions.color || options.color;
@@ -105,26 +164,25 @@ function PathObject (svg, options) {
 			var rect = fixBounds(getExtents());
 			if(x >= rect.x1 && x <= rect.x2 && y >= rect.y1 && y <= rect.y2)
 			{
-				var scaleOffsetX = minX + options.scale.x * (pathData[0].x - minX);
-				var scaleOffsetY = minY + options.scale.y * (pathData[0].y - minY);
-				var _lastPoint = { x: options.offset.x + scaleOffsetX, y: options.offset.y + scaleOffsetY };
-
-				for(var i = 1; i < pathData.length; i++) {
-					var scaleOffsetX = minX + options.scale.x * (pathData[i].x - minX);
-					var scaleOffsetY = minY + options.scale.y * (pathData[i].y - minY);
-					var point = { x: options.offset.x + scaleOffsetX, y: options.offset.y + scaleOffsetY };
-
-					if(lineCircleCollide(point, _lastPoint, { x: x, y: y }, 5))
-					{
-						return true;
+				if(options.fill === 'none') {
+					for(var i = 1; i < scaledPathData.length; i++) {
+						if(lineCircleCollide(scaledPathData[i], scaledPathData[i - 1], { x: x, y: y }, 5))
+						{
+							return true;
+						}
 					}
-					_lastPoint = point;
-				}
 
-				return false;
+					return false;
+				} else {
+					return pointInPolygon({ x: x, y: y }, scaledPathData);
+				}
+					
 			}
 		},
 		isSelected: function() { return isSelected; },
+		arrayLength: function() {
+			return pathData.length;
+		},		
 		length: function() {
 			var _lastPoint = pathData[0];
 			var length = 0;
@@ -145,6 +203,7 @@ function PathObject (svg, options) {
 			pathObject.attr("opacity","1.0");
 		},
 		remove: function() {
+			//group.remove();
 			pathObject.remove();
 		},
 		move: function(x, y) {

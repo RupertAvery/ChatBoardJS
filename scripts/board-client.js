@@ -121,8 +121,12 @@ function WhiteBoard(d3, socket, elementId) {
 	})
 
 	socket.on('point', function (data){
-		objectManager.getObject(data.id).addPoint(data.point);
+		objectManager.getObject(data.id).addPointExternal(data.point);
 	})
+	
+	socket.on('update-points', function (data){
+		objectManager.getObject(data.id).updatePoints(data.diff.length, data.diff.points);
+	})	
 	
 	socket.on('update', function (data){
 		if(Array.isArray(data.id)) {
@@ -297,11 +301,10 @@ function WhiteBoard(d3, socket, elementId) {
 		{
 			switch (selectedTool) {
 			case "pen":
-				if (currentSelection && currentSelection.type == 'path')
-				{
-					currentSelection.addPoint(m);
+				if (currentSelection && currentSelection.type == 'path') {
+					var diff = currentSelection.addPoint(m);
+					socket.emit('update-points', { id: currentSelection.id, diff: diff });
 				}
-				socket.emit('point', { id: currentSelection.id, point: m });
 				break;
 			case "line":
 				preDrawObject.attr("x2", m.x).attr("y2", m.y);

@@ -9,7 +9,7 @@ function Board(boardname) {
 	var images = {};
 	var polls = {};
 	
-	var commands = [ 'chat', 'path', 'line', 'ellipse', 'rectangle', 'point', 'move', 'scale', 'remove', 'image', 'text', 'transform', 'update' ];
+	var commands = [ 'chat', 'path', 'line', 'ellipse', 'rectangle', 'point', 'move', 'scale', 'remove', 'image', 'text', 'transform', 'update', 'update-points', 'points' ];
 
 	function getImage(imgid) {
 		return images[imgid];
@@ -43,7 +43,10 @@ function Board(boardname) {
 				updateObject(objects[data.id], user.name, data.attributes);
 			}
 		},
-		'path' : handleObject,
+		'path' : function (user, data) {
+			handleObject(user, data);
+			objects[data.id].points = [];
+		},
 		'line' : handleObject,
 		'ellipse' : handleObject,
 		'rectangle' : handleObject,
@@ -63,8 +66,16 @@ function Board(boardname) {
 		},
 		'text'  : handleObject,
 		'point' : function(user, data) {
-			objects[data.id].points = objects[data.id].points || [];
 			objects[data.id].points.push(data.point);
+		}, 
+		'update-points' : function(user, data) {
+			if(data.diff.length < objects[data.id].points.length) {
+				objects[data.id].points.splice(data.diff.length, objects[data.id].points.length - data.diff.length)
+			}
+			for(var i = 0; i < data.diff.points.length; i++) {
+				var point = data.diff.points[i];
+				objects[data.id].points[point.index] = { x: point.x, y: point.y };
+			}
 		},
 		'move'  : function(user, data) {
 			if (Array.isArray(data.id)) {
