@@ -1,0 +1,34 @@
+{
+  "name": "chatboard",
+  "version": "1.0.0",
+  "description": "Chat and interactive whiteboard",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.13.3",
+    "express-favicon": "^1.0.1",
+    "html-entities": "^1.1.3",
+    "ms": "^0.7.1",
+    "optimist": "^0.6.1",
+    "socket.io": "^1.3.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RupertAvery/ChatBoard.git"
+  },
+  "keywords": [
+    "chat",
+    "whiteboard",
+    "sockets.io"
+  ],
+  "author": "RupertAvery",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RupertAvery/ChatBoard/issues"
+  },
+  "homepage": "https://github.com/RupertAvery/ChatBoard#readme"
+}

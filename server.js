@@ -8,19 +8,21 @@ var Entities = require('html-entities').AllHtmlEntities;
 var entities = new Entities();
 var server = app.listen(argv.port || 9000);
 
+var __webroot = __dirname + '/web';
+
 var io = require('socket.io').listen(server);
 
 app.get("/", function(req, res) {
-	res.sendFile(__dirname + '/index.html');
+	res.sendFile(__webroot + '/index.html');
 })
 
 app.get("/reload", function(req, res) {
 	Board = require("./board-server.js");
-	res.sendFile(__dirname + '/index.html');
+	res.sendFile(__webroot + '/index.html');
 })
 
 app.get("/board", function(req, res) {
-	res.sendFile(__dirname + '/board.html');
+	res.sendFile(__webroot + '/board.html');
 })
 
 function clean(data) {
@@ -28,16 +30,16 @@ function clean(data) {
 }
 
 app.get('/scripts/fb.js', function(req, res) {
-	var data = fs.readFileSync(__dirname + '/scripts/fb.js', 'utf8');
+	var data = fs.readFileSync(__webroot + '/scripts/fb.js', 'utf8');
 	res.write(data.replace("%appId%", argv.appId));
 	res.end();
 })
 
-app.use('/fonts', express.static( __dirname + '/fonts', { dotfiles: 'allow', maxAge: ms('30 days') }));
 app.use('/common', express.static( __dirname + '/common', { maxAge: ms('30 days') }));
-app.use('/scripts', express.static( __dirname + '/scripts', { maxAge: ms('30 days') }));
-app.use('/css', express.static( __dirname + '/css', { dotfiles: 'allow', maxAge: ms('30 days') }));
-app.use('/images', express.static( __dirname + '/images', { maxAge: ms('30 days') }));
+app.use('/fonts', express.static( __webroot + '/fonts', { dotfiles: 'allow', maxAge: ms('30 days') }));
+app.use('/scripts', express.static( __webroot + '/scripts', { maxAge: ms('30 days') }));
+app.use('/css', express.static( __webroot + '/css', { dotfiles: 'allow', maxAge: ms('30 days') }));
+app.use('/images', express.static( __webroot + '/images', { maxAge: ms('30 days') }));
 
 app.get(/\/images\/*/, function(req, res) {
 	if(req.query.board) {
@@ -61,7 +63,7 @@ app.get(/\/images\/*/, function(req, res) {
 
 
 app.get('*', function(req, res){
-  res.status(404).sendFile(__dirname + '/notfound.html');
+  res.status(404).sendFile(__webroot + '/notfound.html');
 });
 
 function BoardManager() {
