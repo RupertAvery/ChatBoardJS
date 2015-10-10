@@ -548,6 +548,8 @@ function WhiteBoard(d3, socket, elementId) {
 						}						
 					}
 				}
+				_callbacks.onselect(currentSelection);		
+				
 				createResizeHandler();
 			}
 		}
@@ -822,6 +824,9 @@ function WhiteBoard(d3, socket, elementId) {
 		},
 		getSelection: function() {
 			return currentSelection;
+		},
+		onselect: function(callback) {
+			_callbacks.onselect = callback;
 		},
 		removeSelected: removeSelected,
 		deselectAll: objectManager.deselectAll,

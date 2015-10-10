@@ -115,29 +115,12 @@ $('#fillPicker').spectrum({
 });
 
 
-$("#red").click(function() {
-	board.selectColor("red");
-	$('#colorPicker').children('span').css("background-color", "red");
-});
-
-$("#green").click(function() {
-	board.selectColor("green");
-	$('#colorPicker').children('span').css("background-color", "green");
-});
-
-$("#blue").click(function() {
-	board.selectColor("blue");
-	$('#colorPicker').children('span').css("background-color", "blue");
-});
-
-$("#black").click(function() {
-	board.selectColor("black");
-	$('#colorPicker').children('span').css("background-color", "black");
-});
-
-$("#yellow").click(function() {
-	board.selectColor("yellow");
-	$('#colorPicker').children('span').css("background-color", "yellow");
+['black', 'white', 'red', 'green', 'blue', 'yellow'].forEach(function(color) {
+	$("#" + color).click(function() {
+		board.selectColor(color);
+		$('#colorPicker').children('span').css("background-color", color);
+		$('#colorPicker').spectrum("set", color);
+	});
 });
 
 $("#penTool").click(function() {
@@ -294,6 +277,24 @@ function loadImage(url) {
 	preloadImg.src = url;
 }
 
+board.onselect(function(selection) {
+	if(Array.isArray(selection)) {
+		
+	} else {
+		$('#colorPicker').children('span').css("background-color", selection.options.color);
+		$('#colorPicker').spectrum("set", selection.options.color);
+		board.selectColor(selection.options.color);
+		if (!selection.options.fill || selection.options.fill == "none") {
+			board.selectFill("none");
+			$('#fillPicker').children('span').css("background-color", "").css("background", "url(./images/no-color.png) -1px -1px no-repeat no-repeat");
+			$('#fillPicker').spectrum("set", null);
+		} else {
+			board.selectFill(selection.options.fill);
+			$('#fillPicker').children('span').css("background", "").css("background-color", selection.options.fill);
+			$('#fillPicker').spectrum("set", selection.options.fill)
+		}
+	}
+})
 
 $("#uploadImageBtn").click(function() {
 	if ($("#url-tab").hasClass("active")) {
@@ -356,11 +357,16 @@ var hiddenInput = $('#hiddentext');
 				clipboardData.setData('text', selectedObjects.toString()); 
 			} else if (event === "paste") {
 				var items = clipboardData.items;
+				var item = null;
 				var found = false;
 				for (var i = 0; i < items.length; i++) {
-					switch(items[i].kind) {
+					item = items[i];
+				}
+				
+				if(item != null) {
+					switch(item.kind) {
 						case "file":
-							var blob = clipboardData.items[i].getAsFile();
+							var blob = item.getAsFile();
 							var reader = new FileReader();
 							reader.onload = function(evt){
 								loadImage(evt.target.result);
@@ -370,15 +376,14 @@ var hiddenInput = $('#hiddentext');
 							break;
 						case "string":
 							board.addText({
-								text: clipboardData.getData(items[i].type),
+								text: clipboardData.getData(item.type),
 								font: "Arial",
 								size: "12",
-								x: 0,
-								y: 0
+								x: 100,
+								y: 100
 							});
 							break;
 					}
-					if(found) break;
 				}
 			}
     });
