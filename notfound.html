@@ -4,7 +4,6 @@
  <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet" type="text/css">
  <link href="/css/site.css" rel="stylesheet" type="text/css">
  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
- <script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 </head>
 <body>
@@ -18,26 +17,8 @@
 </nav>
 
 <div class="content" style="text-align: center">
-<label for="name">Enter a Name for your new ChatBoard:</label> <input type="text" id="name" />
-<br/>
-<button class="btn" id="create">Create</button> 
-<br/>
+	<span class="error-message">Sorry, but I couldn't find what you were looking for</span>
 </div>
 
-<script>
-var socket = io.connect(window.location.origin);
-
-socket.on("created", function(data) {
-	window.location.href = "/board?id=" + data.id;
-});
-
-$("#create").click(function(){
-	var name = $('#name').val();
-	if(name && name.length >= 0) {
-		socket.emit("create", { name: name });
-	}
-});
-
-</script>
 </body>
 </html>

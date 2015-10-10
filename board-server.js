@@ -9,7 +9,12 @@ function Board(boardname) {
 	var images = {};
 	var polls = {};
 	
-	var commands = [ 'chat', 'path', 'line', 'ellipse', 'rectangle', 'point', 'move', 'scale', 'remove', 'image', 'text', 'transform', 'update', 'update-points', 'points' ];
+	var commands = [ 
+		'chat', 
+		'image', 'text', 'path', 'line', 'ellipse', 'rectangle', 'point', 
+		'move', 'scale', 'remove', 'transform', 
+		'update', 'update-points', 'points' 
+	];
 
 	function getImage(imgid) {
 		return images[imgid];
@@ -228,12 +233,23 @@ function Board(boardname) {
 	function isNotEmptyString(value){
 		return value !== "";
 	}
+
+	function isNotNullOrEmpty(value){
+		return isNotUndefinedOrNull(value) && isNotEmptyString(value);
+	}
 	
+	function areEqual(value1, value2){
+		return 
+			isNotNullOrEmpty(value1) && isNotNullOrEmpty(value2) &&
+			value1 === value2;
+	}
+
 	function userExists(data) {
 		if(users[data.id] !== undefined && users[data.id] !== null) return true;
 		for(var key in users) {
-			if(isNotUndefinedOrNull(users[key].facebookId) && users[key].facebookId === data.facebookId) return true;
-			if(isNotUndefinedOrNull(users[key].gravatarId) && isNotEmptyString(users[key].gravatarId) && users[key].gravatarId === data.gravatarId) return true;
+			if(areEqual(users[key].facebookId, data.facebookId)) return true;
+			if(areEqual(users[key].gravatarId, data.gravatarId)) return true;
+			if(areEqual(users[key].name, data.name)) return true;
 		}
 		return false;
 	}
@@ -248,9 +264,6 @@ function Board(boardname) {
 			var newUser = new User(data, socket); 
 			
 			users[newUser.id] = newUser;
-
-			console.log(socket.id + " joins board: " + name);
-
 			init_connection(socket, newUser);
 
 		} else {

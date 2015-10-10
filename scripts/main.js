@@ -350,8 +350,13 @@ var hiddenInput = $('#hiddentext');
 			hiddenInput.text(' ');
 			hiddenInput.focus().select();
 
-			if (event === "paste") {
-				var  items = clipboardData.items;
+			if (event === "copy") {
+				var selectedObjects = board.getSelection();
+				clipboardData.clearData();
+				clipboardData.setData('text', selectedObjects.toString()); 
+			} else if (event === "paste") {
+				var items = clipboardData.items;
+				var found = false;
 				for (var i = 0; i < items.length; i++) {
 					switch(items[i].kind) {
 						case "file":
@@ -361,21 +366,19 @@ var hiddenInput = $('#hiddentext');
 								loadImage(evt.target.result);
 							};
 							reader.readAsDataURL(blob);
+							found = true;
 							break;
 						case "string":
 							board.addText({
 								text: clipboardData.getData(items[i].type),
 								font: "Arial",
 								size: "12",
-								width: null,
-								height: null,
-								offset: {
-									x: 0,
-									y: 0
-								}
+								x: 0,
+								y: 0
 							});
 							break;
 					}
+					if(found) break;
 				}
 			}
     });

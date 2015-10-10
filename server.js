@@ -1,15 +1,21 @@
-var app = require("express")();
+var express = require("express");
+var ms = require("ms");
+var app = express();
 var argv = require("optimist").argv;
 var Board = require("./board-server.js");
 var fs = require("fs");
 var Entities = require('html-entities').AllHtmlEntities;
 var entities = new Entities();
-
 var server = app.listen(argv.port || 9000);
 
 var io = require('socket.io').listen(server);
 
 app.get("/", function(req, res) {
+	res.sendFile(__dirname + '/index.html');
+})
+
+app.get("/reload", function(req, res) {
+	Board = require("./board-server.js");
 	res.sendFile(__dirname + '/index.html');
 })
 
@@ -21,16 +27,17 @@ function clean(data) {
 	return entities.encode(data)
 }
 
-function serveStatic(req, res) {
-	console.log(req.originalUrl);
-	console.log(" => " + __dirname + req.path);
-	res.sendFile(__dirname + req.path);
-}
+app.get('/scripts/fb.js', function(req, res) {
+	var data = fs.readFileSync(__dirname + '/scripts/fb.js', 'utf8');
+	res.write(data.replace("%appId%", argv.appId));
+	res.end();
+})
 
-function ignoreRoute(url)
-{
-	app.get(url, serveStatic)
-}
+app.use('/fonts', express.static( __dirname + '/fonts', { dotfiles: 'allow', maxAge: ms('30 days') }));
+app.use('/common', express.static( __dirname + '/common', { maxAge: ms('30 days') }));
+app.use('/scripts', express.static( __dirname + '/scripts', { maxAge: ms('30 days') }));
+app.use('/css', express.static( __dirname + '/css', { dotfiles: 'allow', maxAge: ms('30 days') }));
+app.use('/images', express.static( __dirname + '/images', { maxAge: ms('30 days') }));
 
 app.get(/\/images\/*/, function(req, res) {
 	if(req.query.board) {
@@ -52,16 +59,10 @@ app.get(/\/images\/*/, function(req, res) {
 	}
 })
 
-app.get('/scripts/fb.js', function(req, res) {
-	var data = fs.readFileSync(__dirname + '/scripts/fb.js', 'utf8');
-	res.write(data.replace("%appId%", argv.appId));
-	res.end();
-})
 
-ignoreRoute(/\/common\/*/);
-ignoreRoute(/\/scripts\/*/);
-ignoreRoute(/\/css\/*/);
-ignoreRoute(/\/fonts\/*/);
+app.get('*', function(req, res){
+  res.status(404).sendFile(__dirname + '/notfound.html');
+});
 
 function BoardManager() {
 	var boards = {};
