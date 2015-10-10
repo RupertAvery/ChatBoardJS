@@ -583,10 +583,73 @@ function WhiteBoard(d3, socket, elementId) {
 					lines[currentline].span.text(t);
 				} else {
 					if(currentline > 0) {
+						var temp = lines[currentline].text;
 						lines[currentline].span.remove();
-						for(var i = currentline; i < lines.length - 1; i++) {
-							lines[i] = lines[i + 1];
+						currentline--;
+						insertionpoint = lines[currentline].text.length; 
+						lines[currentline].text += temp;
+						offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
+						offsety -= 1.25 * size;
+						cursor
+						.attr("x1", x + offsetx)
+						.attr("y1", offsety + y + fontext.descent)
+						.attr("x2", x + offsetx)
+						.attr("y2", offsety + y - fontext.height);
+						var t = "";
+						if(lines[currentline].text == "" ) {
+							t = " ";
+						} else  {
+							t = lines[currentline].text;	
 						}
+						lines[currentline].span.text(t);
+						
+						lines.splice(currentline + 1, 1);
+					}
+				}
+			},
+			up: function() {
+				if(currentline > 0) {
+					currentline--;
+					if(insertionpoint > lines[currentline].text.length)
+					{
+						insertionpoint = lines[currentline].text.length;
+					}
+					offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
+					offsety -= 1.25 * size;
+					cursor
+					.attr("x1", x + offsetx)
+					.attr("y1", offsety + y + fontext.descent)
+					.attr("x2", x + offsetx)
+					.attr("y2", offsety + y - fontext.height);
+				}
+			},
+			down: function() {
+				if(currentline < lines.length - 1) {
+					currentline++;
+					if(insertionpoint > lines[currentline].text.length)
+					{
+						insertionpoint = lines[currentline].text.length;
+					}
+					offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
+					offsety += 1.25 * size;
+					cursor
+					.attr("x1", x + offsetx)
+					.attr("y1", offsety + y + fontext.descent)
+					.attr("x2", x + offsetx)
+					.attr("y2", offsety + y - fontext.height);
+				}
+			},
+			left: function() {
+				if(insertionpoint > 0) {
+					insertionpoint--;
+					offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
+					cursor
+					.attr("x1", x + offsetx)
+					.attr("y1", offsety + y + fontext.descent)
+					.attr("x2", x + offsetx)
+					.attr("y2", offsety + y - fontext.height);
+				} else {
+					if(currentline > 0) {
 						currentline--;
 						insertionpoint = lines[currentline].text.length; 
 						offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
@@ -599,23 +662,6 @@ function WhiteBoard(d3, socket, elementId) {
 					}
 				}
 			},
-			up: function() {
-				
-			},
-			down: function() {
-				
-			},
-			left: function() {
-				if(insertionpoint > 0) {
-					insertionpoint--;
-					offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
-					cursor
-					.attr("x1", x + offsetx)
-					.attr("y1", offsety + y + fontext.descent)
-					.attr("x2", x + offsetx)
-					.attr("y2", offsety + y - fontext.height);
-				}
-			},
 			right: function() {
 				if(insertionpoint < lines[currentline].text.length) {
 					insertionpoint++;
@@ -625,6 +671,18 @@ function WhiteBoard(d3, socket, elementId) {
 					.attr("y1", offsety + y + fontext.descent)
 					.attr("x2", x + offsetx)
 					.attr("y2", offsety + y - fontext.height);
+				} else {
+					if(currentline < lines.length - 1) {
+						currentline++;
+						insertionpoint = 0; 
+						offsetx = 0;
+						offsety += 1.25 * size;
+						cursor
+						.attr("x1", x + offsetx)
+						.attr("y1", offsety + y + fontext.descent)
+						.attr("x2", x + offsetx)
+						.attr("y2", offsety + y - fontext.height);
+					}
 				}
 			},
 			del: function() {
@@ -643,6 +701,26 @@ function WhiteBoard(d3, socket, elementId) {
 						t = lines[currentline].text;	
 					}
 					lines[currentline].span.text(t);
+				} else {
+					if(currentline + 1 < lines.length) {
+						var temp = lines[currentline + 1].text;
+						lines[currentline + 1].span.remove();
+						lines[currentline].text += temp;
+						offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
+						cursor
+						.attr("x1", x + offsetx)
+						.attr("y1", offsety + y + fontext.descent)
+						.attr("x2", x + offsetx)
+						.attr("y2", offsety + y - fontext.height);
+						var t = "";
+						if(lines[currentline].text == "" ) {
+							t = " ";
+						} else  {
+							t = lines[currentline].text;	
+						}
+						lines[currentline].span.text(t);
+						lines.splice(currentline + 1, 1);
+					}
 				}
 			},
 			remove: function() {
@@ -656,7 +734,7 @@ function WhiteBoard(d3, socket, elementId) {
 				var hit = false;
 				for(var i = 0; i < lines.length; i++) {
 					var width = getTextSize(lines[i].text, size + "px " + font).width;
-					if(ex >= x && ex <= x + width && ey >= y + eoffsety && ey <= y + eoffsety + fontext.height) {
+					if(ey >= y + eoffsety - fontext.height && ey <= y + eoffsety ) {
 						currentline = i;
 						hit = true;
 						break;
@@ -667,6 +745,7 @@ function WhiteBoard(d3, socket, elementId) {
 				if(hit ) {
 					offsety = eoffsety;
 					lastoffsetx = 0;
+					hit = false;
 					for(var j = 0; j < lines[currentline].text.length; j++)
 					{
 						var subtext = lines[currentline].text.substring(0, j);
@@ -678,10 +757,22 @@ function WhiteBoard(d3, socket, elementId) {
 							.attr("x1", x + offsetx)
 							.attr("y1", offsety + y + fontext.descent)
 							.attr("x2", x + offsetx)
-							.attr("y2", offsety + y - fontext.height);				
+							.attr("y2", offsety + y - fontext.height);
+							hit = true;
 							break;
 						}
 						lastoffsetx = offsetx;
+					}
+					if(!hit) {
+						insertionpoint = lines[currentline].text.length;
+						var subtext = lines[currentline].text.substring(0, insertionpoint);
+						offsetx = getTextSize(subtext, size + "px " + font).width;
+						cursor
+						.attr("x1", x + offsetx)
+						.attr("y1", offsety + y + fontext.descent)
+						.attr("x2", x + offsetx)
+						.attr("y2", offsety + y - fontext.height);
+						
 					}
 					
 					
@@ -690,6 +781,15 @@ function WhiteBoard(d3, socket, elementId) {
 			},
 			type: function(key) {
 				if(key == 13) {
+					var temp = lines[currentline].text.substring(insertionpoint);
+					lines[currentline].text = lines[currentline].text.splice(insertionpoint, temp.length);
+					var t = "";
+					if(lines[currentline].text == "" ) {
+						t = " ";
+					} else  {
+						t = lines[currentline].text;	
+					}
+					lines[currentline].span.text(t);
 					currentline++;
 					for(var i = lines.length; i > currentline; i--) {
 						lines[i] = lines[i-1];
@@ -699,14 +799,14 @@ function WhiteBoard(d3, socket, elementId) {
 							span: textObject.insert("tspan", ":nth-child(" + (currentline  + 1) + ")")
 								.attr("x", x)
 								.attr("dy", "1.25em"),
-							text: ""
+							text: temp
 						};
 					} else {
 						lines[currentline] = { 
 							span: textObject.append("tspan")
 								.attr("x", x)
 								.attr("dy", "1.25em"),
-							text: ""
+							text: temp
 						};
 					}
 					insertionpoint = 0;
