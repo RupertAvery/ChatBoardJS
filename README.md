@@ -1,6 +1,6 @@
 ## ChatBoard
 
-ChatBoard is a chat room and interactive whiteboard application built with NodeJS, d3.js, and jQuery.
+ChatBoard is a chat room and interactive whiteboard application built with NodeJS, socket.io, d3.js, and jQuery.
 
 ### Usage
 
@@ -21,27 +21,29 @@ You may also choose to login using Facebook.  The test AppID only works with the
 ### Features
 
 * Real-time chat
+ * Emoticons
 * Real-time interactive whiteboard
- * Lines (Any colors, using a color selector or a set of predefined colors, 4 selectable widths)
+ * Shapes
+  * Paths
+  * Circles
+  * Squares
+  * Rectangles
+  * Lines
+ * Line color and fill color
  * Text
  * Images (upload from local or from an URL)
- * Selection (single or multiple using a selection rectangle)
+ * Selection
  * Scaling of selected objects
- * Moving (move single or multiple objects)
- * Paste (currently only paste text and images in clipboard via Ctrl-V)
- * Eraser
- * Delete (remove currently selected objects from whiteboard by pressing the Delete key)
- 
+ * Moving
+ * Paste clipboard contents (text and image)
+
 ### Planned features
 
-* More shapes (circle, rectangle, straight lines)
-* Text editing and styles
 * UI improvements
 * Rich text in chat
-* Emoticons
 * Auto-parsing of pasted URLs in chat to links with previews?
 * Remove ability to inject HTML/scripting in chat
-* Chatboard management?
+* Chatboard management
 
 ### Notes
 * Boards and images uploaded to them are currently persited in memory.
