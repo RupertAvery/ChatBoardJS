@@ -341,6 +341,7 @@ $(window).bind('beforeunload', function(){
 });
 
 var hiddenInput = $('#hiddentext');
+var fragmentPattern = /^<html><body><!--StartFragment-->.*<!--EndFragment--><\/body><\/html>$/i;
 
 ['cut', 'copy', 'paste'].forEach(function(event) {
     document.addEventListener(event, function(e) {
@@ -358,7 +359,6 @@ var hiddenInput = $('#hiddentext');
 			} else if (event === "paste") {
 				var items = clipboardData.items;
 				var item = null;
-				var found = false;
 				for (var i = 0; i < items.length; i++) {
 					item = items[i];
 				}
@@ -372,11 +372,14 @@ var hiddenInput = $('#hiddentext');
 								loadImage(evt.target.result);
 							};
 							reader.readAsDataURL(blob);
-							found = true;
 							break;
 						case "string":
+							var text = clipboardData.getData(item.type);
+							if(fragmentPattern.test(text)) {
+								text = $(text).text();
+							}
 							board.addText({
-								text: clipboardData.getData(item.type),
+								text: text,
 								font: "Arial",
 								size: "12",
 								x: 100,
