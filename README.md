@@ -2,6 +2,8 @@
 
 ChatBoard is a chat room and interactive whiteboard application built with NodeJS, socket.io, d3.js, and jQuery.
 
+![image](https://cloud.githubusercontent.com/assets/1910659/10409108/4e0bbb46-6f44-11e5-8f46-e038dc2b5a57.png)
+
 ### Usage
 
 To start the chatboard server, run the following from a command line, or use NSSM to install as a service on a Windows machine.
