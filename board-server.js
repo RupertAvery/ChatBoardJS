@@ -49,7 +49,22 @@ function Board(boardname) {
 			}
 		},
 		'update-text': function(user, data) {
-			objects[data.id].lines[data.line].text = data.text;
+			var object = objects[data.id];
+			for(var i = 0; i < data.changes.length; i++)
+			{
+				var change = data.changes[i];
+				switch(change.type) {
+				case 'insert':
+					object.lines.splice(change.line, 0, change.text);
+					break;
+				case 'update':
+					object.lines[change.line] = change.text;
+					break;
+				case 'delete':
+					object.lines.splice(change.line, 1);
+					break;
+				}
+			}
 		},		
 		'path' : function (user, data) {
 			handleObject(user, data);
@@ -72,7 +87,10 @@ function Board(boardname) {
 			}
 			handleObject(user, data);
 		},
-		'text'  : handleObject,
+		'text' : function (user, data) {
+			handleObject(user, data);
+			objects[data.id].lines = [];
+		},
 		'point' : function(user, data) {
 			objects[data.id].points.push(data.point);
 		}, 

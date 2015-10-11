@@ -55,15 +55,15 @@ function WhiteBoard(d3, socket, elementId) {
 	var selectedFill = "none";
 
 	var svg = d3.select(boardId)
-				.append("svg")
-				.attr("class", "noselect")
-				.attr("oncontextmenu", "return false")
-				.attr("width", 1920)
-				.attr("height", 1080)
-				.on("mousemove", mouseMove)
-				.on("mousedown", mouseDown)
-				.on("dblclick", dblClick)
-				.on("mouseup", mouseUp);
+		.append("svg")
+		.attr("class", "noselect")
+		.attr("oncontextmenu", "return false")
+		.attr("width", 1920)
+		.attr("height", 1080)
+		.on("mousemove", mouseMove)
+		.on("mousedown", mouseDown)
+		.on("dblclick", dblClick)
+		.on("mouseup", mouseUp);
 
 	var objectManager = new ObjectManager();
 	
@@ -80,37 +80,34 @@ function WhiteBoard(d3, socket, elementId) {
 		cKey = 67, 
 		deleteKey = 46;
 
-	var textCallback = function(data) {
-		socket.emit("update-text", data);
-	}
-		
+	
 	$(boardId).on("keydown", function () {
 		event.preventDefault();
 		var key = event.which || event.keyCode;
 		switch(key) {
 		case bkspKey:
-			if(textCursor!=null) {
-				textCursor.back();
+			if(textEditor!=null) {
+				textEditor.back();
 			}
 			break;
 		case upKey:
-			if(textCursor!=null) {
-				textCursor.up();
+			if(textEditor!=null) {
+				textEditor.up();
 			}
 			break;
 		case downKey:
-			if(textCursor!=null) {
-				textCursor.down();
+			if(textEditor!=null) {
+				textEditor.down();
 			}
 			break;
 		case leftKey:
-			if(textCursor!=null) {
-				textCursor.left();
+			if(textEditor!=null) {
+				textEditor.left();
 			}
 			break;
 		case rightKey:
-			if(textCursor!=null) {
-				textCursor.right();
+			if(textEditor!=null) {
+				textEditor.right();
 			}
 			break;
 		case ctrlKey:
@@ -120,15 +117,15 @@ function WhiteBoard(d3, socket, elementId) {
 			shiftDown = true;
 			break;
 		case deleteKey:
-			if(textCursor!=null) {
-				textCursor.del();
+			if(textEditor!=null) {
+				textEditor.del();
 			}else {
 				removeSelected();
 			}
 			break;
 		default: 
-			if(textCursor!=null) {
-				textCursor.type(shiftDown, key);
+			if(textEditor!=null) {
+				textEditor.type(shiftDown, key);
 			}
 		}
 	})
@@ -487,7 +484,7 @@ function WhiteBoard(d3, socket, elementId) {
 		
 	}
 
-	var textCursor = null;
+	var textEditor = null;
 	
 	
 	/***********************************
@@ -513,8 +510,9 @@ function WhiteBoard(d3, socket, elementId) {
 			});
 			break;
 		case "text": 
-			if(textCursor) {
-				textCursor.remove();
+			if(textEditor) {
+				textEditor.remove();
+				textEditor = null;
 			}
 			
 			if(currentSelection && currentSelection.type == 'text') {
@@ -522,14 +520,17 @@ function WhiteBoard(d3, socket, elementId) {
 				{
 					currentSelection.remove();
 					objectManager.remove(currentSelection.id);		
+					socket.emit('remove', { id: currentSelection.id });
 				}
 			}
 			
 			var selection = objectManager.getObjectAtPoint(m);
 			
 			if(selection && selection.type == 'text') {
-				textCursor = new TextCursor(svg, selection, textCallback);
-				textCursor.setOffset(selection.editor.edit(m.x, m.y));
+				textEditor = new TextEditor(svg, selection, function(data){
+					socket.emit("update-text", data);
+				});
+				textEditor.edit(m.x, m.y);
 				currentSelection = selection;
 			} else {
 				var newObject = new TextObject(svg, { 
@@ -541,8 +542,10 @@ function WhiteBoard(d3, socket, elementId) {
 					color: selectedColor,
 				});				
 				objectManager.add(newObject);
-				socket.emit('text', newObject.options);				
-				textCursor = new TextCursor(svg, newObject, textCallback);
+				socket.emit('text', newObject.options);
+				textEditor = new TextEditor(svg, newObject, function(data){
+					socket.emit("update-text", data);
+				});
 				currentSelection = newObject;
 			}
 			//_fnCreateText(null, m.x, m.y);
@@ -803,15 +806,16 @@ function WhiteBoard(d3, socket, elementId) {
 		}
 		setCursor(tool);
 		selectedTool = tool;
-		if(textCursor) {
-			textCursor.remove();
-			textCursor = null;
+		if(textEditor) {
+			textEditor.remove();
+			textEditor = null;
 		}
 		if(currentSelection && currentSelection.type == 'text') {
 			if(currentSelection.isEmpty())
 			{
 				currentSelection.remove();
 				objectManager.remove(currentSelection.id);		
+				socket.emit('remove', { id: currentSelection.id });
 			}
 		}
 	}

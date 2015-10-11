@@ -1,16 +1,19 @@
-function TextCursor(svg, textObject, textCallback) {
-
-		var fontMetrics = textObject.options.fontMetrics;
-		var x = textObject.options.offset.x + textObject.options.x;
-		var y = textObject.options.offset.y + textObject.options.y;
-	
-		var offsetx = 0, offsety = 0
-		
+/*
+	@name:
+		TextCursor
+	@description:
+		Creates a cursor for editing a TextObject and manages its position.
+	@parameters:
+		svg - the d3 svg that the cursor will be created on
+		textObject - the TextObject instance that will be edited
+		textEdit - the TextEditor instance
+*/
+function TextCursor(svg, x, y, fontMetrics) {
+		var timeout1 = null, timeout2 = null;
 		var cursor = svg.append("line")
 			.attr("stroke", "black");
-			
-		var offsety = 0;
-		var timeout1 = null, timeout2 = null;
+		
+		// show and hide facilitates the blinkyness of the cursor
 		function show() {
 			if(cursor) {
 				cursor.attr("style", "visibility: visible");
@@ -25,78 +28,26 @@ function TextCursor(svg, textObject, textCallback) {
 			}
 		}
 		
+		// Start blinking!
 		show();
-
 		
-		function updateCursorPosition() {
+		function setOffset(px, py) {
 			cursor
-				.attr("x1", x + offsetx)
-				.attr("y1", offsety + y + fontMetrics.descent)
-				.attr("x2", x + offsetx)
-				.attr("y2", offsety + y - fontMetrics.height);
+				.attr("x1", x + px)
+				.attr("y1", y + py + fontMetrics.descent)
+				.attr("x2", x + px)
+				.attr("y2", y + py - fontMetrics.height);
 		}
 		
-		updateCursorPosition();
+		setOffset(0, 0);
 		
 		return {
-			setOffset: function(offset) {
-				offsetx = offset.x;
-				offsety = offset.y;
-				updateCursorPosition();
-			},
+			setOffset: setOffset,
 			remove: function() {
 				clearTimeout(timeout1);
 				clearTimeout(timeout2);
 				cursor.remove();
 				cursor = null;
-			},
-			back: function() {
-				var offset = textObject.editor.back();
-				offsetx = offset.x;
-				offsety += offset.y;
-				updateCursorPosition();	
-				textCallback(offset);
-			},
-			up: function() {
-				var offset = textObject.editor.up();
-				offsetx = offset.x;
-				offsety += offset.y;
-				updateCursorPosition();				
-			},
-			down: function() {
-				var offset = textObject.editor.down();
-				offsetx = offset.x;
-				offsety += offset.y;
-				updateCursorPosition();				
-			},
-			left: function() {
-				var offset = textObject.editor.left();
-				offsetx = offset.x;
-				offsety += offset.y;
-				updateCursorPosition();				
-			},
-			right: function() {
-				var offset = textObject.editor.right();
-				offsetx = offset.x;
-				offsety += offset.y;
-				updateCursorPosition();				
-			},
-			del: function() {
-				var offset = textObject.editor.del();
-				offsetx = offset.x;
-				offsety += offset.y;
-				updateCursorPosition();				
-				textCallback(offset);
-			},
-			edit: function(ex, ey) {
-				textObject.editor.edit(ex, ey);
-			},
-			type: function(shiftDown, key) {
-				var offset = textObject.editor.type(shiftDown, key);
-				offsetx = offset.x;
-				offsety += offset.y;
-				updateCursorPosition();				
-				textCallback(offset);
 			}
 		}
 	}
