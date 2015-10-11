@@ -80,33 +80,37 @@ function WhiteBoard(d3, socket, elementId) {
 		cKey = 67, 
 		deleteKey = 46;
 
+	var textCallback = function(data) {
+		socket.emit("update-text", data);
+	}
+		
 	$(boardId).on("keydown", function () {
 		event.preventDefault();
 		var key = event.which || event.keyCode;
 		switch(key) {
 		case bkspKey:
-			if(cursor!=null) {
-				cursor.back();
+			if(textCursor!=null) {
+				textCursor.back();
 			}
 			break;
 		case upKey:
-			if(cursor!=null) {
-				cursor.up();
+			if(textCursor!=null) {
+				textCursor.up();
 			}
 			break;
 		case downKey:
-			if(cursor!=null) {
-				cursor.down();
+			if(textCursor!=null) {
+				textCursor.down();
 			}
 			break;
 		case leftKey:
-			if(cursor!=null) {
-				cursor.left();
+			if(textCursor!=null) {
+				textCursor.left();
 			}
 			break;
 		case rightKey:
-			if(cursor!=null) {
-				cursor.right();
+			if(textCursor!=null) {
+				textCursor.right();
 			}
 			break;
 		case ctrlKey:
@@ -116,15 +120,15 @@ function WhiteBoard(d3, socket, elementId) {
 			shiftDown = true;
 			break;
 		case deleteKey:
-			if(cursor!=null) {
-				cursor.del();
+			if(textCursor!=null) {
+				textCursor.del();
 			}else {
 				removeSelected();
 			}
 			break;
 		default: 
-			if(cursor!=null) {
-				cursor.type(key);
+			if(textCursor!=null) {
+				textCursor.type(shiftDown, key);
 			}
 		}
 	})
@@ -170,6 +174,10 @@ function WhiteBoard(d3, socket, elementId) {
 	
 	socket.on('update-points', function (data){
 		objectManager.getObject(data.id).updatePoints(data.diff.length, data.diff.points);
+	})
+	
+	socket.on('update-text', function (data){
+		objectManager.getObject(data.id).updateText(data);
 	})	
 	
 	socket.on('update', function (data){
@@ -479,359 +487,8 @@ function WhiteBoard(d3, socket, elementId) {
 		
 	}
 
-	String.prototype.splice = function( idx, rem, s ) {
-		return (this.slice(0,idx) + (!!s ? s : "") + this.slice(idx + Math.abs(rem)));
-	};
-
-	var cursor = null;
+	var textCursor = null;
 	
-	function Cursor(x, y) {
-		var font = "Arial", size = 16;
-		var fontext = getTextHeight(font, size + "px");		
-		var offsetx = 0, offsety = 0, insertionpoint = 0;
-		
-		var cursor = svg.append("line")
-			.attr("x1", x)
-			.attr("y1", y + fontext.descent)
-			.attr("x2", x)
-			.attr("y2", y - fontext.height)
-			.attr("stroke", "black");
-			
-		var offsety = 0;
-		var timeout1 = null, timeout2 = null;
-		function show() {
-			if(cursor) {
-				cursor.attr("style", "visibility: visible");
-				timeout1 = setTimeout(hide, 500);
-			}
-		}
-			
-		function hide() {
-			if(cursor) {
-				cursor.attr("style", "visibility: hidden");
-				timeout2 = setTimeout(show, 200);
-			}
-		}
-		
-		show();
-		
-		function getTextSize(text, font) {
-			// re-use canvas object for better performance
-			var canvas = getTextSize.canvas || (getTextSize.canvas = document.createElement("canvas"));
-			var context = canvas.getContext("2d");
-			context.font = font;
-			return context.measureText(text);
-		};
-		
-		function getTextHeight(font, size) {
-
-		  var text = $('<span>Hg</span>').css({ fontFamily: font, fontSize: size });
-		  var block = $('<div style="display: inline-block; width: 1px; height: 0px;"></div>');
-
-		  var div = $('<div></div>');
-		  div.append(text, block);
-
-		  var body = $('body');
-		  body.append(div);
-
-		  try {
-
-			var result = {};
-
-			block.css({ verticalAlign: 'baseline' });
-			result.ascent = block.offset().top - text.offset().top;
-
-			block.css({ verticalAlign: 'bottom' });
-			result.height = block.offset().top - text.offset().top;
-
-			result.descent = result.height - result.ascent;
-
-		  } finally {
-			div.remove();
-		  }
-
-		  return result;
-		};		
-
-		var lines = [];
-		var currentline = 0;
-		
-		var textObject = svg.append("text")
-			.attr("font-family", font)
-			.attr("font-size", size + "px")
-			.attr("x", x)
-			.attr("y", y)
-			.attr("xml:space","preserve");
-		lines[currentline] = { span: textObject.append("tspan"), text: "" };
-		
-		return {
-			back: function() {
-				if(insertionpoint > 0) {
-					lines[currentline].text = lines[currentline].text.splice(--insertionpoint, 1);
-					offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
-					cursor
-					.attr("x1", x + offsetx)
-					.attr("y1", offsety + y + fontext.descent)
-					.attr("x2", x + offsetx)
-					.attr("y2", offsety + y - fontext.height);
-					var t = "";
-					if(lines[currentline].text == "" ) {
-						t = " ";
-					} else  {
-						t = lines[currentline].text;	
-					}
-					lines[currentline].span.text(t);
-				} else {
-					if(currentline > 0) {
-						var temp = lines[currentline].text;
-						lines[currentline].span.remove();
-						currentline--;
-						insertionpoint = lines[currentline].text.length; 
-						lines[currentline].text += temp;
-						offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
-						offsety -= 1.25 * size;
-						cursor
-						.attr("x1", x + offsetx)
-						.attr("y1", offsety + y + fontext.descent)
-						.attr("x2", x + offsetx)
-						.attr("y2", offsety + y - fontext.height);
-						var t = "";
-						if(lines[currentline].text == "" ) {
-							t = " ";
-						} else  {
-							t = lines[currentline].text;	
-						}
-						lines[currentline].span.text(t);
-						
-						lines.splice(currentline + 1, 1);
-					}
-				}
-			},
-			up: function() {
-				if(currentline > 0) {
-					currentline--;
-					if(insertionpoint > lines[currentline].text.length)
-					{
-						insertionpoint = lines[currentline].text.length;
-					}
-					offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
-					offsety -= 1.25 * size;
-					cursor
-					.attr("x1", x + offsetx)
-					.attr("y1", offsety + y + fontext.descent)
-					.attr("x2", x + offsetx)
-					.attr("y2", offsety + y - fontext.height);
-				}
-			},
-			down: function() {
-				if(currentline < lines.length - 1) {
-					currentline++;
-					if(insertionpoint > lines[currentline].text.length)
-					{
-						insertionpoint = lines[currentline].text.length;
-					}
-					offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
-					offsety += 1.25 * size;
-					cursor
-					.attr("x1", x + offsetx)
-					.attr("y1", offsety + y + fontext.descent)
-					.attr("x2", x + offsetx)
-					.attr("y2", offsety + y - fontext.height);
-				}
-			},
-			left: function() {
-				if(insertionpoint > 0) {
-					insertionpoint--;
-					offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
-					cursor
-					.attr("x1", x + offsetx)
-					.attr("y1", offsety + y + fontext.descent)
-					.attr("x2", x + offsetx)
-					.attr("y2", offsety + y - fontext.height);
-				} else {
-					if(currentline > 0) {
-						currentline--;
-						insertionpoint = lines[currentline].text.length; 
-						offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
-						offsety -= 1.25 * size;
-						cursor
-						.attr("x1", x + offsetx)
-						.attr("y1", offsety + y + fontext.descent)
-						.attr("x2", x + offsetx)
-						.attr("y2", offsety + y - fontext.height);
-					}
-				}
-			},
-			right: function() {
-				if(insertionpoint < lines[currentline].text.length) {
-					insertionpoint++;
-					offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
-					cursor
-					.attr("x1", x + offsetx)
-					.attr("y1", offsety + y + fontext.descent)
-					.attr("x2", x + offsetx)
-					.attr("y2", offsety + y - fontext.height);
-				} else {
-					if(currentline < lines.length - 1) {
-						currentline++;
-						insertionpoint = 0; 
-						offsetx = 0;
-						offsety += 1.25 * size;
-						cursor
-						.attr("x1", x + offsetx)
-						.attr("y1", offsety + y + fontext.descent)
-						.attr("x2", x + offsetx)
-						.attr("y2", offsety + y - fontext.height);
-					}
-				}
-			},
-			del: function() {
-				if(insertionpoint < lines[currentline].text.length) {
-					lines[currentline].text = lines[currentline].text.splice(insertionpoint, 1);
-					offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
-					cursor
-					.attr("x1", x + offsetx)
-					.attr("y1", offsety + y + fontext.descent)
-					.attr("x2", x + offsetx)
-					.attr("y2", offsety + y - fontext.height);
-					var t = "";
-					if(lines[currentline].text == "" ) {
-						t = " ";
-					} else  {
-						t = lines[currentline].text;	
-					}
-					lines[currentline].span.text(t);
-				} else {
-					if(currentline + 1 < lines.length) {
-						var temp = lines[currentline + 1].text;
-						lines[currentline + 1].span.remove();
-						lines[currentline].text += temp;
-						offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
-						cursor
-						.attr("x1", x + offsetx)
-						.attr("y1", offsety + y + fontext.descent)
-						.attr("x2", x + offsetx)
-						.attr("y2", offsety + y - fontext.height);
-						var t = "";
-						if(lines[currentline].text == "" ) {
-							t = " ";
-						} else  {
-							t = lines[currentline].text;	
-						}
-						lines[currentline].span.text(t);
-						lines.splice(currentline + 1, 1);
-					}
-				}
-			},
-			remove: function() {
-				clearTimeout(timeout1);
-				clearTimeout(timeout2);
-				cursor.remove();
-				cursor = null;
-			},
-			edit: function(ex, ey) {
-				var eoffsety = 0;
-				var hit = false;
-				for(var i = 0; i < lines.length; i++) {
-					var width = getTextSize(lines[i].text, size + "px " + font).width;
-					if(ey >= y + eoffsety - fontext.height && ey <= y + eoffsety ) {
-						currentline = i;
-						hit = true;
-						break;
-					}
-
-					eoffsety += 1.25 * size;
-				}
-				if(hit ) {
-					offsety = eoffsety;
-					lastoffsetx = 0;
-					hit = false;
-					for(var j = 0; j < lines[currentline].text.length; j++)
-					{
-						var subtext = lines[currentline].text.substring(0, j);
-						offsetx = getTextSize(subtext, size + "px " + font).width;
-						if(x + offsetx > ex) {
-							insertionpoint = j-1;
-							offsetx = lastoffsetx;
-							cursor
-							.attr("x1", x + offsetx)
-							.attr("y1", offsety + y + fontext.descent)
-							.attr("x2", x + offsetx)
-							.attr("y2", offsety + y - fontext.height);
-							hit = true;
-							break;
-						}
-						lastoffsetx = offsetx;
-					}
-					if(!hit) {
-						insertionpoint = lines[currentline].text.length;
-						var subtext = lines[currentline].text.substring(0, insertionpoint);
-						offsetx = getTextSize(subtext, size + "px " + font).width;
-						cursor
-						.attr("x1", x + offsetx)
-						.attr("y1", offsety + y + fontext.descent)
-						.attr("x2", x + offsetx)
-						.attr("y2", offsety + y - fontext.height);
-						
-					}
-					
-					
-				}
-				
-			},
-			type: function(key) {
-				if(key == 13) {
-					var temp = lines[currentline].text.substring(insertionpoint);
-					lines[currentline].text = lines[currentline].text.splice(insertionpoint, temp.length);
-					var t = "";
-					if(lines[currentline].text == "" ) {
-						t = " ";
-					} else  {
-						t = lines[currentline].text;	
-					}
-					lines[currentline].span.text(t);
-					currentline++;
-					for(var i = lines.length; i > currentline; i--) {
-						lines[i] = lines[i-1];
-					}
-					if(lines[currentline]) {
-						lines[currentline] = { 
-							span: textObject.insert("tspan", ":nth-child(" + (currentline  + 1) + ")")
-								.attr("x", x)
-								.attr("dy", "1.25em"),
-							text: temp
-						};
-					} else {
-						lines[currentline] = { 
-							span: textObject.append("tspan")
-								.attr("x", x)
-								.attr("dy", "1.25em"),
-							text: temp
-						};
-					}
-					insertionpoint = 0;
-					offsety += 1.25 * size;
-				} else {
-					var chr = String.fromCharCode(key);
-					if(!shiftDown) chr = chr.toLowerCase();
-					lines[currentline].text = lines[currentline].text.splice(insertionpoint++, 0 , chr);
-				}
-				offsetx = getTextSize(lines[currentline].text.substring(0,insertionpoint), size + "px " + font).width;
-				cursor
-				.attr("x1", x + offsetx)
-				.attr("y1", offsety + y + fontext.descent)
-				.attr("x2", x + offsetx)
-				.attr("y2", offsety + y - fontext.height);
-				var t = "";
-				if(lines[currentline].text == "" ) {
-					t = " ";
-				} else  {
-				    t = lines[currentline].text;	
-				}
-				lines[currentline].span.text(t);
-			}
-		}
-	}
 	
 	/***********************************
 		Handle mouse down events
@@ -856,10 +513,37 @@ function WhiteBoard(d3, socket, elementId) {
 			});
 			break;
 		case "text": 
-			if(cursor) {
-				cursor.edit(m.x, m.y);
+			if(textCursor) {
+				textCursor.remove();
+			}
+			
+			if(currentSelection && currentSelection.type == 'text') {
+				if(currentSelection.isEmpty())
+				{
+					currentSelection.remove();
+					objectManager.remove(currentSelection.id);		
+				}
+			}
+			
+			var selection = objectManager.getObjectAtPoint(m);
+			
+			if(selection && selection.type == 'text') {
+				textCursor = new TextCursor(svg, selection, textCallback);
+				textCursor.setOffset(selection.editor.edit(m.x, m.y));
+				currentSelection = selection;
 			} else {
-				cursor = new Cursor(m.x, m.y);
+				var newObject = new TextObject(svg, { 
+					id: Helpers.makeid(),
+					x: m.x, 
+					y: m.y,
+					font: "Arial",
+					size: 12,
+					color: selectedColor,
+				});				
+				objectManager.add(newObject);
+				socket.emit('text', newObject.options);				
+				textCursor = new TextCursor(svg, newObject, textCallback);
+				currentSelection = newObject;
 			}
 			//_fnCreateText(null, m.x, m.y);
 			break;
@@ -1119,9 +803,16 @@ function WhiteBoard(d3, socket, elementId) {
 		}
 		setCursor(tool);
 		selectedTool = tool;
-		if(cursor) {
-			cursor.remove();
-			cursor = null;
+		if(textCursor) {
+			textCursor.remove();
+			textCursor = null;
+		}
+		if(currentSelection && currentSelection.type == 'text') {
+			if(currentSelection.isEmpty())
+			{
+				currentSelection.remove();
+				objectManager.remove(currentSelection.id);		
+			}
 		}
 	}
 

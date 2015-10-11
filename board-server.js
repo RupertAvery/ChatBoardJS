@@ -13,7 +13,7 @@ function Board(boardname) {
 		'chat', 
 		'image', 'text', 'path', 'line', 'ellipse', 'rectangle', 'point', 
 		'move', 'scale', 'remove', 'transform', 
-		'update', 'update-points', 'points' 
+		'update', 'update-points', 'update-text', 'points' 
 	];
 
 	function getImage(imgid) {
@@ -48,6 +48,9 @@ function Board(boardname) {
 				updateObject(objects[data.id], user.name, data.attributes);
 			}
 		},
+		'update-text': function(user, data) {
+			objects[data.id].lines[data.line].text = data.text;
+		},		
 		'path' : function (user, data) {
 			handleObject(user, data);
 			objects[data.id].points = [];
