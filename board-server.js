@@ -17,6 +17,7 @@ function Board(boardname) {
 	this.users = {};
 	this.images = {};
 	this.polls = {};
+	this.onupdate = function() { };
 	this.commands = [ 
 		'chat', 
 		'image', 'text', 'path', 'line', 'ellipse', 'rectangle', 'point', 
@@ -42,7 +43,8 @@ function updateObject(object, name, attributes) {
 var commandHandlers = {
 	'chat' : function(user, data) {
 		data.from = this.getUserDetails(user);
-		this.messages.push(data)
+		this.messages.push(data);
+		this.onupdate();
 	},
 	'update': function(user, data) {
 		if(Array.isArray(data.id)) {
@@ -52,6 +54,7 @@ var commandHandlers = {
 		} else {
 			updateObject(this.objects[data.id], user.name, data.attributes);
 		}
+		this.onupdate();
 	},
 	'update-text': function(user, data) {
 		var object = this.objects[data.id];
@@ -70,14 +73,16 @@ var commandHandlers = {
 				break;
 			}
 		}
+		this.onupdate();
 	},		
 	'path' : function (user, data) {
 		this.handleObject(user, data);
 		this.objects[data.id].points = [];
+		this.onupdate();
 	},
-	'line' : function (user, data) { this.handleObject(user, data); },
-	'ellipse' :function (user, data) { this.handleObject(user, data); },
-	'rectangle' : function (user, data) { this.handleObject(user, data); },
+	'line' : function (user, data) { this.handleObject(user, data); this.onupdate(); },
+	'ellipse' :function (user, data) { this.handleObject(user, data); this.onupdate(); },
+	'rectangle' : function (user, data) { this.handleObject(user, data); this.onupdate(); },
 	'image' : function(user, data) {
 		if (data.href.substring(0,5) == 'data:') {
 			var imgid = Helpers.makeid();
@@ -91,13 +96,16 @@ var commandHandlers = {
 			console.log("Saved image: " + data.href);
 		}
 		this.handleObject(user, data);
+		this.onupdate();
 	},
 	'text' : function (user, data) {
 		this.handleObject(user, data);
 		this.objects[data.id].lines = [];
+		this.onupdate();
 	},
 	'point' : function(user, data) {
 		this.objects[data.id].points.push(data.point);
+		this.onupdate();
 	}, 
 	'update-points' : function(user, data) {
 		if(data.diff.length < this.objects[data.id].points.length) {
@@ -107,6 +115,7 @@ var commandHandlers = {
 			var point = data.diff.points[i];
 			this.objects[data.id].points[point.index] = { x: point.x, y: point.y };
 		}
+		this.onupdate();
 	},
 	'move'  : function(user, data) {
 		if (Array.isArray(data.id)) {
@@ -124,7 +133,7 @@ var commandHandlers = {
 				offset.y += data.y;
 			}
 		}
-		
+		this.onupdate();
 	},
 	'scale' : function(user, data) {
 		var scale = this.objects[data.id].scale;
@@ -132,6 +141,7 @@ var commandHandlers = {
 			scale.x = data.x;
 			scale.y = data.y;
 		}
+		this.onupdate();
 	},
 	'transform' : function(user, data) {
 		var object = this.objects[data.id];
@@ -143,6 +153,7 @@ var commandHandlers = {
 			object.offset.x = data.offset.x;
 			object.offset.y = data.offset.y;
 		}
+		this.onupdate();
 	},
 	'remove' : function(user, data) {
 		if(this.objects[data.id].type == 'image') {
@@ -156,6 +167,7 @@ var commandHandlers = {
 			}
 		}
 		delete this.objects[data.id];
+		this.onupdate();
 	}
 }
 
