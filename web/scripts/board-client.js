@@ -888,7 +888,6 @@ function WhiteBoard(d3, socket, elementId) {
 		});
 		objectManager.add(newObject);
 		socket.emit('image', newObject.options);
-		socket.emit('image', newObject.options);
 		selectTool("select");
 	}
 

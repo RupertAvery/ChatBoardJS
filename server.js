@@ -45,14 +45,15 @@ app.get(/\/images\/*/, function(req, res) {
 	if(req.query.board) {
 		var board = manager.getBoardById(req.query.board);
 		if (board) {
-			var image = board.getImage(req.query.img);
-			if (image) {
-				res.writeHead(200, { 'Content-Type' :  image.contentType });
-				res.end(image.data, 'binary');
-			} else {
-				res.writeHead(500);
-				res.end();
-			}
+			board.getImage(req.query.img, function(image) {
+				if (image) {
+					res.writeHead(200, { 'Content-Type' :  image.contentType });
+					res.end(image.data, 'binary');
+				} else {
+					res.writeHead(500);
+					res.end();
+				}
+			});
 		} else {
 			socket.emit('error', { message: "Board does not exist!" });
 		}
@@ -74,17 +75,43 @@ function BoardManager() {
 		boards[board.id] = board;
 		return board;
 	}
+	
+	function saveBoards() {
+		for(var board in boards){
+			boards[board].save();
+		}
+	}
+
+	function loadBoards() {
+		
+	}
+
+	function getBoardById(id) {
+		var board = boards[id];
+
+		if(!board){
+			board = Board.load(id);
+			if(board){
+				boards[board.id] = board;
+			}
+		}
+
+		return board;
+	}
 
 	return {
 		createBoard: createBoard,
-		getBoardById: function(id) {
-			return boards[id];
-		}
+		saveBoards: saveBoards,
+		loadBoards: loadBoards,
+		getBoardById: getBoardById
 	}
 }
 
 var manager = new BoardManager();
 
+var interval = 5 * 60 * 1000;  // every 5 minutes
+
+setInterval(manager.saveBoards, 10 * 1000);
 
 function registerJoin(socket) {
 	socket.on('join', function (data) {
@@ -125,6 +152,7 @@ function registerCreate(socket) {
 		var board = manager.createBoard(data.name);
 		console.log("Created a new board: " + board.name + " (" + board.id + ")");
 		socket.emit('created', { id: board.id, name: board.name });
+		manager.saveBoards();
 	});
 }
 

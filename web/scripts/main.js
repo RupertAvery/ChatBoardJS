@@ -281,17 +281,19 @@ board.onselect(function(selection) {
 	if(Array.isArray(selection)) {
 		
 	} else {
-		$('#colorPicker').children('span').css("background-color", selection.options.color);
-		$('#colorPicker').spectrum("set", selection.options.color);
-		board.selectColor(selection.options.color);
-		if (!selection.options.fill || selection.options.fill == "none") {
-			board.selectFill("none");
-			$('#fillPicker').children('span').css("background-color", "").css("background", "url(./images/no-color.png) -1px -1px no-repeat no-repeat");
-			$('#fillPicker').spectrum("set", null);
-		} else {
-			board.selectFill(selection.options.fill);
-			$('#fillPicker').children('span').css("background", "").css("background-color", selection.options.fill);
-			$('#fillPicker').spectrum("set", selection.options.fill)
+		if(selection.type=='path' || selection.type=='rectangle' || selection.type=='ellipse'){
+			$('#colorPicker').children('span').css("background-color", selection.options.color);
+			$('#colorPicker').spectrum("set", selection.options.color);
+			board.selectColor(selection.options.color);
+			if (!selection.options.fill || selection.options.fill == "none") {
+				board.selectFill("none");
+				$('#fillPicker').children('span').css("background-color", "").css("background", "url(./images/no-color.png) -1px -1px no-repeat no-repeat");
+				$('#fillPicker').spectrum("set", null);
+			} else {
+				board.selectFill(selection.options.fill);
+				$('#fillPicker').children('span').css("background", "").css("background-color", selection.options.fill);
+				$('#fillPicker').spectrum("set", selection.options.fill)
+			}
 		}
 	}
 })
