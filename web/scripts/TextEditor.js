@@ -171,32 +171,43 @@ function TextEditor(svg, textObject, callback)
 			}
 			updateTextCursor();
 		},
-		type: function(shiftDown, key) {
-			if(key == 13) {
-				var temp = textObject.getLine(currentline).substring(insertionPoint);
-				textObject.deleteText(currentline, insertionPoint, temp.length);
-				currentline++;
-				textObject.insertLine(currentline, temp);
-				callback({ 
-					id: textObject.id, 
-					changes: [
-						{ line: currentline - 1, type: "update", text: textObject.getLine(currentline - 1) },
-						{ line: currentline, type: "insert", text: temp }
-					]
-				});
-				insertionPoint = 0;
-				cursor.y += 1.25 * options.size;
-			} else {
-				var chr = String.fromCharCode(key);
-				if(!shiftDown) chr = chr.toLowerCase();
-				textObject.insertText(currentline, insertionPoint++, 0, chr);
-				callback({ 
-					id: textObject.id, 
-					changes: [
-						{ line: currentline, type: "update", text: textObject.getLine(currentline) }
-					]
-				})
-			}
+		newline: function() {
+			var temp = textObject.getLine(currentline).substring(insertionPoint);
+			textObject.deleteText(currentline, insertionPoint, temp.length);
+			currentline++;
+			textObject.insertLine(currentline, temp);
+			callback({ 
+				id: textObject.id, 
+				changes: [
+					{ line: currentline - 1, type: "update", text: textObject.getLine(currentline - 1) },
+					{ line: currentline, type: "insert", text: temp }
+				]
+			});
+			insertionPoint = 0;
+			cursor.y += 1.25 * options.size;
+			cursor.x = textObject.getLineWidth(currentline, 0, insertionPoint);
+			updateTextCursor();
+
+		},
+		insertspace: function() {
+			textObject.insertText(currentline, insertionPoint++, 0, ' ');
+			callback({ 
+				id: textObject.id, 
+				changes: [
+					{ line: currentline, type: "update", text: textObject.getLine(currentline) }
+				]
+			})
+			cursor.x = textObject.getLineWidth(currentline, 0, insertionPoint);
+			updateTextCursor();
+		},
+		type: function(char) {
+			textObject.insertText(currentline, insertionPoint++, 0, char);
+			callback({ 
+				id: textObject.id, 
+				changes: [
+					{ line: currentline, type: "update", text: textObject.getLine(currentline) }
+				]
+			})
 			cursor.x = textObject.getLineWidth(currentline, 0, insertionPoint);
 			updateTextCursor();
 		}				

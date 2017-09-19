@@ -78,36 +78,43 @@ function WhiteBoard(d3, socket, elementId) {
 		downKey = 40,
 		vKey = 86, 
 		cKey = 67, 
+		returnKey = 13,
+		spaceKey = 32,
 		deleteKey = 46;
 
 	
 	$(boardId).on("keydown", function () {
-		event.preventDefault();
 		var key = event.which || event.keyCode;
+		console.log("keydown " + key);
 		switch(key) {
 		case bkspKey:
 			if(textEditor!=null) {
 				textEditor.back();
+				event.preventDefault();
 			}
 			break;
 		case upKey:
 			if(textEditor!=null) {
 				textEditor.up();
+				event.preventDefault();
 			}
 			break;
 		case downKey:
 			if(textEditor!=null) {
 				textEditor.down();
+				event.preventDefault();
 			}
 			break;
 		case leftKey:
 			if(textEditor!=null) {
 				textEditor.left();
+				event.preventDefault();
 			}
 			break;
 		case rightKey:
 			if(textEditor!=null) {
 				textEditor.right();
+				event.preventDefault();
 			}
 			break;
 		case ctrlKey:
@@ -119,14 +126,32 @@ function WhiteBoard(d3, socket, elementId) {
 		case deleteKey:
 			if(textEditor!=null) {
 				textEditor.del();
+				event.preventDefault();
 			}else {
 				removeSelected();
 			}
 			break;
-		default: 
+		case spaceKey: 
 			if(textEditor!=null) {
-				textEditor.type(shiftDown, key);
+				textEditor.insertspace();
+				event.preventDefault();
 			}
+			break;			
+		case returnKey:
+			if(textEditor!=null) {
+				textEditor.newline();
+				event.preventDefault();
+			}
+			break;			
+		}
+	})
+
+	$(boardId).on("keypress", function () {
+		event.preventDefault();
+		var key = event.which || event.keyCode;
+		console.log("keypress " + key);
+		if(textEditor!=null) {
+			textEditor.type(String.fromCharCode(key));
 		}
 	})
 
